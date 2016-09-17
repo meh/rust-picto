@@ -1,0 +1,8 @@
+[package]
+name = "picto"
+version = "0.1.0"
+authors = ["meh. <meh@schizofreni.co>"]
+
+[dependencies]
+num     = "0.1"
+palette = "0.2"
