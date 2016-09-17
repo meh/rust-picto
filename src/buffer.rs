@@ -124,6 +124,29 @@ impl<C, P, D> Buffer<C, P, D>
 	}
 }
 
+impl<C, P, D> Deref for Buffer<C, P, D>
+	where C: pixel::Channel,
+	      P: Pixel<C>,
+	      D: Deref<Target = [C]>
+{
+	type Target = D::Target;
+
+	fn deref(&self) -> &Self::Target {
+		&self.data
+	}
+}
+
+
+impl<C, P, D> DerefMut for Buffer<C, P, D>
+	where C: pixel::Channel,
+	      P: Pixel<C>,
+	      D: DerefMut<Target = [C]>
+{
+	fn deref_mut(&mut self) -> &mut Self::Target {
+		&mut self.data
+	}
+}
+
 #[cfg(test)]
 mod test {
 	use super::*;
@@ -173,5 +196,10 @@ mod test {
 
 		assert_eq!(Some(Rgb::new(1.0, 0.0, 1.0)),
 			image.get(0, 0));
+	}
+
+	#[test]
+	fn deref() {
+		assert!(Buffer::<u8, Rgb, _>::from_raw(1, 1, vec![0, 0, 0]).unwrap().len() == 3);
 	}
 }
