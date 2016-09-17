@@ -19,6 +19,7 @@ use num::Zero;
 use pixel::{self, Pixel};
 
 /// Buffer for an image.
+#[derive(PartialEq, Debug)]
 pub struct Buffer<C: pixel::Channel, P: Pixel<C>, D> {
 	width:  u32,
 	height: u32,
@@ -147,6 +148,23 @@ impl<C, P, D> DerefMut for Buffer<C, P, D>
 	}
 }
 
+impl<C, P, D> Clone for Buffer<C, P, D>
+	where C: pixel::Channel,
+	      P: Pixel<C>,
+	      D: Clone
+{
+	fn clone(&self) -> Self {
+		Buffer {
+			width:  self.width,
+			height: self.height,
+
+			data:    self.data.clone(),
+			channel: PhantomData,
+			pixel:   PhantomData,
+		}
+	}
+}
+
 #[cfg(test)]
 mod test {
 	use super::*;
@@ -201,5 +219,21 @@ mod test {
 	#[test]
 	fn deref() {
 		assert!(Buffer::<u8, Rgb, _>::from_raw(1, 1, vec![0, 0, 0]).unwrap().len() == 3);
+	}
+
+	#[test]
+	fn clone() {
+		let a = Buffer::<u8, Rgb, _>::from_raw(1, 1, vec![0, 0, 0]).unwrap();
+		let b = a.clone();
+
+		assert_eq!(a.get(0, 0), b.get(0, 0));
+	}
+
+	#[test]
+	fn eq() {
+		let a = Buffer::<u8, Rgb, _>::from_raw(1, 1, vec![0, 0, 0]).unwrap();
+		let b = a.clone();
+
+		assert_eq!(a, b);
 	}
 }
