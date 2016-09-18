@@ -18,6 +18,7 @@ use std::marker::PhantomData;
 use num::Zero;
 use pixel::{self, Pixel};
 use view::{self, View};
+use area::{self, Area};
 
 /// Buffer for an image.
 #[derive(PartialEq, Debug)]
@@ -77,7 +78,7 @@ impl<C, P, D> Buffer<C, P, D>
 	/// Requires that `x < self.width()` and `y < self.height()`, otherwise it will panic.
 	#[inline]
 	pub fn get(&self, x: u32, y: u32) -> P {
-		view::Ref::new(&self.data, 0, 0, self.width, self.height).get(x, y)
+		view::Ref::new(&self.data, Area::from(0, 0, self.width, self.height)).get(x, y)
 	}
 
 	/// Get an immutable view of the given sub-image.
@@ -86,12 +87,14 @@ impl<C, P, D> Buffer<C, P, D>
 	///
 	/// Requires that `x + width <= self.width()` and `y + height <= self.height()`, otherwise it will panic.
 	#[inline]
-	pub fn as_ref(&self, x: u32, y: u32, width: u32, height: u32) -> view::Ref<C, P> {
-		if x + width > self.width || y + height > self.height {
+	pub fn as_ref(&self, area: area::Builder) -> view::Ref<C, P> {
+		let area = area.complete(0, 0, self.width, self.height);
+
+		if area.x + area.width > self.width || area.y + area.height > self.height {
 			panic!("out of bounds");
 		}
 
-		view::Ref::new(&self.data, x, y, width, height)
+		view::Ref::new(&self.data, area)
 	}
 }
 
@@ -107,7 +110,7 @@ impl<C, P, D> Buffer<C, P, D>
 	/// Requires that `x < self.width()` and `y < self.height()`, otherwise it will panic.
 	#[inline]
 	pub fn set(&mut self, x: u32, y: u32, pixel: &P) {
-		view::Mut::new(&mut self.data, 0, 0, self.width, self.height).set(x, y, pixel)
+		view::Mut::new(&mut self.data, Area::from(0, 0, self.width, self.height)).set(x, y, pixel)
 	}
 
 	/// Get a mutable view of the given sub-image.
@@ -116,12 +119,14 @@ impl<C, P, D> Buffer<C, P, D>
 	///
 	/// Requires that `x + width <= self.width()` and `y + height <= self.height()`, otherwise it will panic.
 	#[inline]
-	pub fn as_mut(&mut self, x: u32, y: u32, width: u32, height: u32) -> view::Mut<C, P> {
-		if x + width > self.width || y + height > self.height {
+	pub fn as_mut(&mut self, area: area::Builder) -> view::Mut<C, P> {
+		let area = area.complete(0, 0, self.width, self.height);
+
+		if area.x + area.width > self.width || area.y + area.height > self.height {
 			panic!("out of bounds");
 		}
 
-		view::Mut::new(&mut self.data, x, y, width, height)
+		view::Mut::new(&mut self.data, area)
 	}
 }
 
@@ -136,12 +141,14 @@ impl<C, P, D> Buffer<C, P, D>
 	///
 	/// Requires that `x + width <= self.width()` and `y + height <= self.height()`, otherwise it will panic.
 	#[inline]
-	pub fn view(&mut self, x: u32, y: u32, width: u32, height: u32) -> View<C, P> {
-		if x + width > self.width || y + height > self.height {
+	pub fn view(&mut self, area: area::Builder) -> View<C, P> {
+		let area = area.complete(0, 0, self.width, self.height);
+
+		if area.x + area.width > self.width || area.y + area.height > self.height {
 			panic!("out of bounds");
 		}
 
-		View::new(&mut self.data, x, y, width, height)
+		View::new(&mut self.data, area)
 	}
 
 	/// Transform the pixels within the buffer.
@@ -150,7 +157,7 @@ impl<C, P, D> Buffer<C, P, D>
 	/// new pixel value.
 	#[inline]
 	pub fn transform<T: Into<P>, F: FnMut(u32, u32, P) -> T>(&mut self, func: F) {
-		View::new(&mut self.data, 0, 0, self.width, self.height).transform(func)
+		View::new(&mut self.data, Area::from(0, 0, self.width, self.height)).transform(func)
 	}
 }
 
@@ -256,24 +263,6 @@ mod test {
 
 		assert_eq!(vec![0, 0, 0],
 			Buffer::<u8, Rgb, Vec<_>>::new(1, 1).into_raw());
-	}
-
-	#[test]
-	fn get() {
-		assert_eq!(Rgb::new(1.0, 0.0, 1.0),
-			Buffer::<u8, Rgb, _>::from_raw(1, 1, vec![255, 0, 255]).unwrap().get(0, 0));
-
-		assert_eq!(Rgba::new(0.0, 1.0, 1.0, 0.0),
-			Buffer::<u8, Rgba, _>::from_raw(1, 2, vec![255, 0, 255, 0, 0, 255, 255, 0]).unwrap().get(0, 1));
-	}
-
-	#[test]
-	fn set() {
-		let mut image = Buffer::<u8, Rgb, Vec<_>>::new(2, 2);
-		image.set(0, 0, &Rgb::new(1.0, 0.0, 1.0));
-
-		assert_eq!(Rgb::new(1.0, 0.0, 1.0),
-			image.get(0, 0));
 	}
 
 	#[test]

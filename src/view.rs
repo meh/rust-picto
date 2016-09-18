@@ -15,15 +15,11 @@
 use std::marker::PhantomData;
 
 use pixel::{self, Pixel};
+use area::Area;
 
 /// A view into a `Buffer`.
 pub struct View<'a, C: pixel::Channel, P: Pixel<C>> {
-	x: u32,
-	y: u32,
-
-	width:  u32,
-	height: u32,
-
+	area:    Area,
 	data:    &'a mut [C],
 	channel: PhantomData<C>,
 	pixel:   PhantomData<P>,
@@ -35,42 +31,19 @@ impl<'a, C, P> View<'a, C, P>
 {
 	#[doc(hidden)]
 	#[inline]
-	pub fn new(data: &mut [C], x: u32, y: u32, width: u32, height: u32) -> View<C, P> {
+	pub fn new(data: &mut [C], area: Area) -> View<C, P> {
 		View {
-			x: x,
-			y: y,
-
-			width:  width,
-			height: height,
-
+			area:    area,
 			data:    data,
 			channel: PhantomData,
 			pixel:   PhantomData,
 		}
 	}
 
-	/// Get the offset.
+	/// Get the area.
 	#[inline]
-	pub fn x(&self) -> u32 {
-		self.x
-	}
-
-	/// Get the offset.
-	#[inline]
-	pub fn y(&self) -> u32 {
-		self.y
-	}
-
-	/// Get the width.
-	#[inline]
-	pub fn width(&self) -> u32 {
-		self.width
-	}
-
-	/// Get the height.
-	#[inline]
-	pub fn height(&self) -> u32 {
-		self.height
+	pub fn area(&self) -> Area {
+		self.area
 	}
 }
 
@@ -85,7 +58,7 @@ impl<'a, C, P> View<'a, C, P>
 	/// Requires that `x < self.width()` and `y < self.height()`, otherwise it will panic.
 	#[inline]
 	pub fn get(&self, x: u32, y: u32) -> P {
-		Ref::new(self.data, self.x, self.y, self.width, self.height).get(x, y)
+		Ref::new(self.data, self.area).get(x, y)
 	}
 
 	/// Set the `Pixel` at the given coordinates.
@@ -95,7 +68,7 @@ impl<'a, C, P> View<'a, C, P>
 	/// Requires that `x < self.width()` and `y < self.height()`, otherwise it will panic.
 	#[inline]
 	pub fn set(&mut self, x: u32, y: u32, pixel: &P) {
-		Mut::new(self.data, self.x, self.y, self.width, self.height).set(x, y, pixel)
+		Mut::new(self.data, self.area).set(x, y, pixel)
 	}
 
 	/// Transform the pixels within the view.
@@ -103,9 +76,12 @@ impl<'a, C, P> View<'a, C, P>
 	/// The passed function takes the `x`, `y` and the pixel value and returns a
 	/// new pixel value.
 	#[inline]
-	pub fn transform<T: Into<P>, F: FnMut(u32, u32, P) -> T>(&mut self, mut func: F) {
-		for x in 0 .. self.width {
-			for y in 0 .. self.height {
+	pub fn transform<T, F>(&mut self, mut func: F)
+		where T: Into<P>,
+		      F: FnMut(u32, u32, P) -> T
+	{
+		for x in 0 .. self.area.width {
+			for y in 0 .. self.area.height {
 				let px = self.get(x, y);
 				self.set(x, y, &func(x, y, px).into());
 			}
@@ -115,12 +91,7 @@ impl<'a, C, P> View<'a, C, P>
 
 /// An immutable view into a `Buffer`.
 pub struct Ref<'a, C: pixel::Channel, P: Pixel<C>> {
-	x: u32,
-	y: u32,
-
-	width:  u32,
-	height: u32,
-
+	area:    Area,
 	data:    &'a [C],
 	channel: PhantomData<C>,
 	pixel:   PhantomData<P>,
@@ -132,42 +103,19 @@ impl<'a, C, P> Ref<'a, C, P>
 {
 	#[doc(hidden)]
 	#[inline]
-	pub fn new(data: &[C], x: u32, y: u32, width: u32, height: u32) -> Ref<C, P> {
+	pub fn new(data: &[C], area: Area) -> Ref<C, P> {
 		Ref {
-			x: x,
-			y: y,
-
-			width:  width,
-			height: height,
-
+			area:    area,
 			data:    data,
 			channel: PhantomData,
 			pixel:   PhantomData,
 		}
 	}
 
-	/// Get the offset.
+	/// Get the area.
 	#[inline]
-	pub fn x(&self) -> u32 {
-		self.x
-	}
-
-	/// Get the offset.
-	#[inline]
-	pub fn y(&self) -> u32 {
-		self.y
-	}
-
-	/// Get the width.
-	#[inline]
-	pub fn width(&self) -> u32 {
-		self.width
-	}
-
-	/// Get the height.
-	#[inline]
-	pub fn height(&self) -> u32 {
-		self.height
+	pub fn area(&self) -> Area {
+		self.area
 	}
 }
 
@@ -182,12 +130,12 @@ impl<'a, C, P> Ref<'a, C, P>
 	/// Requires that `x < self.width()` and `y < self.height()`, otherwise it will panic.
 	#[inline]
 	pub fn get(&self, x: u32, y: u32) -> P {
-		if x >= self.width || y >= self.height {
+		if x >= self.area.width || y >= self.area.height {
 			panic!("out of bounds");
 		}
 
 		let channels = P::channels();
-		let index    = channels * ((self.y + y) as usize * self.width as usize + (self.x + x) as usize);
+		let index    = channels * ((self.area.y + y) as usize * self.area.width as usize + (self.area.x + x) as usize);
 
 		P::read(&self.data[index .. index + channels])
 	}
@@ -195,12 +143,7 @@ impl<'a, C, P> Ref<'a, C, P>
 
 /// A mutable view into a `Buffer`.
 pub struct Mut<'a, C: pixel::Channel, P: Pixel<C>> {
-	x: u32,
-	y: u32,
-
-	width:  u32,
-	height: u32,
-
+	area:    Area,
 	data:    &'a mut [C],
 	channel: PhantomData<C>,
 	pixel:   PhantomData<P>,
@@ -212,42 +155,19 @@ impl<'a, C, P> Mut<'a, C, P>
 {
 	#[doc(hidden)]
 	#[inline]
-	pub fn new(data: &mut [C], x: u32, y: u32, width: u32, height: u32) -> Mut<C, P> {
+	pub fn new(data: &mut [C], area: Area) -> Mut<C, P> {
 		Mut {
-			x: x,
-			y: y,
-
-			width:  width,
-			height: height,
-
+			area:    area,
 			data:    data,
 			channel: PhantomData,
 			pixel:   PhantomData,
 		}
 	}
 
-	/// Get the offset.
+	/// Get the area.
 	#[inline]
-	pub fn x(&self) -> u32 {
-		self.x
-	}
-
-	/// Get the offset.
-	#[inline]
-	pub fn y(&self) -> u32 {
-		self.y
-	}
-
-	/// Get the width.
-	#[inline]
-	pub fn width(&self) -> u32 {
-		self.width
-	}
-
-	/// Get the height.
-	#[inline]
-	pub fn height(&self) -> u32 {
-		self.height
+	pub fn area(&self) -> Area {
+		self.area
 	}
 }
 
@@ -262,12 +182,12 @@ impl<'a, C, P> Mut<'a, C, P>
 	/// Requires that `x < self.width()` and `y < self.height()`, otherwise it will panic.
 	#[inline]
 	pub fn set(&mut self, x: u32, y: u32, value: &P) {
-		if x >= self.width || y >= self.height {
+		if x >= self.area.width || y >= self.area.height {
 			panic!("out of bounds");
 		}
 
 		let channels = P::channels();
-		let index    = channels * ((self.y + y) as usize * self.width as usize + (self.x + x) as usize);
+		let index    = channels * ((self.area.y + y) as usize * self.area.width as usize + (self.area.x + x) as usize);
 
 		value.write(&mut self.data[index .. index + channels]);
 	}
@@ -279,9 +199,27 @@ mod test {
 	use color::*;
 
 	#[test]
+	fn get() {
+		assert_eq!(Rgb::new(1.0, 0.0, 1.0),
+			Buffer::<u8, Rgb, _>::from_raw(1, 1, vec![255, 0, 255]).unwrap().get(0, 0));
+
+		assert_eq!(Rgba::new(0.0, 1.0, 1.0, 0.0),
+			Buffer::<u8, Rgba, _>::from_raw(1, 2, vec![255, 0, 255, 0, 0, 255, 255, 0]).unwrap().get(0, 1));
+	}
+
+	#[test]
+	fn set() {
+		let mut image = Buffer::<u8, Rgb, Vec<_>>::new(2, 2);
+		image.set(0, 0, &Rgb::new(1.0, 0.0, 1.0));
+
+		assert_eq!(Rgb::new(1.0, 0.0, 1.0),
+			image.get(0, 0));
+	}
+
+	#[test]
 	fn transform() {
 		let mut buffer = Buffer::<u8, Rgb, _>::from_raw(2, 2, vec![0, 255, 0, 255, 0, 255, 255, 255, 255, 0, 0, 0]).unwrap();
-		let mut view   = buffer.view(0, 0, 2, 2);
+		let mut view   = buffer.view(Default::default());
 
 		view.transform(|_, _, px| {
 			Rgb::new(1.0, 1.0, 1.0) - px

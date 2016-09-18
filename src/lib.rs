@@ -17,6 +17,9 @@ extern crate num;
 pub extern crate palette;
 pub use palette as color;
 
+pub mod area;
+pub use area::Area;
+
 pub mod pixel;
 pub use pixel::Pixel;
 
