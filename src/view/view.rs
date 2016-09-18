@@ -97,5 +97,8 @@ mod test {
 		}
 
 		assert_eq!(view.get(0, 0), Rgb::new(1.0, 0.0, 1.0));
+		assert_eq!(view.get(1, 0), Rgb::new(0.0, 1.0, 0.0));
+		assert_eq!(view.get(0, 1), Rgb::new(0.0, 0.0, 0.0));
+		assert_eq!(view.get(1, 1), Rgb::new(1.0, 1.0, 1.0));
 	}
 }
