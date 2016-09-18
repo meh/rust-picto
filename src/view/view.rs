@@ -16,8 +16,9 @@ use std::marker::PhantomData;
 
 use pixel::{self, Pixel};
 use area::Area;
+use buffer::Buffer;
+use iter::pixel::{Iter as Pixels, IterMut as PixelsMut};
 use super::{Ref, Mut};
-use iter::pixel::{IterMut as PixelsMut};
 
 /// A view into a `Buffer`.
 pub struct View<'a, C: pixel::Channel, P: Pixel<C>> {
@@ -76,8 +77,24 @@ impl<'a, C, P> View<'a, C, P>
 	}
 
 	/// Get a mutable iterator over the view's pixels.
+	pub fn pixels(&self) -> Pixels<C, P> {
+		Pixels::new(self.data, self.area)
+	}
+
+	/// Get a mutable iterator over the view's pixels.
 	pub fn pixels_mut(&mut self) -> PixelsMut<C, P> {
 		PixelsMut::new(self.data, self.area)
+	}
+
+	/// Create a `Buffer` from the `View`.
+	pub fn into_owned(&self) -> Buffer<C, P, Vec<C>> {
+		let mut buffer = Buffer::new(self.area.width, self.area.height);
+
+		for (x, y, px) in self.pixels() {
+			buffer.set(x, y, &px.get());
+		}
+
+		buffer
 	}
 }
 
