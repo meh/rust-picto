@@ -13,7 +13,7 @@
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
 use color::*;
-use num::{Num, NumCast, Float, Zero};
+use num::{NumCast, Float, Zero};
 
 /// Type for the `Channel` in a `Pixel`, this is typically the type for the
 /// element in a buffer as well.
@@ -22,7 +22,7 @@ pub trait Channel: Zero + Copy + 'static {
 }
 
 impl Channel for u8 {
-	fn from<T: Num + Float>(value: T) -> Self {
+	fn from<T: Float>(value: T) -> Self {
 		NumCast::from(value * NumCast::from(255).unwrap()).unwrap()
 	}
 }
@@ -61,6 +61,7 @@ macro_rules! impl_for {
 }
 
 impl_for!(1, Luma);
+impl_for!(2, Lumaa);
 impl_for!(3, Rgb, Hsl, Hsv, Hwb, Lab, Lch, Xyz, Yxy);
 impl_for!(4, Rgba, Hsla, Hsva, Hwba, Laba, Lcha, Xyza, Yxya);
 
