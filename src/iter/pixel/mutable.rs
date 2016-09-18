@@ -102,10 +102,7 @@ impl<'a, C, P> Iterator for Iter<'a, C, P>
 
 		let channels = P::channels();
 		let index    = channels * ((self.area.y + self.y) as usize * self.area.width as usize + (self.area.x + self.x) as usize);
-
-		self.x += 1;
-
-		Some((
+		let item     = (
 			self.x - self.area.x,
 			self.y - self.area.y,
 
@@ -113,6 +110,9 @@ impl<'a, C, P> Iterator for Iter<'a, C, P>
 				let slice = &self.data[index .. index + channels];
 				slice::from_raw_parts_mut(slice.as_ptr() as *mut _, slice.len())
 			})
-		))
+		);
+
+		self.x += 1;
+		Some(item)
 	}
 }

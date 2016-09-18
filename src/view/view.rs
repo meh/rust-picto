@@ -108,7 +108,9 @@ mod test {
 		let mut buffer = Buffer::<u8, Rgb, _>::from_raw(2, 2, vec![0, 255, 0, 255, 0, 255, 255, 255, 255, 0, 0, 0]).unwrap();
 		let mut view = buffer.view(Default::default());
 
-		for (_, _, mut px) in view.pixels_mut() {
+		for (x, y, mut px) in view.pixels_mut() {
+			assert!(x <= 1 && y <= 1);
+
 			let value = px.get::<Rgb>();
 			px.set(Rgb::new(1.0, 1.0, 1.0) - value);
 		}
