@@ -20,5 +20,8 @@ pub use palette as color;
 pub mod pixel;
 pub use pixel::Pixel;
 
+pub mod view;
+pub use view::View;
+
 mod buffer;
 pub use buffer::Buffer;

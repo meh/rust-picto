@@ -17,6 +17,7 @@ use std::marker::PhantomData;
 
 use num::Zero;
 use pixel::{self, Pixel};
+use view::{self, View};
 
 /// Buffer for an image.
 #[derive(PartialEq, Debug)]
@@ -34,6 +35,7 @@ impl<C, P> Buffer<C, P, Vec<C>>
 	      P: Pixel<C>,
 {
 	/// Create a new `Buffer` with the requested space allocated.
+	#[inline]
 	pub fn new(width: u32, height: u32) -> Self {
 		Buffer {
 			width:  width,
@@ -52,6 +54,7 @@ impl<C, P, D> Buffer<C, P, D>
 	      D: Deref<Target = [C]>
 {
 	/// Use an existing container as backing storage for an image `Buffer`.
+	#[inline]
 	pub fn from_raw(width: u32, height: u32, data: D) -> Result<Self, ()> {
 		if width as usize * height as usize * P::channels() != data.len() {
 			return Err(());
@@ -68,15 +71,27 @@ impl<C, P, D> Buffer<C, P, D>
 	}
 
 	/// Get the `Pixel` at the given coordinates.
-	pub fn get(&self, x: u32, y: u32) -> Option<P> {
-		if x >= self.width || y >= self.height {
-			return None;
+	///
+	/// # Panics
+	///
+	/// Requires that `x < self.width()` and `y < self.height()`, otherwise it will panic.
+	#[inline]
+	pub fn get(&self, x: u32, y: u32) -> P {
+		view::Ref::new(&self.data, 0, 0, self.width, self.height).get(x, y)
+	}
+
+	/// Get an immutable view of the given sub-image.
+	///
+	/// # Panics
+	///
+	/// Requires that `x + width <= self.width()` and `y + height <= self.height()`, otherwise it will panic.
+	#[inline]
+	pub fn as_ref(&self, x: u32, y: u32, width: u32, height: u32) -> view::Ref<C, P> {
+		if x + width > self.width || y + height > self.height {
+			panic!("out of bounds");
 		}
 
-		let channels = P::channels();
-		let index    = channels * (y as usize * self.width as usize + x as usize);
-
-		Some(P::read(&self.data[index .. index + channels]))
+		view::Ref::new(&self.data, x, y, width, height)
 	}
 }
 
@@ -86,17 +101,56 @@ impl<C, P, D> Buffer<C, P, D>
 	      D: DerefMut<Target = [C]>
 {
 	/// Set the `Pixel` at the given coordinates.
-	pub fn set(&mut self, x: u32, y: u32, value: &P) -> Result<(), ()> {
-		if x >= self.width || y >= self.height {
-			return Err(());
+	///
+	/// # Panics
+	///
+	/// Requires that `x < self.width()` and `y < self.height()`, otherwise it will panic.
+	#[inline]
+	pub fn set(&mut self, x: u32, y: u32, pixel: &P) {
+		view::Mut::new(&mut self.data, 0, 0, self.width, self.height).set(x, y, pixel)
+	}
+
+	/// Get a mutable view of the given sub-image.
+	///
+	/// # Panics
+	///
+	/// Requires that `x + width <= self.width()` and `y + height <= self.height()`, otherwise it will panic.
+	#[inline]
+	pub fn as_mut(&mut self, x: u32, y: u32, width: u32, height: u32) -> view::Mut<C, P> {
+		if x + width > self.width || y + height > self.height {
+			panic!("out of bounds");
 		}
 
-		let channels = P::channels();
-		let index    = channels * (y as usize * self.width as usize + x as usize);
+		view::Mut::new(&mut self.data, x, y, width, height)
+	}
+}
 
-		value.write(&mut self.data[index .. index + channels]);
+impl<C, P, D> Buffer<C, P, D>
+	where C: pixel::Channel,
+	      P: Pixel<C> + pixel::Write<C> + pixel::Read<C>,
+	      D: DerefMut<Target = [C]>
+{
+	/// Get a view of the given sub-image.
+	///
+	/// # Panics
+	///
+	/// Requires that `x + width <= self.width()` and `y + height <= self.height()`, otherwise it will panic.
+	#[inline]
+	pub fn view(&mut self, x: u32, y: u32, width: u32, height: u32) -> View<C, P> {
+		if x + width > self.width || y + height > self.height {
+			panic!("out of bounds");
+		}
 
-		Ok(())
+		View::new(&mut self.data, x, y, width, height)
+	}
+
+	/// Transform the pixels within the buffer.
+	///
+	/// The passed function takes the `x`, `y` and the pixel value and returns a
+	/// new pixel value.
+	#[inline]
+	pub fn transform<T: Into<P>, F: FnMut(u32, u32, P) -> T>(&mut self, func: F) {
+		View::new(&mut self.data, 0, 0, self.width, self.height).transform(func)
 	}
 }
 
@@ -105,21 +159,25 @@ impl<C, P, D> Buffer<C, P, D>
 	      P: Pixel<C>
 {
 	/// Get the backing storage of the `Buffer`.
+	#[inline]
 	pub fn into_raw(self) -> D {
 		self.data
 	}
 
 	/// Get the dimensions.
+	#[inline]
 	pub fn dimensions(&self) -> (u32, u32) {
 		(self.width, self.height)
 	}
 
 	/// Get the width.
+	#[inline]
 	pub fn width(&self) -> u32 {
 		self.width
 	}
 
 	/// Get the height.
+	#[inline]
 	pub fn height(&self) -> u32 {
 		self.height
 	}
@@ -132,17 +190,18 @@ impl<C, P, D> Deref for Buffer<C, P, D>
 {
 	type Target = D::Target;
 
+	#[inline]
 	fn deref(&self) -> &Self::Target {
 		&self.data
 	}
 }
-
 
 impl<C, P, D> DerefMut for Buffer<C, P, D>
 	where C: pixel::Channel,
 	      P: Pixel<C>,
 	      D: DerefMut<Target = [C]>
 {
+	#[inline]
 	fn deref_mut(&mut self) -> &mut Self::Target {
 		&mut self.data
 	}
@@ -153,6 +212,7 @@ impl<C, P, D> Clone for Buffer<C, P, D>
 	      P: Pixel<C>,
 	      D: Clone
 {
+	#[inline]
 	fn clone(&self) -> Self {
 		Buffer {
 			width:  self.width,
@@ -200,19 +260,19 @@ mod test {
 
 	#[test]
 	fn get() {
-		assert_eq!(Some(Rgb::new(1.0, 0.0, 1.0)),
+		assert_eq!(Rgb::new(1.0, 0.0, 1.0),
 			Buffer::<u8, Rgb, _>::from_raw(1, 1, vec![255, 0, 255]).unwrap().get(0, 0));
 
-		assert_eq!(Some(Rgba::new(0.0, 1.0, 1.0, 0.0)),
+		assert_eq!(Rgba::new(0.0, 1.0, 1.0, 0.0),
 			Buffer::<u8, Rgba, _>::from_raw(1, 2, vec![255, 0, 255, 0, 0, 255, 255, 0]).unwrap().get(0, 1));
 	}
 
 	#[test]
 	fn set() {
 		let mut image = Buffer::<u8, Rgb, Vec<_>>::new(2, 2);
-		assert!(image.set(0, 0, &Rgb::new(1.0, 0.0, 1.0)).is_ok());
+		image.set(0, 0, &Rgb::new(1.0, 0.0, 1.0));
 
-		assert_eq!(Some(Rgb::new(1.0, 0.0, 1.0)),
+		assert_eq!(Rgb::new(1.0, 0.0, 1.0),
 			image.get(0, 0));
 	}
 
