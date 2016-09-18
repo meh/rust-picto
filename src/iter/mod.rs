@@ -12,21 +12,4 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-extern crate num;
-
-pub extern crate palette;
-pub use palette as color;
-
-pub mod area;
-pub use area::Area;
-
 pub mod pixel;
-pub use pixel::Pixel;
-
-pub mod view;
-pub use view::View;
-
-pub mod iter;
-
-mod buffer;
-pub use buffer::Buffer;

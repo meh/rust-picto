@@ -19,6 +19,7 @@ use num::Zero;
 use pixel::{self, Pixel};
 use view::{self, View};
 use area::{self, Area};
+use iter::pixel::{Iter as Pixels, IterMut as PixelsMut};
 
 /// Buffer for an image.
 #[derive(PartialEq, Debug)]
@@ -137,6 +138,11 @@ impl<C, P, D> Buffer<C, P, D>
 
 		view::Ref::new(&self.data, area)
 	}
+
+	#[inline]
+	pub fn pixels(&self) -> Pixels<C, P> {
+		Pixels::new(&self.data, self.area())
+	}
 }
 
 impl<C, P, D> Buffer<C, P, D>
@@ -193,14 +199,10 @@ impl<C, P, D> Buffer<C, P, D>
 		View::new(&mut self.data, area)
 	}
 
-	/// Transform the pixels within the buffer.
-	///
-	/// The passed function takes the `x`, `y` and the pixel value and returns a
-	/// new pixel value.
 	#[inline]
-	pub fn transform<T: Into<P>, F: FnMut(u32, u32, P) -> T>(&mut self, func: F) {
+	pub fn pixels_mut(&mut self) -> PixelsMut<C, P> {
 		let area = self.area();
-		View::new(&mut self.data, area).transform(func)
+		PixelsMut::new(&mut self.data, area)
 	}
 }
 

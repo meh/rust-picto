@@ -17,6 +17,7 @@ use std::marker::PhantomData;
 use pixel::{self, Pixel};
 use area::Area;
 use super::{Ref, Mut};
+use iter::pixel::{IterMut as PixelsMut};
 
 /// A view into a `Buffer`.
 pub struct View<'a, C: pixel::Channel, P: Pixel<C>> {
@@ -72,5 +73,29 @@ impl<'a, C, P> View<'a, C, P>
 	#[inline]
 	pub fn set(&mut self, x: u32, y: u32, pixel: &P) {
 		Mut::new(self.data, self.area).set(x, y, pixel)
+	}
+
+	/// Get a mutable iterator over the view's pixels.
+	pub fn pixels_mut(&mut self) -> PixelsMut<C, P> {
+		PixelsMut::new(self.data, self.area)
+	}
+}
+
+#[cfg(test)]
+mod test {
+	use buffer::*;
+	use color::*;
+
+	#[test]
+	fn pixels_mut() {
+		let mut buffer = Buffer::<u8, Rgb, _>::from_raw(2, 2, vec![0, 255, 0, 255, 0, 255, 255, 255, 255, 0, 0, 0]).unwrap();
+		let mut view = buffer.view(Default::default());
+
+		for (_, _, mut px) in view.pixels_mut() {
+			let value = px.get::<Rgb>();
+			px.set(Rgb::new(1.0, 1.0, 1.0) - value);
+		}
+
+		assert_eq!(view.get(0, 0), Rgb::new(1.0, 0.0, 1.0));
 	}
 }

@@ -16,6 +16,7 @@ use std::marker::PhantomData;
 
 use pixel::{self, Pixel};
 use area::Area;
+use iter::pixel::Iter as Pixels;
 
 /// An immutable view into a `Buffer`.
 pub struct Ref<'a, C: pixel::Channel, P: Pixel<C>> {
@@ -68,6 +69,11 @@ impl<'a, C, P> Ref<'a, C, P>
 		let index    = channels * ((self.area.y + y) as usize * self.area.width as usize + (self.area.x + x) as usize);
 
 		P::read(&self.data[index .. index + channels])
+	}
+
+	/// Get an immutable iterator over the view's pixels.
+	pub fn pixels(&self) -> Pixels<C, P> {
+		Pixels::new(self.data, self.area)
 	}
 }
 
