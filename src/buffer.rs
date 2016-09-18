@@ -26,9 +26,10 @@ pub struct Buffer<C: pixel::Channel, P: Pixel<C>, D> {
 	width:  u32,
 	height: u32,
 
-	data:    D,
-	channel: PhantomData<C>,
-	pixel:   PhantomData<P>,
+	data: D,
+
+	_channel: PhantomData<C>,
+	_pixel:   PhantomData<P>,
 }
 
 impl<C, P> Buffer<C, P, Vec<C>>
@@ -42,9 +43,10 @@ impl<C, P> Buffer<C, P, Vec<C>>
 			width:  width,
 			height: height,
 
-			data:    vec![Zero::zero(); width as usize * height as usize * P::channels()],
-			channel: PhantomData,
-			pixel:   PhantomData,
+			data: vec![Zero::zero(); width as usize * height as usize * P::channels()],
+
+			_channel: PhantomData,
+			_pixel:   PhantomData,
 		}
 	}
 }
@@ -103,9 +105,10 @@ impl<C, P, D> Buffer<C, P, D>
 			width:  width,
 			height: height,
 
-			data:    data,
-			channel: PhantomData,
-			pixel:   PhantomData,
+			data: data,
+
+			_channel: PhantomData,
+			_pixel:   PhantomData,
 		})
 	}
 
@@ -270,9 +273,10 @@ impl<C, P, D> Clone for Buffer<C, P, D>
 			width:  self.width,
 			height: self.height,
 
-			data:    self.data.clone(),
-			channel: PhantomData,
-			pixel:   PhantomData,
+			data: self.data.clone(),
+
+			_channel: PhantomData,
+			_pixel:   PhantomData,
 		}
 	}
 }
