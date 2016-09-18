@@ -116,7 +116,7 @@ impl<C, P, D> Buffer<C, P, D>
 	/// Requires that `x < self.width()` and `y < self.height()`, otherwise it will panic.
 	#[inline]
 	pub fn get(&self, x: u32, y: u32) -> P {
-		view::Ref::new(&self.data, Area::from(0, 0, self.width, self.height)).get(x, y)
+		view::Ref::new(&self.data, self.area()).get(x, y)
 	}
 
 	/// Get an immutable view of the given sub-image.
@@ -148,7 +148,8 @@ impl<C, P, D> Buffer<C, P, D>
 	/// Requires that `x < self.width()` and `y < self.height()`, otherwise it will panic.
 	#[inline]
 	pub fn set(&mut self, x: u32, y: u32, pixel: &P) {
-		view::Mut::new(&mut self.data, Area::from(0, 0, self.width, self.height)).set(x, y, pixel)
+		let area = self.area();
+		view::Mut::new(&mut self.data, area).set(x, y, pixel)
 	}
 
 	/// Get a mutable view of the given sub-image.
@@ -195,7 +196,8 @@ impl<C, P, D> Buffer<C, P, D>
 	/// new pixel value.
 	#[inline]
 	pub fn transform<T: Into<P>, F: FnMut(u32, u32, P) -> T>(&mut self, func: F) {
-		View::new(&mut self.data, Area::from(0, 0, self.width, self.height)).transform(func)
+		let area = self.area();
+		View::new(&mut self.data, area).transform(func)
 	}
 }
 
@@ -207,6 +209,11 @@ impl<C, P, D> Buffer<C, P, D>
 	#[inline]
 	pub fn into_raw(self) -> D {
 		self.data
+	}
+
+	#[inline]
+	pub fn area(&self) -> Area {
+		Area::from(0, 0, self.width, self.height)
 	}
 
 	/// Get the dimensions.
