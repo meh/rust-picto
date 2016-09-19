@@ -92,7 +92,7 @@ impl<C, P> Buffer<C, P, Vec<C>>
 
 impl<C, P, D> Buffer<C, P, D>
 	where C: pixel::Channel,
-	      P: Pixel<C> + pixel::Read<C>,
+	      P: Pixel<C>,
 	      D: Deref<Target = [C]>
 {
 	/// Use an existing container as backing storage for an image `Buffer`.
@@ -112,7 +112,47 @@ impl<C, P, D> Buffer<C, P, D>
 			_pixel:   PhantomData,
 		})
 	}
+}
 
+impl<C, P, D> Buffer<C, P, D>
+	where C: pixel::Channel,
+	      P: Pixel<C>
+{
+	/// Get the backing storage of the `Buffer`.
+	#[inline]
+	pub fn into_raw(self) -> D {
+		self.data
+	}
+
+	#[inline]
+	pub fn area(&self) -> Area {
+		Area::from(0, 0, self.width, self.height)
+	}
+
+	/// Get the dimensions.
+	#[inline]
+	pub fn dimensions(&self) -> (u32, u32) {
+		(self.width, self.height)
+	}
+
+	/// Get the width.
+	#[inline]
+	pub fn width(&self) -> u32 {
+		self.width
+	}
+
+	/// Get the height.
+	#[inline]
+	pub fn height(&self) -> u32 {
+		self.height
+	}
+}
+
+impl<C, P, D> Buffer<C, P, D>
+	where C: pixel::Channel,
+	      P: Pixel<C> + pixel::Read<C>,
+	      D: Deref<Target = [C]>
+{
 	/// Get the `Pixel` at the given coordinates.
 	///
 	/// # Panics
@@ -203,40 +243,6 @@ impl<C, P, D> Buffer<C, P, D>
 	pub fn pixels_mut(&mut self) -> PixelsMut<C, P> {
 		let area = self.area();
 		PixelsMut::new(&mut self.data, area)
-	}
-}
-
-impl<C, P, D> Buffer<C, P, D>
-	where C: pixel::Channel,
-	      P: Pixel<C>
-{
-	/// Get the backing storage of the `Buffer`.
-	#[inline]
-	pub fn into_raw(self) -> D {
-		self.data
-	}
-
-	#[inline]
-	pub fn area(&self) -> Area {
-		Area::from(0, 0, self.width, self.height)
-	}
-
-	/// Get the dimensions.
-	#[inline]
-	pub fn dimensions(&self) -> (u32, u32) {
-		(self.width, self.height)
-	}
-
-	/// Get the width.
-	#[inline]
-	pub fn width(&self) -> u32 {
-		self.width
-	}
-
-	/// Get the height.
-	#[inline]
-	pub fn height(&self) -> u32 {
-		self.height
 	}
 }
 
