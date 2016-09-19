@@ -179,9 +179,26 @@ impl<C, P, D> Buffer<C, P, D>
 		view::Ref::new(&self.data, area)
 	}
 
+	/// Get an immutable iterator over the `Buffer` pixels.
 	#[inline]
 	pub fn pixels(&self) -> Pixels<C, P> {
 		Pixels::new(&self.data, self.area())
+	}
+
+	/// Convert the `Buffer` to another `Buffer` with different channel and pixel type.
+	#[inline]
+	pub fn convert<CO, PO>(&self) -> Buffer<CO, PO, Vec<CO>>
+		where CO: pixel::Channel,
+		      PO: Pixel<CO> + pixel::Write<CO>,
+		      PO: From<P>
+	{
+		let mut result = Buffer::<CO, PO, Vec<_>>::new(self.width, self.height);
+
+		for (x, y, px) in self.pixels() {
+			result.set(x, y, &px.get().into());
+		}
+
+		result
 	}
 }
 
@@ -341,5 +358,17 @@ mod test {
 		let b = a.clone();
 
 		assert_eq!(a, b);
+	}
+
+	#[test]
+	fn convert() {
+		let a = Buffer::<u8, Rgb, _>::from_raw(1, 1, vec![255, 0, 255]).unwrap();
+		let b = a.convert::<u8, Rgba>();
+
+		assert_eq!(Rgba::new(1.0, 0.0, 1.0, 1.0),
+			b.get(0, 0));
+
+		assert_eq!(vec![255, 0, 255, 255],
+			b.into_raw());
 	}
 }
