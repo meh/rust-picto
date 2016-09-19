@@ -33,6 +33,20 @@ pub struct Buffer<C: pixel::Channel, P: Pixel<C>, D> {
 	_pixel:   PhantomData<P>,
 }
 
+pub trait Valid<C: pixel::Channel, P: Pixel<C>> {
+	fn valid(&self) -> bool;
+}
+
+impl<T, C, P> Valid<C, P> for T
+	where C: pixel::Channel,
+	      P: Pixel<C>
+{
+	default
+	fn valid(&self) -> bool {
+		false
+	}
+}
+
 impl<C, P> Buffer<C, P, Vec<C>>
 	where C: pixel::Channel,
 	      P: Pixel<C>,

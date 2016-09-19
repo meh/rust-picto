@@ -12,8 +12,10 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
+use std::mem;
+
 use format::{Format, Color};
-use buffer::{Buffer};
+use buffer::{Buffer, Valid};
 use pixel::{self, Pixel};
 use color;
 
@@ -45,7 +47,12 @@ pub fn load<C, P, D>(mut decoder: D) -> Result<Buffer<C, P, Vec<C>>>
 			let buffer = try!(Buffer::<$ch, $ty, _>::from_raw(dimensions.0, dimensions.1, frame)
 				.map_err(|_| Error::Format("wrong dimensions".into())));
 
-			Ok(buffer.convert::<C, P>())
+			if Valid::<C, P>::valid(&color) {
+				Ok(unsafe { mem::transmute(buffer) })
+			}
+			else {
+				Ok(buffer.convert())
+			}
 		});
 	}
 

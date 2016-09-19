@@ -12,6 +12,12 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
+use std::mem;
+
+use num::Float;
+use buffer;
+use color;
+
 #[derive(Eq, PartialEq, Copy, Clone, Debug)]
 pub enum Color {
 	Gray(u8, bool),
@@ -37,6 +43,50 @@ impl Color {
 			Color::Rgb(_, false)  => 3,
 			Color::Rgb(_, true)   => 4,
 			Color::Palette(_)     => 3,
+		}
+	}
+}
+
+impl<T: Float + Copy + 'static> buffer::Valid<u8, color::Rgb<T>> for Color {
+	fn valid(&self) -> bool {
+		if let Color::Rgb(bits, false) = *self {
+			bits == mem::size_of::<u8>() as u8
+		}
+		else {
+			false
+		}
+	}
+}
+
+impl<T: Float + Copy + 'static> buffer::Valid<u8, color::Rgba<T>> for Color {
+	fn valid(&self) -> bool {
+		if let Color::Rgb(bits, true) = *self {
+			bits == mem::size_of::<u8>() as u8
+		}
+		else {
+			false
+		}
+	}
+}
+
+impl<T: Float + Copy + 'static> buffer::Valid<u8, color::Luma<T>> for Color {
+	fn valid(&self) -> bool {
+		if let Color::Gray(bits, false) = *self {
+			bits == mem::size_of::<u8>() as u8
+		}
+		else {
+			false
+		}
+	}
+}
+
+impl<T: Float + Copy + 'static> buffer::Valid<u8, color::Lumaa<T>> for Color {
+	fn valid(&self) -> bool {
+		if let Color::Gray(bits, true) = *self {
+			bits == mem::size_of::<u8>() as u8
+		}
+		else {
+			false
 		}
 	}
 }
