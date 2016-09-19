@@ -111,8 +111,8 @@ mod test {
 		for (x, y, mut px) in view.pixels_mut() {
 			assert!(x <= 1 && y <= 1);
 
-			let value = px.get::<Rgb>();
-			px.set(Rgb::new(1.0, 1.0, 1.0) - value);
+			let inverted = Rgb::new(1.0, 1.0, 1.0) - px.get();
+			px.set(&inverted);
 		}
 
 		assert_eq!(view.get(0, 0), Rgb::new(1.0, 0.0, 1.0));

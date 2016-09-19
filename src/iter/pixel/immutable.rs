@@ -73,8 +73,8 @@ impl<'a, C, P> Item<'a, C, P>
 	}
 
 	/// Get the pixel value.
-	pub fn get<T: From<P>>(&self) -> T {
-		T::from(P::read(self.data))
+	pub fn get(&self) -> P {
+		P::read(self.data)
 	}
 }
 

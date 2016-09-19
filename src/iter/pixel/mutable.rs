@@ -74,13 +74,13 @@ impl<'a, C, P> Item<'a, C, P>
 	}
 
 	/// Get the pixel value.
-	pub fn get<T: From<P>>(&self) -> T {
-		T::from(P::read(self.data))
+	pub fn get(&self) -> P {
+		P::read(self.data)
 	}
 
 	/// Set the pixel value.
-	pub fn set<T: Into<P>>(&mut self, pixel: T) {
-		pixel.into().write(self.data)
+	pub fn set(&mut self, pixel: &P) {
+		pixel.write(self.data)
 	}
 }
 
