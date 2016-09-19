@@ -58,12 +58,12 @@ impl<C, P> Buffer<C, P, Vec<C>>
 {
 	/// Create a new `Buffer` with the request space allocated and filled with
 	/// the given pixel.
-	pub fn from_pixel(width: u32, height: u32, pixel: P) -> Self {
+	pub fn from_pixel(width: u32, height: u32, pixel: &P) -> Self {
 		let mut buffer = Self::new(width, height);
 
 		for x in 0 .. width {
 			for y in 0 .. height {
-				buffer.set(x, y, &pixel);
+				buffer.set(x, y, pixel);
 			}
 		}
 
