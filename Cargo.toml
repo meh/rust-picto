@@ -12,3 +12,10 @@ keywords    = ["image", "color"]
 [dependencies]
 num     = "0.1"
 palette = "0.2"
+
+[dependencies.png]
+version  = "0.5"
+optional = true
+
+[features]
+default = ["png"]
