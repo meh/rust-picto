@@ -25,18 +25,12 @@ enum State<R: Read> {
 
 pub struct Decoder<R: Read> {
 	state: Option<State<R>>,
-
-	dimensions: Option<(u32, u32)>,
-	color:      Option<Color>,
 }
 
 impl<R: Read> Decoder<R> {
 	pub fn new(input: R) -> Self {
 		Decoder {
 			state: Some(State::Decoder(png::Decoder::new(input))),
-
-			dimensions: None,
-			color:      None,
 		}
 	}
 
@@ -73,18 +67,10 @@ impl<R: Read> super::Decoder for Decoder<R> {
 	}
 
 	fn dimensions(&mut self) -> error::Result<(u32, u32)> {
-		if let Some(dimensions) = self.dimensions {
-			return Ok(dimensions)
-		}
-
 		Ok(try!(self.reader()).info().size())
 	}
 
 	fn color(&mut self) -> error::Result<Color> {
-		if let Some(color) = self.color {
-			return Ok(color);
-		}
-
 		Ok(try!(self.reader()).output_color_type().into())
 	}
 
