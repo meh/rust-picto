@@ -26,13 +26,22 @@ pub mod png;
 #[cfg(feature = "jpeg")]
 pub mod jpeg;
 
+/// An image decoder.
 pub trait Decoder {
+	/// The format the decoder is going to return.
 	fn format(&mut self) -> Result<Format>;
+
+	/// The dimensions of the image to be loaded.
 	fn dimensions(&mut self) -> Result<(u32, u32)>;
+
+	/// The color type for the image to be loaded.
 	fn color(&mut self) -> Result<Color>;
+
+	/// Decode a frame from the stream.
 	fn frame(&mut self) -> Result<Vec<u8>>;
 }
 
+/// Load the image from the given `Decoder`.
 pub fn load<C, P, D>(mut decoder: D) -> Result<Buffer<C, P, Vec<C>>>
 	where C: pixel::Channel,
 	      P: Pixel<C> + pixel::Write<C>,
