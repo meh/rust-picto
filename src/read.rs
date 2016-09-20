@@ -19,20 +19,21 @@ use color;
 use pixel::{self, Pixel};
 use buffer::Buffer;
 use format::{self, Format};
+use error::{self, Error};
 
 /// Load an image from an input stream, guessing its format.
-pub fn from<C, P, R>(mut input: R) -> decoder::Result<Buffer<C, P, Vec<C>>>
+pub fn from<C, P, R>(mut input: R) -> error::Result<Buffer<C, P, Vec<C>>>
 	where C: pixel::Channel,
 	      P: Pixel<C> + pixel::Write<C>,
 	      P: From<color::Rgb> + From<color::Rgba> + From<color::Luma> + From<color::Lumaa>,
 	      R: Read + Seek
 {
-	let format = try!(format::guess(input.by_ref()).ok_or(decoder::Error::Format("unsupported image format".into())));
+	let format = try!(format::guess(input.by_ref()).ok_or(Error::Format("unsupported image format".into())));
 	with_format(input, format)
 }
 
 /// Load an image from memory, guessing its format.
-pub fn from_memory<C, P>(slice: &[u8]) -> decoder::Result<Buffer<C, P, Vec<C>>>
+pub fn from_memory<C, P>(slice: &[u8]) -> error::Result<Buffer<C, P, Vec<C>>>
 	where C: pixel::Channel,
 	      P: Pixel<C> + pixel::Write<C>,
 	      P: From<color::Rgb> + From<color::Rgba> + From<color::Luma> + From<color::Lumaa>
@@ -41,7 +42,7 @@ pub fn from_memory<C, P>(slice: &[u8]) -> decoder::Result<Buffer<C, P, Vec<C>>>
 }
 
 /// Load an image from an input stream with the given format.
-pub fn with_format<C, P, R>(input: R, format: Format) -> decoder::Result<Buffer<C, P, Vec<C>>>
+pub fn with_format<C, P, R>(input: R, format: Format) -> error::Result<Buffer<C, P, Vec<C>>>
 	where C: pixel::Channel,
 	      P: Pixel<C> + pixel::Write<C>,
 	      P: From<color::Rgb> + From<color::Rgba> + From<color::Luma> + From<color::Lumaa>,
@@ -57,6 +58,6 @@ pub fn with_format<C, P, R>(input: R, format: Format) -> decoder::Result<Buffer<
 			decoder::load::<C, P, _>(decoder::jpeg::Decoder::new(input)),
 
 		_ =>
-			Err(decoder::Error::Format("unsupported image format".into())),
+			Err(Error::Format("unsupported image format".into())),
 	}
 }

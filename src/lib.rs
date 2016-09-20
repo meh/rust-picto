@@ -25,6 +25,9 @@ extern crate num;
 pub extern crate palette;
 pub use palette as color;
 
+pub mod error;
+pub use error::{Error, Result};
+
 pub mod area;
 pub use area::Area;
 

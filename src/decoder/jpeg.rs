@@ -16,7 +16,7 @@ use std::io::Read;
 
 use jpeg_decoder as jpeg;
 use format::{Format, Color};
-use super::{error, Error};
+use error::{self, Error};
 
 pub struct Decoder<R: Read> {
 	inner:    jpeg::Decoder<R>,

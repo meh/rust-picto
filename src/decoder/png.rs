@@ -16,7 +16,7 @@ use std::io::Read;
 
 use png;
 use format::{Format, Color};
-use super::{error, Error};
+use error::{self, Error};
 
 enum State<R: Read> {
 	Decoder(png::Decoder<R>),

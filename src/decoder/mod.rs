@@ -16,9 +16,7 @@ use format::{Format, Color};
 use buffer::{Buffer, Cast};
 use pixel::{self, Pixel};
 use color;
-
-mod error;
-pub use self::error::{Error, Result};
+use error::{Error, Result};
 
 #[cfg(feature = "png")]
 pub mod png;
