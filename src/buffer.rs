@@ -306,6 +306,13 @@ impl<C, P, D> Clone for Buffer<C, P, D>
 	}
 }
 
+/// Optimization trait to avoid useless copies, it permits converting a buffer
+/// into another kind of buffer, or in case it's the same type to just return
+/// itself.
+///
+/// This is mostly an implementation detail because of limitations in the type
+/// system, when the `nightly` feature is enabled, specialization will be used
+/// to avoid reallocations, otherwise you're out of luck.
 pub trait Cast<C: pixel::Channel, P: Pixel<C>> {
 	fn cast(self) -> Buffer<C, P, Vec<C>>;
 }
