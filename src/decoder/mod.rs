@@ -23,6 +23,9 @@ pub use self::error::{Error, Result};
 #[cfg(feature = "png")]
 pub mod png;
 
+#[cfg(feature = "jpeg")]
+pub mod jpeg;
+
 pub trait Decoder {
 	fn format(&mut self) -> Result<Format>;
 	fn dimensions(&mut self) -> Result<(u32, u32)>;

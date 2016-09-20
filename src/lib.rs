@@ -17,6 +17,9 @@
 #[cfg(feature = "png")]
 extern crate png;
 
+#[cfg(feature = "jpeg")]
+extern crate jpeg_decoder;
+
 extern crate num;
 
 pub extern crate palette;

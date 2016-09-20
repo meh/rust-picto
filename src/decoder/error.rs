@@ -20,6 +20,7 @@ use std::io;
 pub enum Error {
 	Io(io::Error),
 	Format(String),
+	Unsupported(String),
 }
 
 pub type Result<T> = ::std::result::Result<T, Error>;
@@ -42,7 +43,7 @@ impl error::Error for Error {
 			Error::Io(ref err) =>
 				err.description(),
 
-			Error::Format(ref err) =>
+			Error::Format(ref err) | Error::Unsupported(ref err) =>
 				err,
 		}
 	}

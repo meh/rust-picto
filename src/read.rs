@@ -37,9 +37,12 @@ pub fn from<C, P, R>(input: R, format: Format) -> decoder::Result<Buffer<C, P, V
 {
 	match format {
 		#[cfg(feature = "png")]
-		Format::Png => {
-			decoder::load::<C, P, _>(decoder::png::Decoder::new(input))
-		}
+		Format::Png =>
+			decoder::load::<C, P, _>(decoder::png::Decoder::new(input)),
+
+		#[cfg(feature = "jpeg")]
+		Format::Jpeg =>
+			decoder::load::<C, P, _>(decoder::jpeg::Decoder::new(input)),
 
 		_ =>
 			Err(decoder::Error::Format("unsupported image format".into())),
