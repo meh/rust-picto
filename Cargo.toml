@@ -19,3 +19,4 @@ optional = true
 
 [features]
 default = ["png"]
+nightly = []

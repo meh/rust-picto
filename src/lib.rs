@@ -12,6 +12,8 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
+#![cfg_attr(feature = "nightly", feature(specialization))]
+
 #[cfg(feature = "png")]
 extern crate png;
 

@@ -13,7 +13,7 @@
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
 use format::{Format, Color};
-use buffer::{Buffer};
+use buffer::{Buffer, Cast};
 use pixel::{self, Pixel};
 use color;
 
@@ -42,10 +42,8 @@ pub fn load<C, P, D>(mut decoder: D) -> Result<Buffer<C, P, Vec<C>>>
 
 	macro_rules! buffer {
 		($ch:ty, $ty:path) => ({
-			let buffer = try!(Buffer::<$ch, $ty, _>::from_raw(dimensions.0, dimensions.1, frame)
-				.map_err(|_| Error::Format("wrong dimensions".into())));
-
-			Ok(buffer.convert::<C, P>())
+			Ok(Cast::<C, P>::cast(try!(Buffer::<$ch, $ty, _>::from_raw(dimensions.0, dimensions.1, frame)
+				.map_err(|_| Error::Format("wrong dimensions".into())))))
 		});
 	}
 
