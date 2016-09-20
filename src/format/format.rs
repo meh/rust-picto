@@ -12,6 +12,8 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
+use std::io::{Read, Seek, SeekFrom};
+
 #[derive(Eq, PartialEq, Copy, Clone, Debug)]
 pub enum Format {
 	Png,
@@ -25,7 +27,7 @@ pub enum Format {
 }
 
 /// Guess the image format.
-pub fn guess(buffer: &[u8]) -> Option<Format> {
+pub fn guess<R: Read + Seek>(mut input: R) -> Option<Format> {
 	const MAGIC: &'static [(&'static [u8], Format)] = &[
 		(b"\x89PNG\r\n\x1a\n", Format::Png),
 		(&[0xff, 0xd8, 0xff],  Format::Jpeg),
@@ -39,11 +41,39 @@ pub fn guess(buffer: &[u8]) -> Option<Format> {
 		(b"#?RADIANCE",        Format::Hdr),
 	];
 
+	macro_rules! try {
+		(return $body:expr) => (
+			if let Ok(value) = $body {
+				value
+			}
+			else {
+				return None;
+			}
+		);
+
+		(continue $body:expr) => (
+			if let Ok(value) = $body {
+				value
+			}
+			else {
+				continue;
+			}
+		);
+	}
+
 	for &(magic, format) in MAGIC.iter() {
-		if buffer.starts_with(magic) {
+		try!(continue input.seek(SeekFrom::Start(0)));
+
+		let mut buffer = vec![0; magic.len()];
+		try!(continue input.read_exact(&mut buffer));
+
+		if buffer == &magic[..] {
+			try!(return input.seek(SeekFrom::Start(0)));
 			return Some(format);
 		}
 	}
+
+	try!(return input.seek(SeekFrom::Start(0)));
 
 	None
 }

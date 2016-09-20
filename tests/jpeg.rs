@@ -3,13 +3,12 @@ extern crate approx;
 
 extern crate picto;
 use picto::color::*;
-use picto::Format;
 
 use std::fs::File;
 
 #[test]
 fn read_as_is() {
-	let image = picto::read::from::<u8, Rgb, _>(File::open("tests/rainbow.jpeg").unwrap(), Format::Jpeg).unwrap();
+	let image = picto::read::from::<u8, Rgb, _>(File::open("tests/rainbow.jpeg").unwrap()).unwrap();
 
 	assert_eq!(400, image.width());
 	assert_eq!(326, image.height());
@@ -23,7 +22,7 @@ fn read_as_is() {
 
 #[test]
 fn read_with_convert() {
-	let image = picto::read::from::<u8, Rgba, _>(File::open("tests/rainbow.jpeg").unwrap(), Format::Jpeg).unwrap();
+	let image = picto::read::from::<u8, Rgba, _>(File::open("tests/rainbow.jpeg").unwrap()).unwrap();
 
 	assert_eq!(400, image.width());
 	assert_eq!(326, image.height());

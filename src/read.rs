@@ -12,7 +12,7 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-use std::io::{Read, Cursor};
+use std::io::{Read, Seek, Cursor};
 
 use decoder;
 use color;
@@ -20,16 +20,28 @@ use pixel::{self, Pixel};
 use buffer::Buffer;
 use format::{self, Format};
 
+/// Load an image from an input stream, guessing its format.
+pub fn from<C, P, R>(mut input: R) -> decoder::Result<Buffer<C, P, Vec<C>>>
+	where C: pixel::Channel,
+	      P: Pixel<C> + pixel::Write<C>,
+	      P: From<color::Rgb> + From<color::Rgba> + From<color::Luma> + From<color::Lumaa>,
+	      R: Read + Seek
+{
+	let format = try!(format::guess(input.by_ref()).ok_or(decoder::Error::Format("unsupported image format".into())));
+	with_format(input, format)
+}
+
+/// Load an image from memory, guessing its format.
 pub fn from_memory<C, P>(slice: &[u8]) -> decoder::Result<Buffer<C, P, Vec<C>>>
 	where C: pixel::Channel,
 	      P: Pixel<C> + pixel::Write<C>,
 	      P: From<color::Rgb> + From<color::Rgba> + From<color::Luma> + From<color::Lumaa>
 {
-	from::<C, P, _>(Cursor::new(slice),
-		try!(format::guess(slice).ok_or(decoder::Error::Format("unsupported image format".into()))))
+	from(Cursor::new(slice))
 }
 
-pub fn from<C, P, R>(input: R, format: Format) -> decoder::Result<Buffer<C, P, Vec<C>>>
+/// Load an image from an input stream with the given format.
+pub fn with_format<C, P, R>(input: R, format: Format) -> decoder::Result<Buffer<C, P, Vec<C>>>
 	where C: pixel::Channel,
 	      P: Pixel<C> + pixel::Write<C>,
 	      P: From<color::Rgb> + From<color::Rgba> + From<color::Luma> + From<color::Lumaa>,
