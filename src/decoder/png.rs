@@ -15,8 +15,11 @@
 use std::io::Read;
 
 use png;
-use format::{Format, Color};
 use error::{self, Error};
+use format::Format;
+use buffer::Buffer;
+use pixel::{self, Pixel};
+use color;
 
 enum State<R: Read> {
 	Decoder(png::Decoder<R>),
@@ -61,46 +64,44 @@ impl<R: Read> Decoder<R> {
 	}
 }
 
-impl<R: Read> super::Decoder for Decoder<R> {
+impl<C, P, R> super::Decoder<C, P> for Decoder<R>
+	where C: pixel::Channel,
+	      P: Pixel<C> + pixel::Write<C>,
+	      P: From<color::Rgb> + From<color::Rgba> + From<color::Luma> + From<color::Lumaa>,
+	      R: Read
+{
 	fn format(&mut self) -> error::Result<Format> {
 		Ok(Format::Png)
 	}
 
-	fn dimensions(&mut self) -> error::Result<(u32, u32)> {
-		Ok(try!(self.reader()).info().size())
-	}
-
-	fn color(&mut self) -> error::Result<Color> {
-		Ok(try!(self.reader()).output_color_type().into())
-	}
-
-	fn frame(&mut self) -> error::Result<Vec<u8>> {
+	fn frame(&mut self) -> error::Result<Buffer<C, P, Vec<C>>> {
 		let mut buffer = vec![0; try!(self.reader()).output_buffer_size()];
 		try!(try!(self.reader()).next_frame(&mut buffer));
 
-		Ok(buffer)
-	}
-}
+		macro_rules! buffer {
+			($ch:ty, $ty:path) => ({
+				Ok(Cast::<C, P>::cast(try!(Buffer::<$ch, $ty, _>::from_raw(
+					try!(self.reader()).info().size().0,
+					try!(self.reader()).info().size().1,
+					buffer).map_err(|_| Error::Format("wrong dimensions".into())))))
+			});
+		}
 
-impl From<(png::ColorType, png::BitDepth)> for Color {
-	fn from((kind, depth): (png::ColorType, png::BitDepth)) -> Self {
-		let bits = depth as u8;
+		match try!(self.reader()).output_color_type() {
+			(png::ColorType::Grayscale, png::BitDepth::Eight) =>
+				buffer!(u8, color::Luma),
 
-		match kind {
-			png::ColorType::Grayscale =>
-				Color::Gray(bits, false),
+			(png::ColorType::GrayscaleAlpha, png::BitDepth::Eight) =>
+				buffer!(u8, color::Lumaa),
 
-			png::ColorType::RGB =>
-				Color::Rgb(bits, false),
+			(png::ColorType::RGB, png::BitDepth::Eight) =>
+				buffer!(u8, color::Rgb),
 
-			png::ColorType::Indexed =>
-				Color::Palette(bits),
+			(png::ColorType::RGBA, png::BitDepth::Eight) =>
+				buffer!(u8, color::Rgba),
 
-			png::ColorType::GrayscaleAlpha =>
-				Color::Gray(bits, true),
-
-			png::ColorType::RGBA =>
-				Color::Rgb(bits, true),
+			_ =>
+				Err(Error::Format("unsupported color type".into()))
 		}
 	}
 }
@@ -127,4 +128,70 @@ impl From<png::DecodingError> for Error {
 				Error::Format("compressed data stream corrupted".into())
 		}
 	}
+}
+
+trait Cast<C: pixel::Channel, P: Pixel<C>> {
+	fn cast(self) -> Buffer<C, P, Vec<C>>;
+}
+
+#[cfg(not(feature = "nightly"))]
+mod stable {
+	use std::ops::Deref;
+
+	use pixel::{self, Pixel};
+	use buffer::Buffer;
+	use super::Cast;
+
+	impl<CI, PI, DI, CO, PO> Cast<CO, PO> for Buffer<CI, PI, DI>
+		where CI: pixel::Channel,
+		      PI: Pixel<CI> + pixel::Read<CI>,
+		      DI: Deref<Target = [CI]>,
+		      CO: pixel::Channel,
+		      PO: Pixel<CO> + pixel::Write<CO>,
+		      PO: From<PI>
+	{
+		fn cast(self) -> Buffer<CO, PO, Vec<CO>> {
+			self.convert::<CO, PO>()
+		}
+	}
+}
+
+#[cfg(feature = "nightly")]
+mod nightly {
+	use std::ops::Deref;
+
+	use num::Float;
+	use pixel::{self, Pixel};
+	use color::{Luma, Lumaa, Rgb, Rgba};
+	use buffer::Buffer;
+	use super::Cast;
+
+	impl<CI, PI, DI, CO, PO> Cast<CO, PO> for Buffer<CI, PI, DI>
+		where CI: pixel::Channel,
+		      PI: Pixel<CI> + pixel::Read<CI>,
+		      DI: Deref<Target = [CI]>,
+		      CO: pixel::Channel,
+		      PO: Pixel<CO> + pixel::Write<CO>,
+		      PO: From<PI>
+	{
+		default
+		fn cast(self) -> Buffer<CO, PO, Vec<CO>> {
+			self.convert::<CO, PO>()
+		}
+	}
+
+	macro_rules! impl_for {
+		($ch:ty, $px:ident) => (
+			impl<T: Float + Copy + 'static> Cast<$ch, $px<T>> for Buffer<$ch, $px<T>, Vec<$ch>> {
+				fn cast(self) -> Buffer<$ch, $px<T>, Vec<$ch>> {
+					self
+				}
+			}
+		);
+	}
+
+	impl_for!(u8, Luma);
+	impl_for!(u8, Lumaa);
+	impl_for!(u8, Rgb);
+	impl_for!(u8, Rgba);
 }

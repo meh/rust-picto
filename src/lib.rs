@@ -39,7 +39,7 @@ pub use view::View;
 
 pub mod iter;
 
-pub mod buffer;
+mod buffer;
 pub use buffer::Buffer;
 
 pub mod format;

@@ -14,7 +14,7 @@
 
 use std::io::{Read, Seek, Cursor};
 
-use decoder;
+use decoder::{self, Decoder};
 use color;
 use pixel::{self, Pixel};
 use buffer::Buffer;
@@ -51,11 +51,11 @@ pub fn with_format<C, P, R>(input: R, format: Format) -> error::Result<Buffer<C,
 	match format {
 		#[cfg(feature = "png")]
 		Format::Png =>
-			decoder::load::<C, P, _>(decoder::png::Decoder::new(input)),
+			decoder::png::Decoder::new(input).frame(),
 
 		#[cfg(feature = "jpeg")]
 		Format::Jpeg =>
-			decoder::load::<C, P, _>(decoder::jpeg::Decoder::new(input)),
+			decoder::jpeg::Decoder::new(input).frame(),
 
 		_ =>
 			Err(Error::Format("unsupported image format".into())),
