@@ -84,8 +84,6 @@ pub fn guess<R: Read + Seek>(mut input: R) -> Option<Format> {
 
 		let byte = try!(return input.read_u32::<BigEndian>()) & 0xfff7ffff;
 
-		println!("{:08x}", byte);
-
 		if byte == 0x01010000 || byte == 0x00020000 || byte == 0x00030000 {
 			result = Some(Format::Tga);
 		}
