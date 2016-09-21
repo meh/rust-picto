@@ -64,16 +64,18 @@ impl<R: Read> Decoder<R> {
 	}
 }
 
+impl<R: Read> super::Parameter<Decoder<R>> for Format {
+	fn get(_from: &mut Decoder<R>) -> error::Result<Self> {
+		Ok(Format::Png)
+	}
+}
+
 impl<C, P, R> super::Decoder<C, P> for Decoder<R>
 	where C: pixel::Channel,
 	      P: Pixel<C> + pixel::Write<C>,
 	      P: From<color::Rgb> + From<color::Rgba> + From<color::Luma> + From<color::Lumaa>,
 	      R: Read
 {
-	fn format(&mut self) -> error::Result<Format> {
-		Ok(Format::Png)
-	}
-
 	fn frame(&mut self) -> error::Result<Buffer<C, P, Vec<C>>> {
 		let mut buffer = vec![0; try!(self.reader()).output_buffer_size()];
 		try!(try!(self.reader()).next_frame(&mut buffer));

@@ -33,16 +33,18 @@ impl<R: Read + Seek> Decoder<R> {
 	}
 }
 
+impl<R: Read + Seek> super::Parameter<Decoder<R>> for Format {
+	fn get(_from: &mut Decoder<R>) -> error::Result<Self> {
+		Ok(Format::Bmp)
+	}
+}
+
 impl<C, P, R> super::Decoder<C, P> for Decoder<R>
 	where C: pixel::Channel,
 	      P: Pixel<C> + pixel::Write<C>,
 	      P: From<color::Rgb> + From<color::Rgba>,
 	      R: Read + Seek
 {
-	fn format(&mut self) -> error::Result<Format> {
-		Ok(Format::Bmp)
-	}
-
 	fn frame(&mut self) -> error::Result<Buffer<C, P, Vec<C>>> {
 		let image = try!(bmp::read(self.inner.by_ref(), ColFmt::Auto));
 

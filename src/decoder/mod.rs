@@ -12,15 +12,21 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-use format::Format;
 use buffer::Buffer;
 use pixel::{self, Pixel};
 use error;
 
+/// A decoder parameter.
+pub trait Parameter<T>: Sized {
+	fn get(from: &mut T) -> error::Result<Self>;
+}
+
 /// An image decoder.
-pub trait Decoder<C: pixel::Channel, P: Pixel<C>> {
-	/// The format the decoder is going to return.
-	fn format(&mut self) -> error::Result<Format>;
+pub trait Decoder<C: pixel::Channel, P: Pixel<C>>: Sized {
+	/// Get information from the decoder.
+	fn get<T: Parameter<Self>>(&mut self) -> error::Result<T> {
+		T::get(self)
+	}
 
 	/// Decode a frame from the stream.
 	fn frame(&mut self) -> error::Result<Buffer<C, P, Vec<C>>>;
