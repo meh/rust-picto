@@ -58,7 +58,7 @@ pub fn with_format<C, P, R>(input: R, format: Format) -> error::Result<Buffer<C,
 	where C: pixel::Channel,
 	      P: Pixel<C> + pixel::Write<C>,
 	      P: From<color::Rgb> + From<color::Rgba> + From<color::Luma> + From<color::Lumaa>,
-	      R: Read
+	      R: Read + Seek
 {
 	match format {
 		#[cfg(feature = "png")]
