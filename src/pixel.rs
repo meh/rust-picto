@@ -12,8 +12,12 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-use color::*;
 use num::{NumCast, Float, Zero};
+
+use color::{Luma, Rgb, Hsl, Hsv, Hwb, Lab, Lch, Xyz, Yxy};
+use color::{Lumaa, Rgba, Hsla, Hsva, Hwba, Laba, Lcha, Xyza, Yxya};
+use color::pixel::Srgb;
+use color::RgbHue;
 
 /// Type for the `Channel` in a `Pixel`, this is typically the type for the
 /// element in a buffer as well.
@@ -62,7 +66,7 @@ macro_rules! impl_for {
 
 impl_for!(1, Luma);
 impl_for!(2, Lumaa);
-impl_for!(3, Rgb, Hsl, Hsv, Hwb, Lab, Lch, Xyz, Yxy);
+impl_for!(3, Rgb, Srgb, Hsl, Hsv, Hwb, Lab, Lch, Xyz, Yxy);
 impl_for!(4, Rgba, Hsla, Hsva, Hwba, Laba, Lcha, Xyza, Yxya);
 
 /// A `Pixel` readable from a slice.
@@ -166,13 +170,13 @@ macro_rules! impl_for {
 impl_for!(u8 1 -> Luma);
 impl_for!(u8 2 -> Lumaa);
 
-impl_for!(u8 3 -> Rgb);
+impl_for!(u8 3 -> Rgb, Srgb);
 impl_for!(u8 4 -> Rgba);
 
-impl_for!(f32 3 -> Rgb, Lab, Xyz, Yxy);
+impl_for!(f32 3 -> Rgb, Srgb, Lab, Xyz, Yxy);
 impl_for!(f32 4 -> Rgba, Laba, Xyza, Yxya);
 
-impl_for!(f64 3 -> Rgb, Lab, Xyz, Yxy);
+impl_for!(f64 3 -> Rgb, Srgb, Lab, Xyz, Yxy);
 impl_for!(f64 4 -> Rgba, Laba, Xyza, Yxya);
 
 impl_for!(hue(RgbHue) f32 3 -> Hsl, Hsv, Hwb);
@@ -252,6 +256,7 @@ impl_for!(Luma -> luma);
 impl_for!(Lumaa -> luma, alpha);
 
 impl_for!(Rgb -> red, green, blue);
+impl_for!(Srgb -> red, green, blue);
 impl_for!(Lab -> l, a, b);
 impl_for!(Xyz -> x, y, z);
 impl_for!(Yxy -> x, y, luma);
