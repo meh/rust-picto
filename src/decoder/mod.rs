@@ -27,12 +27,10 @@ pub trait Decoder<C: pixel::Channel, P: Pixel<C>> {
 }
 
 macro_rules! cast {
-	()  => ();
-	(@) => ();
+	()     => ();
+	(impl) => ();
 
-	(@ ($ch:ident, $px:ident)) => (
-		use color::$px;
-
+	(impl ($ch:ident, $px:ident)) => (
 		impl<T: Float + Copy + 'static> Cast<$ch, $px<T>> for Buffer<$ch, $px<T>, Vec<$ch>> {
 			#[inline]
 			fn cast(self) -> Buffer<$ch, $px<T>, Vec<$ch>> {
@@ -41,9 +39,9 @@ macro_rules! cast {
 		}
 	);
 
-	(@ ($ch:ident, $px:ident), $($rest:tt)*) => (
-		cast!(@ ($ch, $px));
-		cast!(@ $($rest)*);
+	(impl ($ch:ident, $px:ident), $($rest:tt)*) => (
+		cast!(impl ($ch, $px));
+		cast!(impl $($rest)*);
 	);
 
 	($($rest:tt)*) => (
@@ -98,7 +96,16 @@ macro_rules! cast {
 				}
 			}
 
-			cast!(@ $($rest)*);
+			#[allow(unused_imports)]
+			use color::{
+				Luma, Rgb, Hsl, Hsv, Hwb, Lab, Lch, Xyz, Yxy,
+			  Lumaa, Rgba, Hsla, Hsva, Hwba, Laba, Lcha, Xyza, Yxya
+			};
+
+			#[allow(unused_imports)]
+			use color::pixel::Srgb;
+
+			cast!(impl $($rest)*);
 		}
 	);
 }

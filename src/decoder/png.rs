@@ -80,7 +80,7 @@ impl<C, P, R> super::Decoder<C, P> for Decoder<R>
 
 		macro_rules! buffer {
 			($ch:ty, $ty:path) => ({
-				Ok(Cast::<C, P>::cast(try!(Buffer::<$ch, $ty, _>::from_raw(
+				Ok(Cast::<C, P>::cast(try!(Buffer::<_, $ty, _>::from_raw(
 					try!(self.reader()).info().size().0,
 					try!(self.reader()).info().size().1,
 					buffer).map_err(|_| Error::Format("wrong dimensions".into())))))
@@ -99,6 +99,18 @@ impl<C, P, R> super::Decoder<C, P> for Decoder<R>
 
 			(png::ColorType::RGBA, png::BitDepth::Eight) =>
 				buffer!(u8, color::Rgba),
+
+			(png::ColorType::Grayscale, png::BitDepth::Sixteen) =>
+				buffer!(u16, color::Luma),
+
+			(png::ColorType::GrayscaleAlpha, png::BitDepth::Sixteen) =>
+				buffer!(u16, color::Lumaa),
+
+			(png::ColorType::RGB, png::BitDepth::Sixteen) =>
+				buffer!(u16, color::Rgb),
+
+			(png::ColorType::RGBA, png::BitDepth::Sixteen) =>
+				buffer!(u16, color::Rgba),
 
 			_ =>
 				Err(Error::Format("unsupported color type".into()))
@@ -130,4 +142,7 @@ impl From<png::DecodingError> for Error {
 	}
 }
 
-cast! { (u8, Luma), (u8, Lumaa), (u8, Rgb), (u8, Rgba) }
+cast! {
+	(u8,  Luma), (u8,  Lumaa), (u8,  Rgb), (u8,  Rgba),
+	(u16, Luma), (u16, Lumaa), (u16, Rgb), (u16, Rgba),
+}
