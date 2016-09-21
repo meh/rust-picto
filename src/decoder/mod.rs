@@ -52,7 +52,7 @@ macro_rules! cast {
 		}
 
 		#[cfg(not(feature = "nightly"))]
-		mod stable {
+		mod stable_cast {
 			use std::ops::Deref;
 
 			use pixel::{self, Pixel};
@@ -75,7 +75,7 @@ macro_rules! cast {
 		}
 
 		#[cfg(feature = "nightly")]
-		mod nightly {
+		mod nightly_cast {
 			use std::ops::Deref;
 
 			use num::Float;
