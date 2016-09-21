@@ -5,11 +5,10 @@ extern crate picto;
 mod png {
 	use picto;
 	use picto::color::*;
-	use std::fs::File;
 
 	#[test]
 	fn read_as_is() {
-		let image = picto::read::from::<u8, Rgb, _>(File::open("tests/rainbow.png").unwrap()).unwrap();
+		let image = picto::read::from_path::<u8, Rgb, _>("tests/rainbow.png").unwrap();
 
 		assert_eq!(400, image.width());
 		assert_eq!(326, image.height());
@@ -23,7 +22,7 @@ mod png {
 
 	#[test]
 	fn read_with_convert() {
-		let image = picto::read::from::<u8, Rgba, _>(File::open("tests/rainbow.png").unwrap()).unwrap();
+		let image = picto::read::from_path::<u8, Rgba, _>("tests/rainbow.png").unwrap();
 
 		assert_eq!(400, image.width());
 		assert_eq!(326, image.height());
@@ -34,16 +33,27 @@ mod png {
 		assert_relative_eq!(Rgba::new_u8(0x00, 0x02, 0xff, 0xff),
 			image.get(399, 0), max_relative = 0.01);
 	}
+
+	#[test]
+	fn write() {
+		let mut image = picto::Buffer::<u8, Rgb, _>::new(2, 2);
+
+		image.set(0, 0, &Rgb::new(1.0, 0.0, 0.0));
+		image.set(0, 1, &Rgb::new(0.0, 1.0, 0.0));
+		image.set(1, 0, &Rgb::new(0.0, 0.0, 1.0));
+		image.set(1, 1, &Rgb::new(1.0, 0.0, 1.0));
+
+		picto::write::to_path(&image, "tests/test.png").unwrap();
+	}
 }
 
 mod jpeg {
 	use picto;
 	use picto::color::*;
-	use std::fs::File;
 
 	#[test]
 	fn read_as_is() {
-		let image = picto::read::from::<u8, Rgb, _>(File::open("tests/rainbow.jpeg").unwrap()).unwrap();
+		let image = picto::read::from_path::<u8, Rgb, _>("tests/rainbow.jpeg").unwrap();
 
 		assert_eq!(400, image.width());
 		assert_eq!(326, image.height());
@@ -57,7 +67,7 @@ mod jpeg {
 
 	#[test]
 	fn read_with_convert() {
-		let image = picto::read::from::<u8, Rgba, _>(File::open("tests/rainbow.jpeg").unwrap()).unwrap();
+		let image = picto::read::from_path::<u8, Rgba, _>("tests/rainbow.jpeg").unwrap();
 
 		assert_eq!(400, image.width());
 		assert_eq!(326, image.height());
