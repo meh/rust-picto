@@ -40,6 +40,12 @@ pub fn to_path<C, P, D, W>(buffer: &Buffer<C, P, D>, path: W) -> error::Result<(
 		Some("jpg") | Some("jpeg") =>
 			Format::Jpeg,
 
+		Some("bmp") =>
+			Format::Bmp,
+
+		Some("tga") =>
+			Format::Tga,
+
 		_ =>
 			return Err(Error::Format("unknown image format".into()))
 	};
@@ -58,6 +64,10 @@ pub fn with_format<C, P, D, W>(buffer: &Buffer<C, P, D>, output: W, format: Form
 		#[cfg(feature = "png")]
 		Format::Png =>
 			encoder::png::Encoder::new(output).frame(buffer),
+
+		#[cfg(feature = "bmp")]
+		Format::Bmp =>
+			encoder::bmp::Encoder::new(output).frame(buffer),
 
 		_ =>
 			Err(Error::Format("unsupported image format".into()))

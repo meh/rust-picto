@@ -128,3 +128,6 @@ macro_rules! cast {
 
 #[cfg(feature = "png")]
 pub mod png;
+
+#[cfg(feature = "bmp")]
+pub mod bmp;
