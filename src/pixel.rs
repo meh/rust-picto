@@ -18,23 +18,23 @@ use num::{NumCast, Float, Zero};
 /// Type for the `Channel` in a `Pixel`, this is typically the type for the
 /// element in a buffer as well.
 pub trait Channel: Zero + Copy + 'static {
-	fn from<T: Float>(value: T) -> Self;
+	fn from<T: Float + 'static>(value: T) -> Self;
 }
 
 impl Channel for u8 {
-	fn from<T: Float>(value: T) -> Self {
+	fn from<T: Float + 'static>(value: T) -> Self {
 		NumCast::from(value * NumCast::from(255).unwrap()).unwrap()
 	}
 }
 
 impl Channel for f32 {
-	fn from<T: Float>(value: T) -> Self {
+	fn from<T: Float + 'static>(value: T) -> Self {
 		NumCast::from(value).unwrap()
 	}
 }
 
 impl Channel for f64 {
-	fn from<T: Float>(value: T) -> Self {
+	fn from<T: Float + 'static>(value: T) -> Self {
 		NumCast::from(value).unwrap()
 	}
 }
@@ -47,7 +47,7 @@ pub trait Pixel<C: Channel>: Copy + 'static {
 
 macro_rules! impl_for {
 	($n:expr, $ty:ident) => (
-		impl<T: Float + Copy + 'static> Pixel<u8> for $ty<T> {
+		impl<T: Float + 'static> Pixel<u8> for $ty<T> {
 			fn channels() -> usize {
 				$n
 			}
@@ -73,7 +73,7 @@ pub trait Read<C: Channel> {
 
 macro_rules! impl_for {
 	(u8 1 -> $ty:ident) => (
-		impl<T: Float + Copy + 'static> Read<u8> for $ty<T> {
+		impl<T: Float + 'static> Read<u8> for $ty<T> {
 			fn read(data: &[u8]) -> Self {
 				$ty::new_u8(data[0])
 			}
@@ -81,7 +81,7 @@ macro_rules! impl_for {
 	);
 
 	(u8 2 -> $ty:ident) => (
-		impl<T: Float + Copy + 'static> Read<u8> for $ty<T> {
+		impl<T: Float + 'static> Read<u8> for $ty<T> {
 			fn read(data: &[u8]) -> Self {
 				$ty::new_u8(data[0], data[1])
 			}
@@ -89,7 +89,7 @@ macro_rules! impl_for {
 	);
 
 	(u8 3 -> $ty:ident) => (
-		impl<T: Float + Copy + 'static> Read<u8> for $ty<T> {
+		impl<T: Float + 'static> Read<u8> for $ty<T> {
 			fn read(data: &[u8]) -> Self {
 				$ty::new_u8(data[0], data[1], data[2])
 			}
@@ -97,7 +97,7 @@ macro_rules! impl_for {
 	);
 
 	(u8 4 -> $ty:ident) => (
-		impl<T: Float + Copy + 'static> Read<u8> for $ty<T> {
+		impl<T: Float + 'static> Read<u8> for $ty<T> {
 			fn read(data: &[u8]) -> Self {
 				$ty::new_u8(data[0], data[1], data[2], data[3])
 			}
@@ -189,7 +189,7 @@ pub trait Write<C: Channel> {
 
 macro_rules! impl_for {
 	($ty:ident -> $a:ident) => (
-		impl<C: Channel, T: Float + Copy + 'static> Write<C> for $ty<T> {
+		impl<C: Channel, T: Float + 'static> Write<C> for $ty<T> {
 			fn write(&self, data: &mut [C]) {
 				data[0] = C::from(self.$a);
 			}
@@ -197,7 +197,7 @@ macro_rules! impl_for {
 	);
 
 	($ty:ident -> $a:ident, $b:ident) => (
-		impl<C: Channel, T: Float + Copy + 'static> Write<C> for $ty<T> {
+		impl<C: Channel, T: Float + 'static> Write<C> for $ty<T> {
 			fn write(&self, data: &mut [C]) {
 				data[0] = C::from(self.$a);
 				data[1] = C::from(self.$b);
@@ -206,7 +206,7 @@ macro_rules! impl_for {
 	);
 
 	($ty:ident -> $a:ident, $b:ident, $c:ident) => (
-		impl<C: Channel, T: Float + Copy + 'static> Write<C> for $ty<T> {
+		impl<C: Channel, T: Float + 'static> Write<C> for $ty<T> {
 			fn write(&self, data: &mut [C]) {
 				data[0] = C::from(self.$a);
 				data[1] = C::from(self.$b);
@@ -216,7 +216,7 @@ macro_rules! impl_for {
 	);
 
 	($ty:ident -> $a:ident, $b:ident, $c:ident, $d:ident) => (
-		impl<C: Channel, T: Float + Copy + 'static> Write<C> for $ty<T> {
+		impl<C: Channel, T: Float + 'static> Write<C> for $ty<T> {
 			fn write(&self, data: &mut [C]) {
 				data[0] = C::from(self.$a);
 				data[1] = C::from(self.$b);
@@ -227,7 +227,7 @@ macro_rules! impl_for {
 	);
 
 	($ty:ident -> $a:ident($hue:ident), $b:ident, $c:ident) => (
-		impl<C: Channel, T: Float + Copy + 'static> Write<C> for $ty<T> {
+		impl<C: Channel, T: Float + 'static> Write<C> for $ty<T> {
 			fn write(&self, data: &mut [C]) {
 				data[0] = C::from(self.$a.to_radians());
 				data[1] = C::from(self.$b);
@@ -237,7 +237,7 @@ macro_rules! impl_for {
 	);
 
 	($ty:ident -> $a:ident($hue:ident), $b:ident, $c:ident, $d:ident) => (
-		impl<C: Channel, T: Float + Copy + 'static> Write<C> for $ty<T> {
+		impl<C: Channel, T: Float + 'static> Write<C> for $ty<T> {
 			fn write(&self, data: &mut [C]) {
 				data[0] = C::from(self.$a.to_radians());
 				data[1] = C::from(self.$b);
