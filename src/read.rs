@@ -78,6 +78,6 @@ pub fn with_format<C, P, R>(input: R, format: Format) -> error::Result<Buffer<C,
 			decoder::tga::Decoder::new(input).frame(),
 
 		_ =>
-			Err(Error::Format("unsupported image format".into())),
+			Err(Error::Unsupported("unsupported image format".into())),
 	}
 }
