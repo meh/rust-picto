@@ -20,6 +20,9 @@ extern crate png;
 #[cfg(feature = "jpeg")]
 extern crate jpeg_decoder;
 
+#[cfg(any(feature = "bmp", feature = "tga"))]
+extern crate imagefmt;
+
 extern crate num;
 
 pub extern crate palette;

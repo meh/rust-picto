@@ -112,3 +112,25 @@ mod jpeg {
 		}
 	}
 }
+
+#[cfg(any(feature = "bmp", feature = "tga"))]
+mod imagefmt {
+	use imagefmt;
+
+	impl From<imagefmt::Error> for Error {
+		fn from(value: imagefmt::Error) -> Self {
+			match value {
+				imagefmt::Error::Io(err) =>
+					Error::Io(err),
+
+				imagefmt::Error::InvalidData(desc) |
+				imagefmt::Error::InvalidArg(desc) |
+				imagefmt::Error::Internal(desc) =>
+					Error::Format(desc.into()),
+
+				imagefmt::Error::Unsupported(desc) =>
+					Error::Unsupported(desc.into()),
+			}
+		}
+	}
+}

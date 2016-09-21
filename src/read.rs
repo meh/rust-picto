@@ -69,6 +69,14 @@ pub fn with_format<C, P, R>(input: R, format: Format) -> error::Result<Buffer<C,
 		Format::Jpeg =>
 			decoder::jpeg::Decoder::new(input).frame(),
 
+		#[cfg(feature = "bmp")]
+		Format::Bmp =>
+			decoder::bmp::Decoder::new(input).frame(),
+
+		#[cfg(feature = "tga")]
+		Format::Tga =>
+			decoder::tga::Decoder::new(input).frame(),
+
 		_ =>
 			Err(Error::Format("unsupported image format".into())),
 	}

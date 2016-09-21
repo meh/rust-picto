@@ -24,6 +24,7 @@ pub enum Format {
 	Bmp,
 	Ico,
 	Hdr,
+	Tga,
 }
 
 /// Guess the image format.
