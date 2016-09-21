@@ -96,6 +96,16 @@ impl<'a, C, P> View<'a, C, P>
 
 		buffer
 	}
+
+	/// Convert the `View` to a `Buffer` with different channel and pixel type.
+	#[inline]
+	pub fn convert<CO, PO>(&self) -> Buffer<CO, PO, Vec<CO>>
+		where CO: pixel::Channel,
+		      PO: Pixel<CO> + pixel::Write<CO>,
+		      P: Into<PO>
+	{
+		Ref::<C, P>::new(self.data, self.area).convert()
+	}
 }
 
 #[cfg(test)]

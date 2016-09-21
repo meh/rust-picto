@@ -190,15 +190,9 @@ impl<C, P, D> Buffer<C, P, D>
 	pub fn convert<CO, PO>(&self) -> Buffer<CO, PO, Vec<CO>>
 		where CO: pixel::Channel,
 		      PO: Pixel<CO> + pixel::Write<CO>,
-		      PO: From<P>
+		      P: Into<PO>
 	{
-		let mut result = Buffer::<CO, PO, Vec<_>>::new(self.width, self.height);
-
-		for (x, y, px) in self.pixels() {
-			result.set(x, y, &px.get().into());
-		}
-
-		result
+		self.as_ref(Default::default()).convert()
 	}
 }
 
