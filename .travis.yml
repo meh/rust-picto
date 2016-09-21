@@ -1,5 +1,16 @@
 language: rust
-rust:
-  - stable
-  - beta
-  - nightly
+sudo: false
+
+matrix:
+  include:
+    - rust: stable
+    - rust: beta
+    - rust: nightly
+      env:
+       - FEATURES='nightly'
+
+script:
+  - |
+      cargo test --verbose &&
+      ([ -z "$FEATURES" ] || cargo test --verbose --features "$FEATURES") &&
+      ([ -z "$BENCHES"  ] || cargo bench --verbose --features "$FEATURES")
