@@ -47,7 +47,7 @@ pub fn to_path<C, P, D, W>(buffer: &Buffer<C, P, D>, path: W) -> error::Result<(
 			Format::Tga,
 
 		_ =>
-			return Err(Error::Format("unknown image format".into()))
+			return Err(Error::Unsupported("unsupported image format".into()))
 	};
 
 	with_format(buffer, try!(File::create(path)), format)
@@ -74,6 +74,6 @@ pub fn with_format<C, P, D, W>(buffer: &Buffer<C, P, D>, output: W, format: Form
 			encoder::tga::Encoder::new(output).frame(buffer),
 
 		_ =>
-			Err(Error::Format("unsupported image format".into()))
+			Err(Error::Unsupported("unsupported image format".into()))
 	}
 }
