@@ -27,7 +27,13 @@ pub trait Channel: Zero + Copy + 'static {
 
 impl Channel for u8 {
 	fn from<T: Float + 'static>(value: T) -> Self {
-		NumCast::from(value * NumCast::from(255).unwrap()).unwrap()
+		NumCast::from(value * NumCast::from(u8::max_value()).unwrap()).unwrap()
+	}
+}
+
+impl Channel for u16 {
+	fn from<T: Float + 'static>(value: T) -> Self {
+		NumCast::from(value * NumCast::from(u16::max_value()).unwrap()).unwrap()
 	}
 }
 
@@ -51,7 +57,7 @@ pub trait Pixel<C: Channel>: Copy + 'static {
 
 macro_rules! impl_for {
 	($n:expr, $ty:ident) => (
-		impl<T: Float + 'static> Pixel<u8> for $ty<T> {
+		impl<C: Channel, T: Float + 'static> Pixel<C> for $ty<T> {
 			fn channels() -> usize {
 				$n
 			}
@@ -104,6 +110,52 @@ macro_rules! impl_for {
 		impl<T: Float + 'static> Read<u8> for $ty<T> {
 			fn read(data: &[u8]) -> Self {
 				$ty::new_u8(data[0], data[1], data[2], data[3])
+			}
+		}
+	);
+
+	(u16 1 -> $ty:ident) => (
+		impl<T: Float + 'static> Read<u16> for $ty<T> {
+			fn read(data: &[u16]) -> Self {
+				$ty::new(
+					T::from(data[0]).unwrap() / T::from(u16::max_value()).unwrap()
+				)
+			}
+		}
+	);
+
+	(u16 2 -> $ty:ident) => (
+		impl<T: Float + 'static> Read<u16> for $ty<T> {
+			fn read(data: &[u16]) -> Self {
+				$ty::new(
+					T::from(data[0]).unwrap() / T::from(u16::max_value()).unwrap(),
+					T::from(data[1]).unwrap() / T::from(u16::max_value()).unwrap()
+				)
+			}
+		}
+	);
+
+	(u16 3 -> $ty:ident) => (
+		impl<T: Float + 'static> Read<u16> for $ty<T> {
+			fn read(data: &[u16]) -> Self {
+				$ty::new(
+					T::from(data[0]).unwrap() / T::from(u16::max_value()).unwrap(),
+					T::from(data[1]).unwrap() / T::from(u16::max_value()).unwrap(),
+					T::from(data[2]).unwrap() / T::from(u16::max_value()).unwrap(),
+				)
+			}
+		}
+	);
+
+	(u16 4 -> $ty:ident) => (
+		impl<T: Float + 'static> Read<u16> for $ty<T> {
+			fn read(data: &[u16]) -> Self {
+				$ty::new(
+					T::from(data[0]).unwrap() / T::from(u16::max_value()).unwrap(),
+					T::from(data[1]).unwrap() / T::from(u16::max_value()).unwrap(),
+					T::from(data[2]).unwrap() / T::from(u16::max_value()).unwrap(),
+					T::from(data[3]).unwrap() / T::from(u16::max_value()).unwrap(),
+				)
 			}
 		}
 	);
@@ -169,13 +221,21 @@ macro_rules! impl_for {
 
 impl_for!(u8 1 -> Luma);
 impl_for!(u8 2 -> Lumaa);
-
 impl_for!(u8 3 -> Rgb, Srgb);
 impl_for!(u8 4 -> Rgba);
 
+impl_for!(u16 1 -> Luma);
+impl_for!(u16 2 -> Lumaa);
+impl_for!(u16 3 -> Rgb, Srgb);
+impl_for!(u16 4 -> Rgba);
+
+impl_for!(f32 1 -> Luma);
+impl_for!(f32 2 -> Lumaa);
 impl_for!(f32 3 -> Rgb, Srgb, Lab, Xyz, Yxy);
 impl_for!(f32 4 -> Rgba, Laba, Xyza, Yxya);
 
+impl_for!(f64 1 -> Luma);
+impl_for!(f64 2 -> Lumaa);
 impl_for!(f64 3 -> Rgb, Srgb, Lab, Xyz, Yxy);
 impl_for!(f64 4 -> Rgba, Laba, Xyza, Yxya);
 
