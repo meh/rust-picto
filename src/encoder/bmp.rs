@@ -94,9 +94,7 @@ mod stable {
 
 #[cfg(feature = "nightly")]
 mod nightly {
-	use png;
-	use png::ColorType::*;
-	use png::BitDepth::*;
+	use imagefmt::ColFmt;
 	use num::Float;
 	use buffer::Buffer;
 	use pixel::{self, Pixel};
