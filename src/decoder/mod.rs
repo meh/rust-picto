@@ -34,6 +34,7 @@ macro_rules! cast {
 		use color::$px;
 
 		impl<T: Float + Copy + 'static> Cast<$ch, $px<T>> for Buffer<$ch, $px<T>, Vec<$ch>> {
+			#[inline]
 			fn cast(self) -> Buffer<$ch, $px<T>, Vec<$ch>> {
 				self
 			}
@@ -66,6 +67,7 @@ macro_rules! cast {
 				      PO: Pixel<CO> + pixel::Write<CO>,
 				      PO: From<PI>
 			{
+				#[inline]
 				fn cast(self) -> Buffer<CO, PO, Vec<CO>> {
 					self.convert::<CO, PO>()
 				}
@@ -89,6 +91,7 @@ macro_rules! cast {
 				      PO: Pixel<CO> + pixel::Write<CO>,
 				      PO: From<PI>
 			{
+				#[inline]
 				default
 				fn cast(self) -> Buffer<CO, PO, Vec<CO>> {
 					self.convert::<CO, PO>()
