@@ -111,15 +111,4 @@ impl<C, P, R> super::Decoder<C, P> for Decoder<R>
 	}
 }
 
-impl From<jpeg::Error> for Error {
-	fn from(value: jpeg::Error) -> Self {
-		match value {
-			jpeg::Error::Format(desc)      => Error::Format(desc),
-			jpeg::Error::Unsupported(desc) => Error::Unsupported(format!("{:?}", desc)),
-			jpeg::Error::Io(err)           => Error::Io(err),
-			jpeg::Error::Internal(err)     => Error::Format(err.description().to_owned()),
-		}
-	}
-}
-
 cast! { (u8, Luma), (u8, Rgb) }

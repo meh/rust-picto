@@ -48,3 +48,67 @@ impl error::Error for Error {
 		}
 	}
 }
+
+#[cfg(feature = "png")]
+mod png {
+	use png;
+
+	impl From<png::DecodingError> for Error {
+		fn from(value: png::DecodingError) -> Self {
+			match value {
+				png::DecodingError::IoError(err) =>
+					Error::Io(err),
+
+				png::DecodingError::Format(desc) =>
+					Error::Format(desc.into_owned()),
+
+				png::DecodingError::InvalidSignature =>
+					Error::Format("invalid signature".into()),
+
+				png::DecodingError::CrcMismatch { .. } =>
+					Error::Format("CRC error".into()),
+
+				png::DecodingError::Other(desc) =>
+					Error::Format(desc.into_owned()),
+
+				png::DecodingError::CorruptFlateStream =>
+					Error::Format("compressed data stream corrupted".into())
+			}
+		}
+	}
+
+	impl From<png::EncodingError> for Error {
+		fn from(value: png::EncodingError) -> Self {
+			match value {
+				png::EncodingError::IoError(err) =>
+					Error::Io(err),
+
+				png::EncodingError::Format(desc) =>
+					Error::Format(desc.into_owned()),
+			}
+		}
+	}
+}
+
+#[cfg(feature = "jpeg")]
+mod jpeg {
+	use jpeg_decoder as jpeg;
+
+	impl From<jpeg::Error> for Error {
+		fn from(value: jpeg::Error) -> Self {
+			match value {
+				jpeg::Error::Format(desc) =>
+					Error::Format(desc),
+
+				jpeg::Error::Unsupported(desc) =>
+					Error::Unsupported(format!("{:?}", desc)),
+
+				jpeg::Error::Io(err) =>
+					Error::Io(err),
+
+				jpeg::Error::Internal(err) =>
+					Error::Format(err.description().to_owned()),
+			}
+		}
+	}
+}

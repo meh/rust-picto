@@ -91,18 +91,6 @@ impl<C, P, D, W> super::Encoder<C, P, D> for Encoder<W>
 	}
 }
 
-impl From<png::EncodingError> for Error {
-	fn from(value: png::EncodingError) -> Self {
-		match value {
-			png::EncodingError::IoError(err) =>
-				Error::Io(err),
-
-			png::EncodingError::Format(desc) =>
-				Error::Format(desc.into_owned()),
-		}
-	}
-}
-
 trait Color {
 	fn color(&self) -> Option<(png::ColorType, png::BitDepth)>;
 }

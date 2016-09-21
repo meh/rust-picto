@@ -113,31 +113,7 @@ impl<C, P, R> super::Decoder<C, P> for Decoder<R>
 				buffer!(u16, color::Rgba),
 
 			_ =>
-				Err(Error::Format("unsupported color type".into()))
-		}
-	}
-}
-
-impl From<png::DecodingError> for Error {
-	fn from(value: png::DecodingError) -> Self {
-		match value {
-			png::DecodingError::IoError(err) =>
-				Error::Io(err),
-
-			png::DecodingError::Format(desc) =>
-				Error::Format(desc.into_owned()),
-
-			png::DecodingError::InvalidSignature =>
-				Error::Format("invalid signature".into()),
-
-			png::DecodingError::CrcMismatch { .. } =>
-				Error::Format("CRC error".into()),
-
-			png::DecodingError::Other(desc) =>
-				Error::Format(desc.into_owned()),
-
-			png::DecodingError::CorruptFlateStream =>
-				Error::Format("compressed data stream corrupted".into())
+				Err(Error::Unsupported("unsupported color type".into()))
 		}
 	}
 }
