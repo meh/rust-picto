@@ -52,6 +52,7 @@ impl error::Error for Error {
 #[cfg(feature = "png")]
 mod png {
 	use png;
+	use super::Error;
 
 	impl From<png::DecodingError> for Error {
 		fn from(value: png::DecodingError) -> Self {
@@ -93,6 +94,7 @@ mod png {
 #[cfg(feature = "jpeg")]
 mod jpeg {
 	use jpeg_decoder as jpeg;
+	use super::Error;
 
 	impl From<jpeg::Error> for Error {
 		fn from(value: jpeg::Error) -> Self {
@@ -116,6 +118,7 @@ mod jpeg {
 #[cfg(any(feature = "bmp", feature = "tga"))]
 mod imagefmt {
 	use imagefmt;
+	use super::Error;
 
 	impl From<imagefmt::Error> for Error {
 		fn from(value: imagefmt::Error) -> Self {
