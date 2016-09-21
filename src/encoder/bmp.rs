@@ -51,12 +51,6 @@ impl<C, P, D, W> super::Encoder<C, P, D> for Encoder<W>
 		}
 
 		match format {
-			ColFmt::Y =>
-				write!(u8, color::Luma),
-
-			ColFmt::YA =>
-				write!(u8, color::Lumaa),
-
 			ColFmt::RGB =>
 				write!(u8, color::Rgb),
 
@@ -98,7 +92,7 @@ mod nightly {
 	use num::Float;
 	use buffer::Buffer;
 	use pixel::{self, Pixel};
-	use color::{Luma, Lumaa, Rgb, Rgba};
+	use color::{Rgb, Rgba};
 	use super::Color;
 
 	impl<C, P, D> Color for Buffer<C, P, D>
@@ -123,12 +117,10 @@ mod nightly {
 		)
 	}
 
-	impl_for!(u8, Luma => ColFmt::Y);
-	impl_for!(u8, Lumaa => ColFmt::YA);
 	impl_for!(u8, Rgb => ColFmt::RGB);
 	impl_for!(u8, Rgba => ColFmt::RGBA);
 }
 
 cast! {
-	(u8,  Luma), (u8,  Lumaa), (u8,  Rgb), (u8,  Rgba)
+	(u8,  Rgb), (u8,  Rgba)
 }
