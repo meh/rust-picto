@@ -36,14 +36,35 @@ mod png {
 
 	#[test]
 	fn write() {
-		let mut image = picto::Buffer::<u8, Rgb, _>::new(2, 2);
+		{
+			let mut image = picto::Buffer::<u8, Rgb, _>::new(2, 2);
 
-		image.set(0, 0, &Rgb::new(1.0, 0.0, 0.0));
-		image.set(0, 1, &Rgb::new(0.0, 1.0, 0.0));
-		image.set(1, 0, &Rgb::new(0.0, 0.0, 1.0));
-		image.set(1, 1, &Rgb::new(1.0, 0.0, 1.0));
+			image.set(0, 0, &Rgb::new(1.0, 0.0, 0.0));
+			image.set(0, 1, &Rgb::new(0.0, 1.0, 0.0));
+			image.set(1, 0, &Rgb::new(0.0, 0.0, 1.0));
+			image.set(1, 1, &Rgb::new(1.0, 0.0, 1.0));
 
-		picto::write::to_path(&image, "tests/test.png").unwrap();
+			picto::write::to_path(&image, "tests/test.png").unwrap();
+		}
+
+		{
+			let image = picto::read::from_path::<u8, Rgb, _>("tests/test.png").unwrap();
+
+			assert_eq!(2, image.width());
+			assert_eq!(2, image.height());
+
+			assert_relative_eq!(Rgb::new(1.0, 0.0, 0.0),
+				image.get(0, 0), max_relative = 0.01);
+
+			assert_relative_eq!(Rgb::new(0.0, 1.0, 0.0),
+				image.get(0, 1), max_relative = 0.01);
+
+			assert_relative_eq!(Rgb::new(0.0, 0.0, 1.0),
+				image.get(1, 0), max_relative = 0.01);
+
+			assert_relative_eq!(Rgb::new(1.0, 0.0, 1.0),
+				image.get(1, 1), max_relative = 0.01);
+		}
 	}
 }
 
