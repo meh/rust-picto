@@ -17,7 +17,6 @@ use std::ops::Deref;
 
 use png::{self, HasParameters};
 use error;
-use format::Format;
 use pixel::{self, Pixel};
 use buffer::Buffer;
 use color;
@@ -41,10 +40,6 @@ impl<C, P, D, W> super::Encoder<C, P, D> for Encoder<W>
 	      D: Deref<Target = [C]>,
 	      W: Write
 {
-	fn format(&mut self, _format: Format) -> error::Result<()> {
-		Ok(())
-	}
-
 	fn frame(&mut self, buffer: &Buffer<C, P, D>) -> error::Result<()> {
 		let (color, depth) = buffer.color().unwrap_or((png::ColorType::RGBA, png::BitDepth::Eight));
 
@@ -58,7 +53,7 @@ impl<C, P, D, W> super::Encoder<C, P, D> for Encoder<W>
 				try!(writer.write_image_data(Cast::<$ty>::cast(buffer).as_ref()))
 			);
 		}
-			
+
 		match (color, depth) {
 			(png::ColorType::Grayscale, png::BitDepth::Eight) =>
 				write!(u8, color::Luma),

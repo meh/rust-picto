@@ -14,15 +14,21 @@
 
 use std::ops::Deref;
 
-use format::Format;
 use buffer::Buffer;
 use pixel::{self, Pixel};
 use error;
 
+/// An encoder parameter.
+pub trait Parameter<T>: Sized {
+	fn set(self, to: &mut T) -> error::Result<()>;
+}
+
 /// An image encoder.
-pub trait Encoder<C: pixel::Channel, P: Pixel<C>, D: Deref<Target = [C]>> {
+pub trait Encoder<C: pixel::Channel, P: Pixel<C>, D: Deref<Target = [C]>>: Sized {
 	/// The format the encoder must use.
-	fn format(&mut self, format: Format) -> error::Result<()>;
+	fn set<T: Parameter<Self>>(&mut self, value: T) -> error::Result<()> {
+		value.set(self)
+	}
 
 	/// A frame for the image, respecting the previously defined metadata.
 	fn frame(&mut self, buffer: &Buffer<C, P, D>) -> error::Result<()>;
