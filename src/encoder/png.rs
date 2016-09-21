@@ -55,7 +55,7 @@ impl<C, P, D, W> super::Encoder<C, P, D> for Encoder<W>
 
 		macro_rules! write {
 			($ch:ty, $ty:path) => (
-				try!(writer.write_image_data(Cast::<$ch, $ty>::cast(buffer).as_ref()))
+				try!(writer.write_image_data(Cast::<$ty>::cast(buffer).as_ref()))
 			);
 		}
 			
@@ -71,6 +71,18 @@ impl<C, P, D, W> super::Encoder<C, P, D> for Encoder<W>
 
 			(png::ColorType::RGBA, png::BitDepth::Eight) =>
 				write!(u8, color::Rgba),
+
+			(png::ColorType::Grayscale, png::BitDepth::Sixteen) =>
+				write!(u16, color::Luma),
+
+			(png::ColorType::GrayscaleAlpha, png::BitDepth::Sixteen) =>
+				write!(u16, color::Lumaa),
+
+			(png::ColorType::RGB, png::BitDepth::Sixteen) =>
+				write!(u16, color::Rgb),
+
+			(png::ColorType::RGBA, png::BitDepth::Sixteen) =>
+				write!(u16, color::Rgba),
 
 			_ => unreachable!()
 		}
@@ -116,10 +128,12 @@ mod stable {
 #[cfg(feature = "nightly")]
 mod nightly {
 	use png;
+	use png::ColorType::*;
+	use png::BitDepth::*;
 	use num::Float;
 	use buffer::Buffer;
 	use pixel::{self, Pixel};
-	use color;
+	use color::{Luma, Lumaa, Rgb, Rgba};
 	use super::Color;
 
 	impl<C, P, D> Color for Buffer<C, P, D>
@@ -133,33 +147,29 @@ mod nightly {
 		}
 	}
 
-	impl<D, T: Float + 'static> Color for Buffer<u8, color::Luma<T>, D> {
-		#[inline]
-		fn color(&self) -> Option<(png::ColorType, png::BitDepth)> {
-			Some((png::ColorType::Grayscale, png::BitDepth::Eight))
-		}
+	macro_rules! impl_for {
+		($ch:ident, $px:ident => $color:path, $depth:path) => (
+			impl<D, T: Float + 'static> Color for Buffer<$ch, $px<T>, D> {
+				#[inline]
+				fn color(&self) -> Option<(png::ColorType, png::BitDepth)> {
+					Some(($color, $depth))
+				}
+			}
+		)
 	}
 
-	impl<D, T: Float + 'static> Color for Buffer<u8, color::Lumaa<T>, D> {
-		#[inline]
-		fn color(&self) -> Option<(png::ColorType, png::BitDepth)> {
-			Some((png::ColorType::GrayscaleAlpha, png::BitDepth::Eight))
-		}
-	}
+	impl_for!(u8, Luma => Grayscale, Eight);
+	impl_for!(u8, Lumaa => GrayscaleAlpha, Eight);
+	impl_for!(u8, Rgb => RGB, Eight);
+	impl_for!(u8, Rgba => RGBA, Eight);
 
-	impl<D, T: Float + 'static> Color for Buffer<u8, color::Rgb<T>, D> {
-		#[inline]
-		fn color(&self) -> Option<(png::ColorType, png::BitDepth)> {
-			Some((png::ColorType::RGB, png::BitDepth::Eight))
-		}
-	}
-
-	impl<D, T: Float + 'static> Color for Buffer<u8, color::Rgba<T>, D> {
-		#[inline]
-		fn color(&self) -> Option<(png::ColorType, png::BitDepth)> {
-			Some((png::ColorType::RGBA, png::BitDepth::Eight))
-		}
-	}
+	impl_for!(u16, Luma => Grayscale, Sixteen);
+	impl_for!(u16, Lumaa => GrayscaleAlpha, Sixteen);
+	impl_for!(u16, Rgb => RGB, Sixteen);
+	impl_for!(u16, Rgba => RGBA, Sixteen);
 }
 
-cast! { (u8, Luma), (u8, Lumaa), (u8, Rgb), (u8, Rgba) }
+cast! {
+	(u8,  Luma), (u8,  Lumaa), (u8,  Rgb), (u8,  Rgba),
+	(u16, Luma), (u16, Lumaa), (u16, Rgb), (u16, Rgba),
+}

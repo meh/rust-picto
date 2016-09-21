@@ -29,30 +29,32 @@ pub trait Encoder<C: pixel::Channel, P: Pixel<C>, D: Deref<Target = [C]>> {
 }
 
 macro_rules! cast {
-	()  => ();
-	(@) => ();
+	()     => ();
+	(impl) => ();
 
-	(@ ($ch:ident, $px:ident)) => (
-		use color::$px;
-
-		impl<T: Float + Copy + 'static> Cast<$ch, $px<T>> for Buffer<$ch, $px<T>, Vec<$ch>> {
+	(impl ($ch:ident, $px:ident)) => (
+		impl<T: Float + Copy + 'static> Cast<$px<T>> for Buffer<$ch, $px<T>, Vec<$ch>> {
 			#[inline]
-			fn cast(&self) -> Cow<[$ch]> {
-				Cow::Borrowed(&*self)
+			fn cast(&self) -> Cow<[u8]> {
+				let slice: &[$ch] = &*self;
+
+				Cow::Borrowed(unsafe {
+					slice::from_raw_parts(slice.as_ptr() as *const _, slice.len() * mem::size_of::<$ch>())
+				})
 			}
 		}
 	);
 
-	(@ ($ch:ident, $px:ident), $($rest:tt)*) => (
-		cast!(@ ($ch, $px));
-		cast!(@ $($rest)*);
+	(impl ($ch:ident, $px:ident), $($rest:tt)*) => (
+		cast!(impl ($ch, $px));
+		cast!(impl $($rest)*);
 	);
 
 	($($rest:tt)*) => (
 		use std::borrow::Cow;
 
-		trait Cast<C: pixel::Channel, P: Pixel<C>> {
-			fn cast(&self) -> Cow<[C]>;
+		trait Cast<P: Pixel<u8>> {
+			fn cast(&self) -> Cow<[u8]>;
 		}
 		
 		#[cfg(not(feature = "nightly"))]
@@ -64,17 +66,16 @@ macro_rules! cast {
 			use buffer::Buffer;
 			use super::Cast;
 
-			impl<CI, PI, DI, CO, PO> Cast<CO, PO> for Buffer<CI, PI, DI>
+			impl<CI, PI, DI, PO> Cast<PO> for Buffer<CI, PI, DI>
 				where CI: pixel::Channel,
 				      PI: Pixel<CI> + pixel::Read<CI>,
 				      PI: Into<PO>,
 				      DI: Deref<Target = [CI]>,
-				      CO: pixel::Channel,
-				      PO: Pixel<CO> + pixel::Write<CO>
+				      PO: Pixel<u8> + pixel::Write<u8>
 			{
 				#[inline]
-				fn cast(&self) -> Cow<[CO]> {
-					Cow::Owned(self.convert::<CO, PO>().into_raw())
+				fn cast(&self) -> Cow<[u8]> {
+					Cow::Owned(self.convert::<u8, PO>().into_raw())
 				}
 			}
 		}
@@ -83,33 +84,41 @@ macro_rules! cast {
 		mod nightly_cast {
 			use std::ops::Deref;
 			use std::borrow::Cow;
+			use std::slice;
+			use std::mem;
 
 			use num::Float;
 			use pixel::{self, Pixel};
 			use buffer::Buffer;
 			use super::Cast;
 
-			impl<CI, PI, DI, CO, PO> Cast<CO, PO> for Buffer<CI, PI, DI>
+			impl<CI, PI, DI, PO> Cast<PO> for Buffer<CI, PI, DI>
 				where CI: pixel::Channel,
 				      PI: Pixel<CI> + pixel::Read<CI>,
 				      PI: Into<PO>,
 				      DI: Deref<Target = [CI]>,
-				      CO: pixel::Channel,
-				      PO: Pixel<CO> + pixel::Write<CO>
+				      PO: Pixel<u8> + pixel::Write<u8>
 			{
 				#[inline]
 				default
-				fn cast(&self) -> Cow<[CO]> {
-					Cow::Owned(self.convert::<CO, PO>().into_raw())
+				fn cast(&self) -> Cow<[u8]> {
+					Cow::Owned(self.convert::<u8, PO>().into_raw())
 				}
 			}
 
-			cast!(@ $($rest)*);
+			#[allow(unused_imports)]
+			use color::{
+				Luma, Rgb, Hsl, Hsv, Hwb, Lab, Lch, Xyz, Yxy,
+			  Lumaa, Rgba, Hsla, Hsva, Hwba, Laba, Lcha, Xyza, Yxya
+			};
+
+			#[allow(unused_imports)]
+			use color::pixel::Srgb;
+
+			cast!(impl $($rest)*);
 		}
 	);
 }
-
-
 
 #[cfg(feature = "png")]
 pub mod png;
