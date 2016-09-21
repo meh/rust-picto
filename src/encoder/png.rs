@@ -16,7 +16,7 @@ use std::io::Write;
 use std::ops::Deref;
 
 use png::{self, HasParameters};
-use error::{self, Error};
+use error;
 use format::Format;
 use pixel::{self, Pixel};
 use buffer::Buffer;
