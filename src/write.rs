@@ -69,6 +69,10 @@ pub fn with_format<C, P, D, W>(buffer: &Buffer<C, P, D>, output: W, format: Form
 		Format::Bmp =>
 			encoder::bmp::Encoder::new(output).frame(buffer),
 
+		#[cfg(feature = "tga")]
+		Format::Tga =>
+			encoder::tga::Encoder::new(output).frame(buffer),
+
 		_ =>
 			Err(Error::Format("unsupported image format".into()))
 	}
