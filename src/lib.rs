@@ -14,6 +14,12 @@
 
 #![cfg_attr(feature = "nightly", feature(specialization))]
 
+extern crate byteorder;
+extern crate num;
+
+pub extern crate palette;
+pub use palette as color;
+
 #[cfg(feature = "png")]
 extern crate png;
 
@@ -22,11 +28,6 @@ extern crate jpeg_decoder;
 
 #[cfg(any(feature = "bmp", feature = "tga"))]
 extern crate imagefmt;
-
-extern crate num;
-
-pub extern crate palette;
-pub use palette as color;
 
 pub mod error;
 pub use error::{Error, Result};

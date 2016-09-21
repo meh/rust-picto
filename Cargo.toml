@@ -13,8 +13,9 @@ keywords    = ["image", "color"]
 approx = "0.1"
 
 [dependencies]
-num     = "0.1"
-palette = "0.2"
+byteorder = "0.5"
+num       = "0.1"
+palette   = "0.2"
 
 [dependencies.imagefmt]
 version  = "4"

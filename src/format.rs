@@ -13,6 +13,7 @@
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
 use std::io::{Read, Seek, SeekFrom};
+use byteorder::{BigEndian, ReadBytesExt};
 
 #[derive(Eq, PartialEq, Copy, Clone, Debug)]
 pub enum Format {
@@ -30,16 +31,16 @@ pub enum Format {
 /// Guess the image format.
 pub fn guess<R: Read + Seek>(mut input: R) -> Option<Format> {
 	const MAGIC: &'static [(&'static [u8], Format)] = &[
-		(b"\x89PNG\r\n\x1a\n", Format::Png),
-		(&[0xff, 0xd8, 0xff],  Format::Jpeg),
-		(b"GIF89a",            Format::Gif),
-		(b"GIF87a",            Format::Gif),
-		(b"WEBP",              Format::Webp),
-		(b"MM.*",              Format::Tiff),
-		(b"II*.",              Format::Tiff),
-		(b"BM",                Format::Bmp),
-		(&[0, 0, 1, 0],        Format::Ico),
-		(b"#?RADIANCE",        Format::Hdr),
+		(b"\x89PNG\r\n\x1a\n",      Format::Png),
+		(&[0xff, 0xd8, 0xff],       Format::Jpeg),
+		(b"GIF89a",                 Format::Gif),
+		(b"GIF87a",                 Format::Gif),
+		(b"WEBP",                   Format::Webp),
+		(b"MM.*",                   Format::Tiff),
+		(b"II*.",                   Format::Tiff),
+		(b"BM",                     Format::Bmp),
+		(&[0x00, 0x00, 0x01, 0x00], Format::Ico),
+		(b"#?RADIANCE",             Format::Hdr),
 	];
 
 	macro_rules! try {
@@ -62,6 +63,9 @@ pub fn guess<R: Read + Seek>(mut input: R) -> Option<Format> {
 		);
 	}
 
+	let mut result = None;
+
+	// Check through static MAGIC fields.
 	for &(magic, format) in MAGIC.iter() {
 		try!(continue input.seek(SeekFrom::Start(0)));
 
@@ -69,12 +73,25 @@ pub fn guess<R: Read + Seek>(mut input: R) -> Option<Format> {
 		try!(continue input.read_exact(&mut buffer));
 
 		if buffer == &magic[..] {
-			try!(return input.seek(SeekFrom::Start(0)));
-			return Some(format);
+			result = Some(format);
+			break;
+		}
+	}
+
+	// Check for TGA
+	if result.is_none() {
+		try!(return input.seek(SeekFrom::Start(1)));
+
+		let byte = try!(return input.read_u32::<BigEndian>()) & 0xfff7ffff;
+
+		println!("{:08x}", byte);
+
+		if byte == 0x01010000 || byte == 0x00020000 || byte == 0x00030000 {
+			result = Some(Format::Tga);
 		}
 	}
 
 	try!(return input.seek(SeekFrom::Start(0)));
 
-	None
+	result
 }
