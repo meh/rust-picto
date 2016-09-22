@@ -36,7 +36,7 @@ impl<W: Write> Encoder<W> {
 impl<C, P, D, W> super::Encoder<C, P, D> for Encoder<W>
 	where C: pixel::Channel,
 	      P: Pixel<C> + pixel::Read<C>,
-	      P: Into<color::Luma> + Into<color::Lumaa> + Into<color::Rgb> + Into<color::Rgba>,
+	      P: Into<color::Rgb> + Into<color::Rgba>,
 	      D: Deref<Target = [C]>,
 	      W: Write
 {

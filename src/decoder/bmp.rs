@@ -16,7 +16,6 @@ use std::io::{Read, Seek};
 
 use imagefmt::{bmp, ColFmt};
 use error::{self, Error};
-use format::Format;
 use buffer::Buffer;
 use pixel::{self, Pixel};
 use color;
@@ -30,12 +29,6 @@ impl<R: Read + Seek> Decoder<R> {
 		Decoder {
 			inner: input
 		}
-	}
-}
-
-impl<R: Read + Seek> super::Parameter<Decoder<R>> for Format {
-	fn get(_from: &mut Decoder<R>) -> error::Result<Self> {
-		Ok(Format::Bmp)
 	}
 }
 

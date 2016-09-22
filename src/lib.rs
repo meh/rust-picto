@@ -38,6 +38,9 @@ extern crate xyz;
 pub mod error;
 pub use error::{Error, Result};
 
+mod parameter;
+pub use parameter::{HasParameters, Parameter};
+
 pub mod area;
 pub use area::Area;
 

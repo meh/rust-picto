@@ -20,6 +20,7 @@ use error;
 use pixel::{self, Pixel};
 use buffer::Buffer;
 use color;
+use parameter::{Parameter, HasParameters};
 
 pub struct Encoder<W: Write> {
 	inner:   W,
@@ -35,12 +36,16 @@ impl<W: Write> Encoder<W> {
 	}
 }
 
-impl<'a, W: Write> super::Parameter<Encoder<W>> for Vec<u8> {
+impl<W: Write> Parameter<Encoder<W>> for Vec<u8> {
 	fn set(self, to: &mut Encoder<W>) -> error::Result<()> {
 		to.palette = self;
 
 		Ok(())
 	}
+}
+
+impl<W: Write> HasParameters for Encoder<W>
+{
 }
 
 impl<C, P, D, W> super::Encoder<C, P, D> for Encoder<W>

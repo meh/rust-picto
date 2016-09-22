@@ -16,7 +16,6 @@ use std::io::Read;
 
 use png;
 use error::{self, Error};
-use format::Format;
 use buffer::Buffer;
 use pixel::{self, Pixel};
 use color;
@@ -61,12 +60,6 @@ impl<R: Read> Decoder<R> {
 		else {
 			unreachable!();
 		}
-	}
-}
-
-impl<R: Read> super::Parameter<Decoder<R>> for Format {
-	fn get(_from: &mut Decoder<R>) -> error::Result<Self> {
-		Ok(Format::Png)
 	}
 }
 
