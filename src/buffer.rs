@@ -24,9 +24,7 @@ use iter::pixel::{Iter as Pixels, IterMut as PixelsMut};
 /// Buffer for an image.
 #[derive(PartialEq, Debug)]
 pub struct Buffer<C: pixel::Channel, P: Pixel<C>, D> {
-	width:  u32,
-	height: u32,
-
+	area: Area,
 	data: D,
 
 	_channel: PhantomData<C>,
@@ -41,9 +39,7 @@ impl<C, P> Buffer<C, P, Vec<C>>
 	#[inline]
 	pub fn new(width: u32, height: u32) -> Self {
 		Buffer {
-			width:  width,
-			height: height,
-
+			area: Area::from(0, 0, width, height),
 			data: vec![Zero::zero(); width as usize * height as usize * P::channels()],
 
 			_channel: PhantomData,
@@ -58,13 +54,12 @@ impl<C, P> Buffer<C, P, Vec<C>>
 {
 	/// Create a new `Buffer` with the request space allocated and filled with
 	/// the given pixel.
+	#[inline]
 	pub fn from_pixel(width: u32, height: u32, pixel: &P) -> Self {
 		let mut buffer = Self::new(width, height);
 
-		for x in 0 .. width {
-			for y in 0 .. height {
-				buffer.set(x, y, pixel);
-			}
+		for (x, y) in buffer.area().absolute() {
+			buffer.set(x, y, pixel);
 		}
 
 		buffer
@@ -74,16 +69,15 @@ impl<C, P> Buffer<C, P, Vec<C>>
 	/// the pixel returned by the given function.
 	///
 	/// The function takes the coordinates and returns a pixel.
+	#[inline]
 	pub fn from_fn<T, F>(width: u32, height: u32, mut func: F) -> Self
 		where T: Into<P>,
 		      F: FnMut(u32, u32) -> T
 	{
 		let mut buffer = Self::new(width, height);
 
-		for x in 0 .. width {
-			for y in 0 .. height {
-				buffer.set(x, y, &func(x, y).into());
-			}
+		for (x, y) in buffer.area().absolute() {
+			buffer.set(x, y, &func(x, y).into());
 		}
 
 		buffer
@@ -103,9 +97,7 @@ impl<C, P, D> Buffer<C, P, D>
 		}
 
 		Ok(Buffer {
-			width:  width,
-			height: height,
-
+			area: Area::from(0, 0, width, height),
 			data: data,
 
 			_channel: PhantomData,
@@ -126,25 +118,25 @@ impl<C, P, D> Buffer<C, P, D>
 
 	#[inline]
 	pub fn area(&self) -> Area {
-		Area::from(0, 0, self.width, self.height)
+		self.area
 	}
 
 	/// Get the dimensions.
 	#[inline]
 	pub fn dimensions(&self) -> (u32, u32) {
-		(self.width, self.height)
+		(self.area.width, self.area.height)
 	}
 
 	/// Get the width.
 	#[inline]
 	pub fn width(&self) -> u32 {
-		self.width
+		self.area.width
 	}
 
 	/// Get the height.
 	#[inline]
 	pub fn height(&self) -> u32 {
-		self.height
+		self.area.height
 	}
 }
 
@@ -160,7 +152,7 @@ impl<C, P, D> Buffer<C, P, D>
 	/// Requires that `x < self.width()` and `y < self.height()`, otherwise it will panic.
 	#[inline]
 	pub fn get(&self, x: u32, y: u32) -> P {
-		view::Ref::new(&self.data, self.area()).get(x, y)
+		view::Ref::new(&self.data, self.area).get(x, y)
 	}
 
 	/// Get an immutable view of the given sub-image.
@@ -170,9 +162,9 @@ impl<C, P, D> Buffer<C, P, D>
 	/// Requires that `x + width <= self.width()` and `y + height <= self.height()`, otherwise it will panic.
 	#[inline]
 	pub fn as_ref(&self, area: area::Builder) -> view::Ref<C, P> {
-		let area = area.complete(0, 0, self.width, self.height);
+		let area = area.complete(self.area);
 
-		if area.x + area.width > self.width || area.y + area.height > self.height {
+		if area.x + area.width > self.area.width || area.y + area.height > self.area.height {
 			panic!("out of bounds");
 		}
 
@@ -182,7 +174,7 @@ impl<C, P, D> Buffer<C, P, D>
 	/// Get an immutable iterator over the `Buffer` pixels.
 	#[inline]
 	pub fn pixels(&self) -> Pixels<C, P> {
-		Pixels::new(&self.data, self.area())
+		Pixels::new(&self.data, self.area)
 	}
 
 	/// Convert the `Buffer` to another `Buffer` with different channel and pixel type.
@@ -208,8 +200,7 @@ impl<C, P, D> Buffer<C, P, D>
 	/// Requires that `x < self.width()` and `y < self.height()`, otherwise it will panic.
 	#[inline]
 	pub fn set(&mut self, x: u32, y: u32, pixel: &P) {
-		let area = self.area();
-		view::Mut::new(&mut self.data, area).set(x, y, pixel)
+		view::Mut::new(&mut self.data, self.area).set(x, y, pixel)
 	}
 
 	/// Get a mutable view of the given sub-image.
@@ -219,9 +210,9 @@ impl<C, P, D> Buffer<C, P, D>
 	/// Requires that `x + width <= self.width()` and `y + height <= self.height()`, otherwise it will panic.
 	#[inline]
 	pub fn as_mut(&mut self, area: area::Builder) -> view::Mut<C, P> {
-		let area = area.complete(0, 0, self.width, self.height);
+		let area = area.complete(self.area);
 
-		if area.x + area.width > self.width || area.y + area.height > self.height {
+		if area.x + area.width > self.area.width || area.y + area.height > self.area.height {
 			panic!("out of bounds");
 		}
 
@@ -241,9 +232,9 @@ impl<C, P, D> Buffer<C, P, D>
 	/// Requires that `x + width <= self.width()` and `y + height <= self.height()`, otherwise it will panic.
 	#[inline]
 	pub fn view(&mut self, area: area::Builder) -> View<C, P> {
-		let area = area.complete(0, 0, self.width, self.height);
+		let area = area.complete(self.area);
 
-		if area.x + area.width > self.width || area.y + area.height > self.height {
+		if area.x + area.width > self.area.width || area.y + area.height > self.area.height {
 			panic!("out of bounds");
 		}
 
@@ -252,8 +243,7 @@ impl<C, P, D> Buffer<C, P, D>
 
 	#[inline]
 	pub fn pixels_mut(&mut self) -> PixelsMut<C, P> {
-		let area = self.area();
-		PixelsMut::new(&mut self.data, area)
+		PixelsMut::new(&mut self.data, self.area)
 	}
 }
 
@@ -289,9 +279,7 @@ impl<C, P, D> Clone for Buffer<C, P, D>
 	#[inline]
 	fn clone(&self) -> Self {
 		Buffer {
-			width:  self.width,
-			height: self.height,
-
+			area: self.area,
 			data: self.data.clone(),
 
 			_channel: PhantomData,

@@ -70,13 +70,13 @@ pub struct Builder {
 
 impl Builder {
 	#[inline]
-	pub fn complete(&self, x: u32, y: u32, width: u32, height: u32) -> Area {
+	pub fn complete(&self, area: Area) -> Area {
 		Area {
-			x: self.x.unwrap_or(x),
-			y: self.y.unwrap_or(y),
+			x: self.x.unwrap_or(area.x),
+			y: self.y.unwrap_or(area.y),
 
-			width:  self.width.unwrap_or(width),
-			height: self.height.unwrap_or(height),
+			width:  self.width.unwrap_or(area.width),
+			height: self.height.unwrap_or(area.height),
 		}
 	}
 
