@@ -63,29 +63,125 @@ pub fn with_format<C, P, R>(input: R, format: Format) -> error::Result<Buffer<C,
 	match format {
 		#[cfg(feature = "png")]
 		Format::Png =>
-			decoder::png::Decoder::new(input).frame(),
+			png(input, |_| { }),
 
 		#[cfg(feature = "jpeg")]
 		Format::Jpeg =>
-			decoder::jpeg::Decoder::new(input).frame(),
+			jpeg(input, |_| { }),
 
 		#[cfg(feature = "bmp")]
 		Format::Bmp =>
-			decoder::bmp::Decoder::new(input).frame(),
+			bmp(input, |_| { }),
 
 		#[cfg(feature = "tga")]
 		Format::Tga =>
-			decoder::tga::Decoder::new(input).frame(),
+			tga(input, |_| { }),
 
 		#[cfg(feature = "gif")]
 		Format::Gif =>
-			decoder::gif::Decoder::new(input).frame(),
+			gif(input, |_| { }),
 
 		#[cfg(feature = "xyz")]
 		Format::Xyz =>
-			decoder::xyz::Decoder::new(input).frame(),
+			xyz(input, |_| { }),
 
 		_ =>
 			Err(Error::Unsupported("unsupported image format".into())),
 	}
+}
+
+/// Load a PNG image from an input stream, with the ability to set parameters
+/// on the decoder.
+#[cfg(feature = "png")]
+#[inline]
+pub fn png<C, P, F, R>(input: R, func: F) -> error::Result<Buffer<C, P, Vec<C>>>
+	where C: pixel::Channel,
+	      P: Pixel<C> + pixel::Write<C>,
+	      P: From<color::Rgb> + From<color::Rgba> + From<color::Luma> + From<color::Lumaa>,
+	      for<'r> F: FnOnce(&'r mut decoder::png::Decoder<R>),
+	      R: Read
+{
+	let mut decoder = decoder::png::Decoder::new(input);
+	func(&mut decoder);
+	decoder.frame()
+}
+
+/// Load a JPEG image from an input stream, with the ability to set parameters
+/// on the decoder.
+#[cfg(feature = "jpeg")]
+#[inline]
+pub fn jpeg<C, P, F, R>(input: R, func: F) -> error::Result<Buffer<C, P, Vec<C>>>
+	where C: pixel::Channel,
+	      P: Pixel<C> + pixel::Write<C>,
+	      P: From<color::Rgb> + From<color::Luma>,
+	      for<'r> F: FnOnce(&'r mut decoder::jpeg::Decoder<R>),
+	      R: Read
+{
+	let mut decoder = decoder::jpeg::Decoder::new(input);
+	func(&mut decoder);
+	decoder.frame()
+}
+
+/// Load a BMP image from an input stream, with the ability to set parameters
+/// on the decoder.
+#[cfg(feature = "bmp")]
+#[inline]
+pub fn bmp<C, P, F, R>(input: R, func: F) -> error::Result<Buffer<C, P, Vec<C>>>
+	where C: pixel::Channel,
+	      P: Pixel<C> + pixel::Write<C>,
+	      P: From<color::Rgb> + From<color::Rgba>,
+	      for<'r> F: FnOnce(&'r mut decoder::bmp::Decoder<R>),
+	      R: Read + Seek
+{
+	let mut decoder = decoder::bmp::Decoder::new(input);
+	func(&mut decoder);
+	decoder.frame()
+}
+
+/// Load a TGA image from an input stream, with the ability to set parameters
+/// on the decoder.
+#[cfg(feature = "tga")]
+#[inline]
+pub fn tga<C, P, F, R>(input: R, func: F) -> error::Result<Buffer<C, P, Vec<C>>>
+	where C: pixel::Channel,
+	      P: Pixel<C> + pixel::Write<C>,
+	      P: From<color::Rgb> + From<color::Rgba> + From<color::Luma> + From<color::Lumaa>,
+	      for<'r> F: FnOnce(&'r mut decoder::tga::Decoder<R>),
+	      R: Read + Seek
+{
+	let mut decoder = decoder::tga::Decoder::new(input);
+	func(&mut decoder);
+	decoder.frame()
+}
+
+/// Load a GIF image from an input stream, with the ability to set parameters
+/// on the decoder.
+#[cfg(feature = "gif")]
+#[inline]
+pub fn gif<C, P, F, R>(input: R, func: F) -> error::Result<Buffer<C, P, Vec<C>>>
+	where C: pixel::Channel,
+	      P: Pixel<C> + pixel::Write<C>,
+	      P: From<color::Rgb> + From<color::Rgba> + From<color::Luma> + From<color::Lumaa>,
+	      for<'r> F: FnOnce(&'r mut decoder::gif::Decoder<R>),
+	      R: Read
+{
+	let mut decoder = decoder::gif::Decoder::new(input);
+	func(&mut decoder);
+	decoder.frame()
+}
+
+/// Load an XYZ image from an input stream, with the ability to set parameters
+/// on the decoder.
+#[cfg(feature = "xyz")]
+#[inline]
+pub fn xyz<C, P, F, R>(input: R, func: F) -> error::Result<Buffer<C, P, Vec<C>>>
+	where C: pixel::Channel,
+	      P: Pixel<C> + pixel::Write<C>,
+	      P: From<color::Rgb> + From<color::Rgba>,
+	      for<'r> F: FnOnce(&'r mut decoder::xyz::Decoder<R>),
+	      R: Read
+{
+	let mut decoder = decoder::xyz::Decoder::new(input);
+	func(&mut decoder);
+	decoder.frame()
 }
