@@ -14,6 +14,7 @@
 
 use iter::Coordinates;
 
+/// An area within a buffer or view.
 #[derive(Eq, PartialEq, Copy, Clone, Debug)]
 pub struct Area {
 	pub x: u32,
@@ -24,10 +25,12 @@ pub struct Area {
 }
 
 impl Area {
+	/// Create a `Builder` to create an `Area`.
 	pub fn new() -> Builder {
 		Default::default()
 	}
 
+	/// Create an `Area` from the given parameters.
 	#[inline]
 	pub fn from(x: u32, y: u32, width: u32, height: u32) -> Self {
 		Area {
@@ -69,6 +72,8 @@ pub struct Builder {
 }
 
 impl Builder {
+	/// Complete any missing parts of the `Builder` and return the resulting
+	/// `Area`.
 	#[inline]
 	pub fn complete(&self, area: Area) -> Area {
 		Area {
@@ -80,6 +85,8 @@ impl Builder {
 		}
 	}
 
+	/// Builds an `Area` panicking if any fields are missing.
+	#[inline]
 	pub fn unwrap(self) -> Area {
 		Area {
 			x: self.x.unwrap(),
@@ -90,24 +97,28 @@ impl Builder {
 		}
 	}
 
+	/// Set the X value.
 	#[inline]
 	pub fn x(mut self, value: u32) -> Self {
 		self.x = Some(value);
 		self
 	}
 
+	/// Set the Y value.
 	#[inline]
 	pub fn y(mut self, value: u32) -> Self {
 		self.y = Some(value);
 		self
 	}
 
+	/// Set the width.
 	#[inline]
 	pub fn width(mut self, value: u32) -> Self {
 		self.width = Some(value);
 		self
 	}
 
+	/// Set the height.
 	#[inline]
 	pub fn height(mut self, value: u32) -> Self {
 		self.height = Some(value);
@@ -130,5 +141,4 @@ mod test {
 		assert_eq!(vec![(0, 0), (1, 0), (0, 1), (1, 1), (0, 2), (1, 2), (0, 3), (1, 3)],
 		 Area::new().x(2).y(4).width(2).height(4).unwrap().absolute().collect::<Vec<(u32, u32)>>());
 	}
-
 }
