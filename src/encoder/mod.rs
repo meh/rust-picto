@@ -134,3 +134,6 @@ pub mod bmp;
 
 #[cfg(feature = "tga")]
 pub mod tga;
+
+#[cfg(feature = "gif")]
+pub mod gif;

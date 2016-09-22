@@ -264,6 +264,39 @@ mod gif {
 		assert_relative_eq!(Rgba::new_u8(0x00, 0x02, 0xff, 0xff),
 			image.get(399, 0), max_relative = 1.0);
 	}
+
+	#[test]
+	fn write() {
+		{
+			let mut image = picto::Buffer::<u8, Rgb, _>::new(2, 2);
+
+			image.set(0, 0, &Rgb::new(1.0, 0.0, 0.0));
+			image.set(0, 1, &Rgb::new(0.0, 1.0, 0.0));
+			image.set(1, 0, &Rgb::new(0.0, 0.0, 1.0));
+			image.set(1, 1, &Rgb::new(1.0, 0.0, 1.0));
+
+			picto::write::to_path(&image, "tests/test.gif").unwrap();
+		}
+
+		{
+			let image = picto::read::from_path::<u8, Rgb, _>("tests/test.gif").unwrap();
+
+			assert_eq!(2, image.width());
+			assert_eq!(2, image.height());
+
+			assert_relative_eq!(Rgb::new(1.0, 0.0, 0.0),
+				image.get(0, 0), max_relative = 1.0);
+
+			assert_relative_eq!(Rgb::new(0.0, 1.0, 0.0),
+				image.get(0, 1), max_relative = 1.0);
+
+			assert_relative_eq!(Rgb::new(0.0, 0.0, 1.0),
+				image.get(1, 0), max_relative = 1.0);
+
+			assert_relative_eq!(Rgb::new(1.0, 0.0, 1.0),
+				image.get(1, 1), max_relative = 1.0);
+		}
+	}
 }
 
 mod xyz {
