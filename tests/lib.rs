@@ -14,10 +14,10 @@ mod png {
 		assert_eq!(326, image.height());
 
 		assert_relative_eq!(Rgb::new_u8(0xff, 0x00, 0x00),
-			image.get(0, 0), max_relative = 0.01);
+			image.get(0, 0), epsilon = 0.01);
 
 		assert_relative_eq!(Rgb::new_u8(0x00, 0x02, 0xff),
-			image.get(399, 0), max_relative = 0.01);
+			image.get(399, 0), epsilon = 0.01);
 	}
 
 	#[test]
@@ -28,10 +28,10 @@ mod png {
 		assert_eq!(326, image.height());
 
 		assert_relative_eq!(Rgba::new_u8(0xff, 0x00, 0x00, 0xff),
-			image.get(0, 0), max_relative = 0.01);
+			image.get(0, 0), epsilon = 0.01);
 
 		assert_relative_eq!(Rgba::new_u8(0x00, 0x02, 0xff, 0xff),
-			image.get(399, 0), max_relative = 0.01);
+			image.get(399, 0), epsilon = 0.01);
 	}
 
 	#[test]
@@ -54,16 +54,16 @@ mod png {
 			assert_eq!(2, image.height());
 
 			assert_relative_eq!(Rgb::new(1.0, 0.0, 0.0),
-				image.get(0, 0), max_relative = 0.01);
+				image.get(0, 0), epsilon = 0.01);
 
 			assert_relative_eq!(Rgb::new(0.0, 1.0, 0.0),
-				image.get(0, 1), max_relative = 0.01);
+				image.get(0, 1), epsilon = 0.01);
 
 			assert_relative_eq!(Rgb::new(0.0, 0.0, 1.0),
-				image.get(1, 0), max_relative = 0.01);
+				image.get(1, 0), epsilon = 0.01);
 
 			assert_relative_eq!(Rgb::new(1.0, 0.0, 1.0),
-				image.get(1, 1), max_relative = 0.01);
+				image.get(1, 1), epsilon = 0.01);
 		}
 	}
 }
@@ -80,10 +80,10 @@ mod jpeg {
 		assert_eq!(326, image.height());
 
 		assert_relative_eq!(Rgb::new_u8(0xff, 0x00, 0x00),
-			image.get(0, 0), max_relative = 0.01);
+			image.get(0, 0), epsilon = 0.01);
 
 		assert_relative_eq!(Rgb::new_u8(0x00, 0x02, 0xff),
-			image.get(399, 0), max_relative = 0.01);
+			image.get(399, 0), epsilon = 0.01);
 	}
 
 	#[test]
@@ -94,10 +94,10 @@ mod jpeg {
 		assert_eq!(326, image.height());
 
 		assert_relative_eq!(Rgba::new_u8(0xff, 0x00, 0x00, 0xff),
-			image.get(0, 0), max_relative = 0.01);
+			image.get(0, 0), epsilon = 0.01);
 
 		assert_relative_eq!(Rgba::new_u8(0x00, 0x02, 0xff, 0xff),
-			image.get(399, 0), max_relative = 0.01);
+			image.get(399, 0), epsilon = 0.01);
 	}
 }
 
@@ -113,10 +113,10 @@ mod bmp {
 		assert_eq!(326, image.height());
 
 		assert_relative_eq!(Rgb::new_u8(0xff, 0x00, 0x00),
-			image.get(0, 0), max_relative = 0.01);
+			image.get(0, 0), epsilon = 0.01);
 
 		assert_relative_eq!(Rgb::new_u8(0x00, 0x02, 0xff),
-			image.get(399, 0), max_relative = 0.01);
+			image.get(399, 0), epsilon = 0.01);
 	}
 
 	#[test]
@@ -127,10 +127,10 @@ mod bmp {
 		assert_eq!(326, image.height());
 
 		assert_relative_eq!(Rgba::new_u8(0xff, 0x00, 0x00, 0xff),
-			image.get(0, 0), max_relative = 0.01);
+			image.get(0, 0), epsilon = 0.01);
 
 		assert_relative_eq!(Rgba::new_u8(0x00, 0x02, 0xff, 0xff),
-			image.get(399, 0), max_relative = 0.01);
+			image.get(399, 0), epsilon = 0.01);
 	}
 
 	#[test]
@@ -153,16 +153,16 @@ mod bmp {
 			assert_eq!(2, image.height());
 
 			assert_relative_eq!(Rgb::new(1.0, 0.0, 0.0),
-				image.get(0, 0), max_relative = 0.01);
+				image.get(0, 0), epsilon = 0.01);
 
 			assert_relative_eq!(Rgb::new(0.0, 1.0, 0.0),
-				image.get(0, 1), max_relative = 0.01);
+				image.get(0, 1), epsilon = 0.01);
 
 			assert_relative_eq!(Rgb::new(0.0, 0.0, 1.0),
-				image.get(1, 0), max_relative = 0.01);
+				image.get(1, 0), epsilon = 0.01);
 
 			assert_relative_eq!(Rgb::new(1.0, 0.0, 1.0),
-				image.get(1, 1), max_relative = 0.01);
+				image.get(1, 1), epsilon = 0.01);
 		}
 	}
 }
@@ -179,10 +179,10 @@ mod tga {
 		assert_eq!(326, image.height());
 
 		assert_relative_eq!(Rgb::new_u8(0xff, 0x00, 0x00),
-			image.get(0, 0), max_relative = 0.01);
+			image.get(0, 0), epsilon = 0.01);
 
 		assert_relative_eq!(Rgb::new_u8(0x00, 0x02, 0xff),
-			image.get(399, 0), max_relative = 0.01);
+			image.get(399, 0), epsilon = 0.01);
 	}
 
 	#[test]
@@ -193,10 +193,10 @@ mod tga {
 		assert_eq!(326, image.height());
 
 		assert_relative_eq!(Rgba::new_u8(0xff, 0x00, 0x00, 0xff),
-			image.get(0, 0), max_relative = 0.01);
+			image.get(0, 0), epsilon = 0.01);
 
 		assert_relative_eq!(Rgba::new_u8(0x00, 0x02, 0xff, 0xff),
-			image.get(399, 0), max_relative = 0.01);
+			image.get(399, 0), epsilon = 0.01);
 	}
 
 	#[test]
@@ -245,10 +245,10 @@ mod gif {
 		assert_eq!(326, image.height());
 
 		assert_relative_eq!(Rgb::new_u8(0xff, 0x00, 0x00),
-			image.get(0, 0), max_relative = 1.0);
+			image.get(0, 0), epsilon = 0.2);
 
 		assert_relative_eq!(Rgb::new_u8(0x00, 0x02, 0xff),
-			image.get(399, 0), max_relative = 1.0);
+			image.get(399, 0), epsilon = 0.2);
 	}
 
 	#[test]
@@ -259,10 +259,10 @@ mod gif {
 		assert_eq!(326, image.height());
 
 		assert_relative_eq!(Rgba::new_u8(0xff, 0x00, 0x00, 0xff),
-			image.get(0, 0), max_relative = 1.0);
+			image.get(0, 0), epsilon = 0.2);
 
 		assert_relative_eq!(Rgba::new_u8(0x00, 0x02, 0xff, 0xff),
-			image.get(399, 0), max_relative = 1.0);
+			image.get(399, 0), epsilon = 0.2);
 	}
 
 	#[test]
@@ -270,7 +270,7 @@ mod gif {
 		{
 			let mut image = picto::Buffer::<u8, Rgb, _>::new(2, 2);
 
-			image.set(0, 0, &Rgb::new(1.0, 0.0, 0.0));
+			image.set(0, 0, &Rgb::new(0.0, 0.0, 0.0));
 			image.set(0, 1, &Rgb::new(0.0, 1.0, 0.0));
 			image.set(1, 0, &Rgb::new(0.0, 0.0, 1.0));
 			image.set(1, 1, &Rgb::new(1.0, 0.0, 1.0));
@@ -284,17 +284,17 @@ mod gif {
 			assert_eq!(2, image.width());
 			assert_eq!(2, image.height());
 
-			assert_relative_eq!(Rgb::new(1.0, 0.0, 0.0),
-				image.get(0, 0), max_relative = 1.0);
+			assert_relative_eq!(Rgb::new(0.0, 0.0, 0.0),
+				image.get(0, 0), epsilon = 0.2);
 
 			assert_relative_eq!(Rgb::new(0.0, 1.0, 0.0),
-				image.get(0, 1), max_relative = 1.0);
+				image.get(0, 1), epsilon = 0.2);
 
 			assert_relative_eq!(Rgb::new(0.0, 0.0, 1.0),
-				image.get(1, 0), max_relative = 1.0);
+				image.get(1, 0), epsilon = 0.2);
 
 			assert_relative_eq!(Rgb::new(1.0, 0.0, 1.0),
-				image.get(1, 1), max_relative = 1.0);
+				image.get(1, 1), epsilon = 0.5);
 		}
 	}
 }
@@ -311,10 +311,10 @@ mod xyz {
 		assert_eq!(240, image.height());
 
 		assert_relative_eq!(Rgb::new_u8(0x1e, 0x03, 0x43),
-			image.get(0, 0), max_relative = 0.01);
+			image.get(0, 0), epsilon = 0.01);
 
 		assert_relative_eq!(Rgb::new_u8(0x1f, 0x03, 0x45),
-			image.get(0, 239), max_relative = 0.01);
+			image.get(0, 239), epsilon = 0.01);
 	}
 
 	#[test]
@@ -325,9 +325,9 @@ mod xyz {
 		assert_eq!(240, image.height());
 
 		assert_relative_eq!(Rgba::new_u8(0x1e, 0x03, 0x43, 0xff),
-			image.get(0, 0), max_relative = 0.01);
+			image.get(0, 0), epsilon = 0.01);
 
 		assert_relative_eq!(Rgba::new_u8(0x1f, 0x03, 0x45, 0xff),
-			image.get(0, 239), max_relative = 0.01);
+			image.get(0, 239), epsilon = 0.01);
 	}
 }
