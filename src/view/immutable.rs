@@ -16,7 +16,7 @@ use std::marker::PhantomData;
 
 use pixel::{self, Pixel};
 use buffer::Buffer;
-use area::Area;
+use area::{self, Area};
 use iter::pixel::Iter as Pixels;
 
 /// An immutable view into a `Buffer`.
@@ -72,6 +72,22 @@ impl<'a, C, P> Ref<'a, C, P>
 		P::read(&self.data[index .. index + channels])
 	}
 
+	/// Get an immutable view of the given sub-image.
+	///
+	/// # Panics
+	///
+	/// Requires that `x + width <= self.width()` and `y + height <= self.height()`, otherwise it will panic.
+	#[inline]
+	pub fn as_ref(&self, area: area::Builder) -> Ref<C, P> {
+		let area = area.complete(Area::from(0, 0, self.area.width, self.area.height));
+
+		if area.x + area.width > self.area.width || area.y + area.height > self.area.height {
+			panic!("out of bounds");
+		}
+
+		Ref::new(&self.data, Area { x: area.x + self.area.x, y: area.y + self.area.y, .. area })
+	}
+
 	/// Get an immutable iterator over the view's pixels.
 	pub fn pixels(&self) -> Pixels<C, P> {
 		Pixels::new(self.data, self.area)
@@ -98,6 +114,7 @@ impl<'a, C, P> Ref<'a, C, P>
 mod test {
 	use buffer::*;
 	use color::*;
+	use area::Area;
 
 	#[test]
 	fn get() {
@@ -106,5 +123,31 @@ mod test {
 
 		assert_eq!(Rgba::new(0.0, 1.0, 1.0, 0.0),
 			Buffer::<u8, Rgba, _>::from_raw(1, 2, vec![255, 0, 255, 0, 0, 255, 255, 0]).unwrap().get(0, 1));
+	}
+
+	#[test]
+	fn as_ref() {
+		let image = Buffer::<u8, Rgb, Vec<_>>::new(50, 50);
+		let image = image.as_ref(Area::new().x(10).y(10).width(4).height(4));
+
+		assert_eq!(vec![
+			(10, 10), (11, 10), (12, 10), (13, 10),
+			(10, 11), (11, 11), (12, 11), (13, 11),
+			(10, 12), (11, 12), (12, 12), (13, 12),
+			(10, 13), (11, 13), (12, 13), (13, 13),
+		], image.area().relative().collect::<Vec<_>>());
+
+		let image = image.as_ref(Area::new().x(1).y(1).width(2).height(2));
+
+		assert_eq!(vec![
+			(11, 11), (12, 11),
+			(11, 12), (12, 12),
+		], image.area().relative().collect::<Vec<_>>());
+
+		let image = image.as_ref(Area::new().width(2).height(1));
+
+		assert_eq!(vec![
+			(11, 11), (12, 11),
+		], image.area().relative().collect::<Vec<_>>());
 	}
 }

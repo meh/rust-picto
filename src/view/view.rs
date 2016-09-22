@@ -15,7 +15,7 @@
 use std::marker::PhantomData;
 
 use pixel::{self, Pixel};
-use area::Area;
+use area::{self, Area};
 use buffer::Buffer;
 use iter::pixel::{Iter as Pixels, IterMut as PixelsMut};
 use super::{Ref, Mut};
@@ -76,6 +76,54 @@ impl<'a, C, P> View<'a, C, P>
 		Mut::new(self.data, self.area).set(x, y, pixel)
 	}
 
+	/// Get an immutable view of the given sub-image.
+	///
+	/// # Panics
+	///
+	/// Requires that `x + width <= self.width()` and `y + height <= self.height()`, otherwise it will panic.
+	#[inline]
+	pub fn as_ref(&self, area: area::Builder) -> Ref<C, P> {
+		let area = area.complete(Area::from(0, 0, self.area.width, self.area.height));
+
+		if area.x + area.width > self.area.width || area.y + area.height > self.area.height {
+			panic!("out of bounds");
+		}
+
+		Ref::new(&self.data, Area { x: area.x + self.area.x, y: area.y + self.area.y, .. area })
+	}
+
+	/// Get a mutable view of the given sub-image.
+	///
+	/// # Panics
+	///
+	/// Requires that `x + width <= self.width()` and `y + height <= self.height()`, otherwise it will panic.
+	#[inline]
+	pub fn as_mut(&mut self, area: area::Builder) -> Mut<C, P> {
+		let area = area.complete(Area::from(0, 0, self.area.width, self.area.height));
+
+		if area.x + area.width > self.area.width || area.y + area.height > self.area.height {
+			panic!("out of bounds");
+		}
+
+		Mut::new(&mut self.data, Area { x: area.x + self.area.x, y: area.y + self.area.y, .. area })
+	}
+
+	/// Get a mutable view of the given sub-image.
+	///
+	/// # Panics
+	///
+	/// Requires that `x + width <= self.width()` and `y + height <= self.height()`, otherwise it will panic.
+	#[inline]
+	pub fn view(&mut self, area: area::Builder) -> View<C, P> {
+		let area = area.complete(Area::from(0, 0, self.area.width, self.area.height));
+
+		if area.x + area.width > self.area.width || area.y + area.height > self.area.height {
+			panic!("out of bounds");
+		}
+
+		View::new(&mut self.data, Area { x: area.x + self.area.x, y: area.y + self.area.y, .. area })
+	}
+
 	/// Get a mutable iterator over the view's pixels.
 	pub fn pixels(&self) -> Pixels<C, P> {
 		Pixels::new(self.data, self.area)
@@ -112,6 +160,7 @@ impl<'a, C, P> View<'a, C, P>
 mod test {
 	use buffer::*;
 	use color::*;
+	use area::Area;
 
 	#[test]
 	fn pixels_mut() {
@@ -129,5 +178,83 @@ mod test {
 		assert_eq!(view.get(1, 0), Rgb::new(0.0, 1.0, 0.0));
 		assert_eq!(view.get(0, 1), Rgb::new(0.0, 0.0, 0.0));
 		assert_eq!(view.get(1, 1), Rgb::new(1.0, 1.0, 1.0));
+	}
+
+	#[test]
+	fn as_ref() {
+		let mut image = Buffer::<u8, Rgb, Vec<_>>::new(50, 50);
+		let     image = image.view(Area::new().x(10).y(10).width(4).height(4));
+
+		assert_eq!(vec![
+			(10, 10), (11, 10), (12, 10), (13, 10),
+			(10, 11), (11, 11), (12, 11), (13, 11),
+			(10, 12), (11, 12), (12, 12), (13, 12),
+			(10, 13), (11, 13), (12, 13), (13, 13),
+		], image.area().relative().collect::<Vec<_>>());
+
+		let image = image.as_ref(Area::new().x(1).y(1).width(2).height(2));
+
+		assert_eq!(vec![
+			(11, 11), (12, 11),
+			(11, 12), (12, 12),
+		], image.area().relative().collect::<Vec<_>>());
+
+		let image = image.as_ref(Area::new().width(2).height(1));
+
+		assert_eq!(vec![
+			(11, 11), (12, 11),
+		], image.area().relative().collect::<Vec<_>>());
+	}
+
+	#[test]
+	fn as_mut() {
+		let mut image = Buffer::<u8, Rgb, Vec<_>>::new(50, 50);
+		let mut image = image.view(Area::new().x(10).y(10).width(4).height(4));
+
+		assert_eq!(vec![
+			(10, 10), (11, 10), (12, 10), (13, 10),
+			(10, 11), (11, 11), (12, 11), (13, 11),
+			(10, 12), (11, 12), (12, 12), (13, 12),
+			(10, 13), (11, 13), (12, 13), (13, 13),
+		], image.area().relative().collect::<Vec<_>>());
+
+		let mut image = image.as_mut(Area::new().x(1).y(1).width(2).height(2));
+
+		assert_eq!(vec![
+			(11, 11), (12, 11),
+			(11, 12), (12, 12),
+		], image.area().relative().collect::<Vec<_>>());
+
+		let image = image.as_mut(Area::new().width(2).height(1));
+
+		assert_eq!(vec![
+			(11, 11), (12, 11),
+		], image.area().relative().collect::<Vec<_>>());
+	}
+
+	#[test]
+	fn view() {
+		let mut image = Buffer::<u8, Rgb, Vec<_>>::new(50, 50);
+		let mut image = image.view(Area::new().x(10).y(10).width(4).height(4));
+
+		assert_eq!(vec![
+			(10, 10), (11, 10), (12, 10), (13, 10),
+			(10, 11), (11, 11), (12, 11), (13, 11),
+			(10, 12), (11, 12), (12, 12), (13, 12),
+			(10, 13), (11, 13), (12, 13), (13, 13),
+		], image.area().relative().collect::<Vec<_>>());
+
+		let mut image = image.view(Area::new().x(1).y(1).width(2).height(2));
+
+		assert_eq!(vec![
+			(11, 11), (12, 11),
+			(11, 12), (12, 12),
+		], image.area().relative().collect::<Vec<_>>());
+
+		let image = image.view(Area::new().width(2).height(1));
+
+		assert_eq!(vec![
+			(11, 11), (12, 11),
+		], image.area().relative().collect::<Vec<_>>());
 	}
 }
