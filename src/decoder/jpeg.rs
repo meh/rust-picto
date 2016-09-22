@@ -50,6 +50,40 @@ impl<C, P, R> super::Decoder<C, P> for Decoder<R>
 	      R: Read
 {
 	fn frame(&mut self) -> error::Result<Buffer<C, P, Vec<C>>> {
+		#[inline]
+		fn convert(buffer: &mut Vec<u8>) {
+			let     length = buffer.len();
+			let mut cmyk   = 0;
+			let mut rgb    = 0;
+
+			while cmyk < length {
+				let c = buffer[cmyk    ] as f32 / 255.0;
+				let m = buffer[cmyk + 1] as f32 / 255.0;
+				let y = buffer[cmyk + 2] as f32 / 255.0;
+				let k = buffer[cmyk + 3] as f32 / 255.0;
+
+				// CMYK -> CMY
+				let c = c * (1.0 - k) + k;
+				let m = m * (1.0 - k) + k;
+				let y = y * (1.0 - k) + k;
+
+				// CMY -> RGB
+				let r = (1.0 - c) * 255.0;
+				let g = (1.0 - m) * 255.0;
+				let b = (1.0 - y) * 255.0;
+
+				buffer[rgb    ] = r as u8;
+				buffer[rgb + 1] = g as u8;
+				buffer[rgb + 2] = b as u8;
+
+				cmyk += 4;
+				rgb  += 3;
+			}
+
+			buffer.resize((length / 4 ) * 3, 0);
+			buffer.shrink_to_fit();
+		}
+
 		let mut buffer = try!(self.inner.decode());
 
 		macro_rules! buffer {
@@ -69,37 +103,7 @@ impl<C, P, R> super::Decoder<C, P> for Decoder<R>
 				buffer!(u8, color::Rgb),
 
 			jpeg::PixelFormat::CMYK32 => {
-				let     length = buffer.len();
-				let mut cmyk   = 0;
-				let mut rgb    = 0;
-
-				while cmyk < length {
-					let c = buffer[cmyk    ] as f32 / 255.0;
-					let m = buffer[cmyk + 1] as f32 / 255.0;
-					let y = buffer[cmyk + 2] as f32 / 255.0;
-					let k = buffer[cmyk + 3] as f32 / 255.0;
-
-					// CMYK -> CMY
-					let c = c * (1.0 - k) + k;
-					let m = m * (1.0 - k) + k;
-					let y = y * (1.0 - k) + k;
-
-					// CMY -> RGB
-					let r = (1.0 - c) * 255.0;
-					let g = (1.0 - m) * 255.0;
-					let b = (1.0 - y) * 255.0;
-
-					buffer[rgb    ] = r as u8;
-					buffer[rgb + 1] = g as u8;
-					buffer[rgb + 2] = b as u8;
-
-					cmyk += 4;
-					rgb  += 3;
-				}
-
-				buffer.resize((length / 4 ) * 3, 0);
-				buffer.shrink_to_fit();
-
+				convert(&mut buffer);
 				buffer!(u8, color::Rgb)
 			}
 		}
