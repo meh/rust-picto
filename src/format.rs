@@ -26,6 +26,7 @@ pub enum Format {
 	Ico,
 	Hdr,
 	Tga,
+	Xyz,
 }
 
 /// Guess the image format.
@@ -39,6 +40,7 @@ pub fn guess<R: Read + Seek>(mut input: R) -> Option<Format> {
 		(b"MM.*",                   Format::Tiff),
 		(b"II*.",                   Format::Tiff),
 		(b"BM",                     Format::Bmp),
+		(b"XYZ1",                   Format::Xyz),
 		(&[0x00, 0x00, 0x01, 0x00], Format::Ico),
 		(b"#?RADIANCE",             Format::Hdr),
 	];

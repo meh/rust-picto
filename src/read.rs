@@ -77,6 +77,10 @@ pub fn with_format<C, P, R>(input: R, format: Format) -> error::Result<Buffer<C,
 		Format::Tga =>
 			decoder::tga::Decoder::new(input).frame(),
 
+		#[cfg(feature = "xyz")]
+		Format::Xyz =>
+			decoder::xyz::Decoder::new(input).frame(),
+
 		_ =>
 			Err(Error::Unsupported("unsupported image format".into())),
 	}

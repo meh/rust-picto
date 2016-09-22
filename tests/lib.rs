@@ -232,3 +232,36 @@ mod tga {
 		}
 	}
 }
+
+mod xyz {
+	use picto;
+	use picto::color::*;
+
+	#[test]
+	fn read_as_is() {
+		let image = picto::read::from_path::<u8, Rgb, _>("tests/boat.xyz").unwrap();
+
+		assert_eq!(320, image.width());
+		assert_eq!(240, image.height());
+
+		assert_relative_eq!(Rgb::new_u8(0x1e, 0x03, 0x43),
+			image.get(0, 0), max_relative = 0.01);
+
+		assert_relative_eq!(Rgb::new_u8(0x1f, 0x03, 0x45),
+			image.get(0, 239), max_relative = 0.01);
+	}
+
+	#[test]
+	fn read_with_convert() {
+		let image = picto::read::from_path::<u8, Rgba, _>("tests/boat.xyz").unwrap();
+
+		assert_eq!(320, image.width());
+		assert_eq!(240, image.height());
+
+		assert_relative_eq!(Rgba::new_u8(0x1e, 0x03, 0x43, 0xff),
+			image.get(0, 0), max_relative = 0.01);
+
+		assert_relative_eq!(Rgba::new_u8(0x1f, 0x03, 0x45, 0xff),
+			image.get(0, 239), max_relative = 0.01);
+	}
+}

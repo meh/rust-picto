@@ -29,6 +29,9 @@ extern crate jpeg_decoder;
 #[cfg(any(feature = "bmp", feature = "tga"))]
 extern crate imagefmt;
 
+#[cfg(feature = "xyz")]
+extern crate xyz;
+
 pub mod error;
 pub use error::{Error, Result};
 

@@ -29,8 +29,12 @@ optional = true
 version  = "0.1"
 optional = true
 
+[dependencies.xyz]
+version  = "0.2"
+optional = true
+
 [features]
-default = ["png", "jpeg", "bmp", "tga"]
+default = ["png", "jpeg", "bmp", "tga", "xyz"]
 nightly = []
 
 jpeg = ["jpeg-decoder"]
