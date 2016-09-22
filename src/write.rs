@@ -79,21 +79,81 @@ pub fn with_format<C, P, D, W>(output: W, format: Format, buffer: &Buffer<C, P, 
 	match format {
 		#[cfg(feature = "png")]
 		Format::Png =>
-			encoder::png::Encoder::new(output).frame(buffer),
+			png(output, buffer, |_| { }),
 
 		#[cfg(feature = "bmp")]
 		Format::Bmp =>
-			encoder::bmp::Encoder::new(output).frame(buffer),
+			bmp(output, buffer, |_| { }),
 
 		#[cfg(feature = "tga")]
 		Format::Tga =>
-			encoder::tga::Encoder::new(output).frame(buffer),
+			tga(output, buffer, |_| { }),
 
 		#[cfg(feature = "gif")]
 		Format::Gif =>
-			encoder::gif::Encoder::new(output).frame(buffer),
+			gif(output, buffer, |_| { }),
 
 		_ =>
 			Err(Error::Unsupported("unsupported image format".into()))
 	}
+}
+
+#[cfg(feature = "png")]
+#[inline]
+pub fn png<C, P, D, F, W>(output: W, buffer: &Buffer<C, P, D>, func: F) -> error::Result<()>
+	where C: pixel::Channel,
+	      P: Pixel<C> + pixel::Read<C>,
+	      P: Into<color::Rgb> + Into<color::Rgba> + Into<color::Luma> + Into<color::Lumaa>,
+	      D: Deref<Target = [C]>,
+	      for<'r> F: FnOnce(&'r mut encoder::png::Encoder<W>),
+	      W: Write
+{
+	let mut encoder = encoder::png::Encoder::new(output);
+	func(&mut encoder);
+	encoder.frame(buffer)
+}
+
+#[cfg(feature = "bmp")]
+#[inline]
+pub fn bmp<C, P, D, F, W>(output: W, buffer: &Buffer<C, P, D>, func: F) -> error::Result<()>
+	where C: pixel::Channel,
+	      P: Pixel<C> + pixel::Read<C>,
+	      P: Into<color::Rgb> + Into<color::Rgba>,
+	      D: Deref<Target = [C]>,
+	      for<'r> F: FnOnce(&'r mut encoder::bmp::Encoder<W>),
+	      W: Write
+{
+	let mut encoder = encoder::bmp::Encoder::new(output);
+	func(&mut encoder);
+	encoder.frame(buffer)
+}
+
+#[cfg(feature = "tga")]
+#[inline]
+pub fn tga<C, P, D, F, W>(output: W, buffer: &Buffer<C, P, D>, func: F) -> error::Result<()>
+	where C: pixel::Channel,
+	      P: Pixel<C> + pixel::Read<C>,
+	      P: Into<color::Rgb> + Into<color::Rgba> + Into<color::Luma> + Into<color::Lumaa>,
+	      D: Deref<Target = [C]>,
+	      for<'r> F: FnOnce(&'r mut encoder::tga::Encoder<W>),
+	      W: Write
+{
+	let mut encoder = encoder::tga::Encoder::new(output);
+	func(&mut encoder);
+	encoder.frame(buffer)
+}
+
+#[cfg(feature = "gif")]
+#[inline]
+pub fn gif<C, P, D, F, W>(output: W, buffer: &Buffer<C, P, D>, func: F) -> error::Result<()>
+	where C: pixel::Channel,
+	      P: Pixel<C> + pixel::Read<C>,
+	      P: Into<color::Rgb> + Into<color::Rgba> + Into<color::Luma> + Into<color::Lumaa>,
+	      D: Deref<Target = [C]>,
+	      for<'r> F: FnOnce(&'r mut encoder::gif::Encoder<W>),
+	      W: Write
+{
+	let mut encoder = encoder::gif::Encoder::new(output);
+	func(&mut encoder);
+	encoder.frame(buffer)
 }
