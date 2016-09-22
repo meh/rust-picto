@@ -58,6 +58,7 @@ pub trait Pixel<C: Channel>: Copy + 'static {
 macro_rules! impl_for {
 	($n:expr, $ty:ident) => (
 		impl<C: Channel, T: Float + 'static> Pixel<C> for $ty<T> {
+			#[inline]
 			fn channels() -> usize {
 				$n
 			}
@@ -84,6 +85,7 @@ pub trait Read<C: Channel> {
 macro_rules! impl_for {
 	(u8 1 -> $ty:ident) => (
 		impl<T: Float + 'static> Read<u8> for $ty<T> {
+			#[inline]
 			fn read(data: &[u8]) -> Self {
 				$ty::new_u8(data[0])
 			}
@@ -92,6 +94,7 @@ macro_rules! impl_for {
 
 	(u8 2 -> $ty:ident) => (
 		impl<T: Float + 'static> Read<u8> for $ty<T> {
+			#[inline]
 			fn read(data: &[u8]) -> Self {
 				$ty::new_u8(data[0], data[1])
 			}
@@ -100,6 +103,7 @@ macro_rules! impl_for {
 
 	(u8 3 -> $ty:ident) => (
 		impl<T: Float + 'static> Read<u8> for $ty<T> {
+			#[inline]
 			fn read(data: &[u8]) -> Self {
 				$ty::new_u8(data[0], data[1], data[2])
 			}
@@ -108,6 +112,7 @@ macro_rules! impl_for {
 
 	(u8 4 -> $ty:ident) => (
 		impl<T: Float + 'static> Read<u8> for $ty<T> {
+			#[inline]
 			fn read(data: &[u8]) -> Self {
 				$ty::new_u8(data[0], data[1], data[2], data[3])
 			}
@@ -116,6 +121,7 @@ macro_rules! impl_for {
 
 	(u16 1 -> $ty:ident) => (
 		impl<T: Float + 'static> Read<u16> for $ty<T> {
+			#[inline]
 			fn read(data: &[u16]) -> Self {
 				$ty::new(
 					T::from(data[0]).unwrap() / T::from(u16::max_value()).unwrap()
@@ -126,6 +132,7 @@ macro_rules! impl_for {
 
 	(u16 2 -> $ty:ident) => (
 		impl<T: Float + 'static> Read<u16> for $ty<T> {
+			#[inline]
 			fn read(data: &[u16]) -> Self {
 				$ty::new(
 					T::from(data[0]).unwrap() / T::from(u16::max_value()).unwrap(),
@@ -137,6 +144,7 @@ macro_rules! impl_for {
 
 	(u16 3 -> $ty:ident) => (
 		impl<T: Float + 'static> Read<u16> for $ty<T> {
+			#[inline]
 			fn read(data: &[u16]) -> Self {
 				$ty::new(
 					T::from(data[0]).unwrap() / T::from(u16::max_value()).unwrap(),
@@ -149,6 +157,7 @@ macro_rules! impl_for {
 
 	(u16 4 -> $ty:ident) => (
 		impl<T: Float + 'static> Read<u16> for $ty<T> {
+			#[inline]
 			fn read(data: &[u16]) -> Self {
 				$ty::new(
 					T::from(data[0]).unwrap() / T::from(u16::max_value()).unwrap(),
@@ -162,6 +171,7 @@ macro_rules! impl_for {
 
 	($ch:ident 1 -> $ty:ident) => (
 		impl Read<$ch> for $ty<$ch> {
+			#[inline]
 			fn read(data: &[$ch]) -> Self {
 				$ty::new(data[0])
 			}
@@ -170,6 +180,7 @@ macro_rules! impl_for {
 
 	($ch:ident 2 -> $ty:ident) => (
 		impl Read<$ch> for $ty<$ch> {
+			#[inline]
 			fn read(data: &[$ch]) -> Self {
 				$ty::new(data[0], data[1])
 			}
@@ -178,6 +189,7 @@ macro_rules! impl_for {
 
 	($ch:ident 3 -> $ty:ident) => (
 		impl Read<$ch> for $ty<$ch> {
+			#[inline]
 			fn read(data: &[$ch]) -> Self {
 				$ty::new(data[0], data[1], data[2])
 			}
@@ -186,6 +198,7 @@ macro_rules! impl_for {
 
 	($ch:ident 4 -> $ty:ident) => (
 		impl Read<$ch> for $ty<$ch> {
+			#[inline]
 			fn read(data: &[$ch]) -> Self {
 				$ty::new(data[0], data[1], data[2], data[3])
 			}
@@ -199,6 +212,7 @@ macro_rules! impl_for {
 
 	(hue($hue:ident) $ch:ident 3 -> $ty:ident) => (
 		impl Read<$ch> for $ty<$ch> {
+			#[inline]
 			fn read(data: &[$ch]) -> Self {
 				$ty::new($hue::from_radians(data[0]), data[1], data[2])
 			}
@@ -207,6 +221,7 @@ macro_rules! impl_for {
 
 	(hue($hue:ident) $ch:ident 4 -> $ty:ident) => (
 		impl Read<$ch> for $ty<$ch> {
+			#[inline]
 			fn read(data: &[$ch]) -> Self {
 				$ty::new($hue::from_radians(data[0]), data[1], data[2], data[3])
 			}
@@ -254,6 +269,7 @@ pub trait Write<C: Channel> {
 macro_rules! impl_for {
 	($ty:ident -> $a:ident) => (
 		impl<C: Channel, T: Float + 'static> Write<C> for $ty<T> {
+			#[inline]
 			fn write(&self, data: &mut [C]) {
 				data[0] = C::from(self.$a);
 			}
@@ -262,6 +278,7 @@ macro_rules! impl_for {
 
 	($ty:ident -> $a:ident, $b:ident) => (
 		impl<C: Channel, T: Float + 'static> Write<C> for $ty<T> {
+			#[inline]
 			fn write(&self, data: &mut [C]) {
 				data[0] = C::from(self.$a);
 				data[1] = C::from(self.$b);
@@ -271,6 +288,7 @@ macro_rules! impl_for {
 
 	($ty:ident -> $a:ident, $b:ident, $c:ident) => (
 		impl<C: Channel, T: Float + 'static> Write<C> for $ty<T> {
+			#[inline]
 			fn write(&self, data: &mut [C]) {
 				data[0] = C::from(self.$a);
 				data[1] = C::from(self.$b);
@@ -281,6 +299,7 @@ macro_rules! impl_for {
 
 	($ty:ident -> $a:ident, $b:ident, $c:ident, $d:ident) => (
 		impl<C: Channel, T: Float + 'static> Write<C> for $ty<T> {
+			#[inline]
 			fn write(&self, data: &mut [C]) {
 				data[0] = C::from(self.$a);
 				data[1] = C::from(self.$b);
@@ -292,6 +311,7 @@ macro_rules! impl_for {
 
 	($ty:ident -> $a:ident($hue:ident), $b:ident, $c:ident) => (
 		impl<C: Channel, T: Float + 'static> Write<C> for $ty<T> {
+			#[inline]
 			fn write(&self, data: &mut [C]) {
 				data[0] = C::from(self.$a.to_radians());
 				data[1] = C::from(self.$b);
@@ -302,6 +322,7 @@ macro_rules! impl_for {
 
 	($ty:ident -> $a:ident($hue:ident), $b:ident, $c:ident, $d:ident) => (
 		impl<C: Channel, T: Float + 'static> Write<C> for $ty<T> {
+			#[inline]
 			fn write(&self, data: &mut [C]) {
 				data[0] = C::from(self.$a.to_radians());
 				data[1] = C::from(self.$b);
