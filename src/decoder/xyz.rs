@@ -49,9 +49,9 @@ impl<C, P, R> super::Decoder<C, P> for Decoder<R>
 		let image = try!(xyz::read(self.inner.by_ref()));
 
 		Ok(Cast::<C, P>::cast(try!(Buffer::<u8, color::Rgb, _>::from_raw(
-			image.width as u32,
-			image.height as u32,
-			image.to_rgb_buffer()).map_err(|_| Error::Format("wrong dimensions".into())))))
+			image.width as u32, image.height as u32,
+			image.to_rgb_buffer())
+				.map_err(|_| Error::Format("wrong dimensions".into())))))
 	}
 }
 
