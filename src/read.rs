@@ -14,7 +14,7 @@
 
 use std::path::Path;
 use std::fs::File;
-use std::io::{Read, Seek, Cursor};
+use std::io::{Read, Seek, Cursor, BufReader};
 
 use decoder::{self, Decoder};
 use color;
@@ -50,7 +50,7 @@ pub fn from_path<C, P, R>(path: R) -> error::Result<Buffer<C, P, Vec<C>>>
 	      P: From<color::Rgb> + From<color::Rgba> + From<color::Luma> + From<color::Lumaa>,
 	      R: AsRef<Path>
 {
-	from(try!(File::open(path)))
+	from(BufReader::new(try!(File::open(path))))
 }
 
 /// Load an image from an input stream with the given format.
