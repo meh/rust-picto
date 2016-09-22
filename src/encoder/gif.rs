@@ -22,14 +22,24 @@ use buffer::Buffer;
 use color;
 
 pub struct Encoder<W: Write> {
-	inner: W,
+	inner:   W,
+	palette: Vec<u8>
 }
 
 impl<W: Write> Encoder<W> {
 	pub fn new(output: W) -> Self {
 		Encoder {
-			inner: output,
+			inner:   output,
+			palette: vec![],
 		}
+	}
+}
+
+impl<'a, W: Write> super::Parameter<Encoder<W>> for Vec<u8> {
+	fn set(self, to: &mut Encoder<W>) -> error::Result<()> {
+		to.palette = self;
+
+		Ok(())
 	}
 }
 
@@ -43,7 +53,7 @@ impl<C, P, D, W> super::Encoder<C, P, D> for Encoder<W>
 	fn frame(&mut self, buffer: &Buffer<C, P, D>) -> error::Result<()> {
 		let mut buffer  = buffer.convert::<u8, color::Rgba>();
 		let mut encoder = try!(gif::Encoder::new(self.inner.by_ref(),
-			buffer.width() as u16, buffer.height() as u16, &[]));
+			buffer.width() as u16, buffer.height() as u16, &self.palette));
 
 		try!(encoder.write_frame(&gif::Frame::from_rgba(
 			buffer.width() as u16, buffer.height() as u16, &mut buffer)));
