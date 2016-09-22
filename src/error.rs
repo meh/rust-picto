@@ -137,3 +137,24 @@ mod imagefmt {
 		}
 	}
 }
+
+#[cfg(feature = "gif")]
+mod gif {
+	use gif;
+	use super::Error;
+
+	impl From<gif::DecodingError> for Error {
+		fn from(value: gif::DecodingError) -> Self {
+			match value {
+				gif::DecodingError::Io(err) =>
+					Error::Io(err),
+
+				gif::DecodingError::Format(desc) =>
+					Error::Format(desc.into()),
+
+				gif::DecodingError::Internal(desc) =>
+					Error::Format(desc.into()),
+			}
+		}
+	}
+}

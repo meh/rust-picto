@@ -29,12 +29,16 @@ optional = true
 version  = "0.1"
 optional = true
 
+[dependencies.gif]
+version  = "0.9"
+optional = true
+
 [dependencies.xyz]
 version  = "0.2"
 optional = true
 
 [features]
-default = ["png", "jpeg", "bmp", "tga", "xyz"]
+default = ["png", "jpeg", "bmp", "tga", "gif", "xyz"]
 nightly = []
 
 jpeg = ["jpeg-decoder"]

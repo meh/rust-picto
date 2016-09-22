@@ -29,6 +29,9 @@ extern crate jpeg_decoder;
 #[cfg(any(feature = "bmp", feature = "tga"))]
 extern crate imagefmt;
 
+#[cfg(feature = "gif")]
+extern crate gif;
+
 #[cfg(feature = "xyz")]
 extern crate xyz;
 

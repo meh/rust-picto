@@ -233,6 +233,39 @@ mod tga {
 	}
 }
 
+mod gif {
+	use picto;
+	use picto::color::*;
+
+	#[test]
+	fn read_as_is() {
+		let image = picto::read::from_path::<u8, Rgb, _>("tests/rainbow.gif").unwrap();
+
+		assert_eq!(400, image.width());
+		assert_eq!(326, image.height());
+
+		assert_relative_eq!(Rgb::new_u8(0xff, 0x00, 0x00),
+			image.get(0, 0), max_relative = 1.0);
+
+		assert_relative_eq!(Rgb::new_u8(0x00, 0x02, 0xff),
+			image.get(399, 0), max_relative = 1.0);
+	}
+
+	#[test]
+	fn read_with_convert() {
+		let image = picto::read::from_path::<u8, Rgba, _>("tests/rainbow.gif").unwrap();
+
+		assert_eq!(400, image.width());
+		assert_eq!(326, image.height());
+
+		assert_relative_eq!(Rgba::new_u8(0xff, 0x00, 0x00, 0xff),
+			image.get(0, 0), max_relative = 1.0);
+
+		assert_relative_eq!(Rgba::new_u8(0x00, 0x02, 0xff, 0xff),
+			image.get(399, 0), max_relative = 1.0);
+	}
+}
+
 mod xyz {
 	use picto;
 	use picto::color::*;
