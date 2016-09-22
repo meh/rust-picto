@@ -184,7 +184,13 @@ impl<C, P, D> Buffer<C, P, D>
 		      PO: Pixel<CO> + pixel::Write<CO>,
 		      P: Into<PO>
 	{
-		self.as_ref(Default::default()).convert()
+		let mut result = Buffer::<CO, PO, Vec<_>>::new(self.area.width, self.area.height);
+
+		for (input, output) in self.chunks(P::channels()).zip(result.chunks_mut(PO::channels())) {
+			P::read(input).into().write(output)
+		}
+
+		result
 	}
 }
 
