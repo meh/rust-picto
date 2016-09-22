@@ -19,16 +19,17 @@ pub struct Coordinates {
 	x: u32,
 	y: u32,
 
-	inner: Area,
+	area: Area,
 }
 
 impl Coordinates {
+	#[inline]
 	pub fn new(area: Area) -> Self {
 		Coordinates {
 			x: 0,
 			y: 0,
 
-			inner: area,
+			area: area,
 		}
 	}
 
@@ -44,17 +45,17 @@ impl Coordinates {
 
 	#[inline]
 	pub fn width(&self) -> u32 {
-		self.inner.width
+		self.area.width
 	}
 
 	#[inline]
 	pub fn height(&self) -> u32 {
-		self.inner.height
+		self.area.height
 	}
 
 	#[inline]
 	pub fn area(&self) -> Area {
-		self.inner
+		self.area
 	}
 }
 
@@ -63,17 +64,53 @@ impl Iterator for Coordinates {
 
 	#[inline]
 	fn next(&mut self) -> Option<Self::Item> {
-		if self.x >= self.inner.width {
+		if self.x >= self.area.width {
 			self.x  = 0;
 			self.y += 1;
 		}
 
-		if self.y >= self.inner.height {
+		if self.y >= self.area.height {
 			return None;
 		}
 
 		self.x += 1;
 
-		Some((self.x - 1 + self.inner.x , self.y + self.inner.y))
+		Some((self.x - 1 + self.area.x, self.y + self.area.y))
+	}
+
+	#[inline]
+	fn size_hint(&self) -> (usize, Option<usize>) {
+		(self.len(), Some(self.len()))
+	}
+}
+
+impl ExactSizeIterator for Coordinates {
+	#[inline]
+	fn len(&self) -> usize {
+		let length    = self.area.width * self.area.height;
+		let remaining = length - (self.y * self.area.width + self.x);
+
+		remaining as usize
+	}
+}
+
+#[cfg(test)]
+mod test {
+	use super::*;
+	use area::Area;
+
+	#[test]
+	fn size_hint() {
+		let mut coord = Coordinates::new(Area::from(0, 0, 2, 2));
+
+		assert_eq!(4, coord.size_hint().0);
+		coord.next().unwrap();
+		assert_eq!(3, coord.size_hint().0);
+		coord.next().unwrap();
+		assert_eq!(2, coord.size_hint().0);
+		coord.next().unwrap();
+		assert_eq!(1, coord.size_hint().0);
+		coord.next().unwrap();
+		assert_eq!(0, coord.size_hint().0);
 	}
 }

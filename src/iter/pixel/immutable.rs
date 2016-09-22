@@ -98,4 +98,19 @@ impl<'a, C, P> Iterator for Iter<'a, C, P>
 			Item::new(&self.data[index .. index + channels])
 		))
 	}
+
+	#[inline]
+	fn size_hint(&self) -> (usize, Option<usize>) {
+		self.inner.size_hint()
+	}
+}
+
+impl<'a, C, P> ExactSizeIterator for Iter<'a, C, P>
+	where C: pixel::Channel,
+	      P: Pixel<C> + pixel::Read<C>
+{
+	#[inline]
+	fn len(&self) -> usize {
+		self.inner.len()
+	}
 }

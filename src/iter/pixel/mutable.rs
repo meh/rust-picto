@@ -87,6 +87,7 @@ impl<'a, C, P> Iterator for Iter<'a, C, P>
 {
 	type Item = (u32, u32, Item<'a, C, P>);
 
+	#[inline]
 	fn next(&mut self) -> Option<Self::Item> {
 		let (x, y) = if let Some((x, y)) = self.inner.next() {
 			(x, y)
@@ -107,5 +108,20 @@ impl<'a, C, P> Iterator for Iter<'a, C, P>
 				slice::from_raw_parts_mut(slice.as_ptr() as *mut _, slice.len())
 			})
 		))
+	}
+
+	#[inline]
+	fn size_hint(&self) -> (usize, Option<usize>) {
+		self.inner.size_hint()
+	}
+}
+
+impl<'a, C, P> ExactSizeIterator for Iter<'a, C, P>
+	where C: pixel::Channel,
+	      P: Pixel<C> + pixel::Read<C> + pixel::Write<C>
+{
+	#[inline]
+	fn len(&self) -> usize {
+		self.inner.len()
 	}
 }
