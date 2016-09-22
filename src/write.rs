@@ -24,7 +24,19 @@ use buffer::Buffer;
 use format::Format;
 use error::{self, Error};
 
-pub fn to_path<C, P, D, W>(buffer: &Buffer<C, P, D>, path: W) -> error::Result<()>
+#[inline]
+pub fn to<C, P, D, W>(output: W, buffer: &Buffer<C, P, D>) -> error::Result<()>
+	where C: pixel::Channel,
+	      P: Pixel<C> + pixel::Read<C>,
+	      P: Into<color::Rgb> + Into<color::Rgba> + Into<color::Luma> + Into<color::Lumaa>,
+	      D: Deref<Target = [C]>,
+	      W: Write
+{
+	with_format(output, Format::Png, buffer)
+}
+
+#[inline]
+pub fn to_path<C, P, D, W>(path: W, buffer: &Buffer<C, P, D>) -> error::Result<()>
 	where C: pixel::Channel,
 	      P: Pixel<C> + pixel::Read<C>,
 	      P: Into<color::Rgb> + Into<color::Rgba> + Into<color::Luma> + Into<color::Lumaa>,
@@ -53,10 +65,11 @@ pub fn to_path<C, P, D, W>(buffer: &Buffer<C, P, D>, path: W) -> error::Result<(
 			return Err(Error::Unsupported("unsupported image format".into()))
 	};
 
-	with_format(buffer, try!(File::create(path)), format)
+	with_format(try!(File::create(path)), format, buffer)
 }
 
-pub fn with_format<C, P, D, W>(buffer: &Buffer<C, P, D>, output: W, format: Format) -> error::Result<()>
+#[inline]
+pub fn with_format<C, P, D, W>(output: W, format: Format, buffer: &Buffer<C, P, D>) -> error::Result<()>
 	where C: pixel::Channel,
 	      P: Pixel<C> + pixel::Read<C>,
 	      P: Into<color::Rgb> + Into<color::Rgba> + Into<color::Luma> + Into<color::Lumaa>,
