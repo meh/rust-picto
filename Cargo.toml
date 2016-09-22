@@ -11,6 +11,7 @@ keywords    = ["image", "color"]
 
 [dev-dependencies]
 approx = "0.1"
+image  = "0.10"
 
 [dependencies]
 byteorder = "0.5"

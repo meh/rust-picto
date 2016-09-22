@@ -8,9 +8,11 @@ matrix:
     - rust: nightly
       env:
        - FEATURES='nightly'
+       - BENCHES=1
 
 script:
   - |
       cargo test --verbose &&
-      ([ -z "$FEATURES" ] || cargo test --verbose --features "$FEATURES") &&
-      ([ -z "$BENCHES"  ] || cargo bench --verbose --features "$FEATURES")
+      ([[ -z "$FEATURES"                  ]] || cargo test --verbose --features "$FEATURES") &&
+      ([[ -z "$BENCHES"                   ]] || cargo bench --verbose) &&
+      ([[ -z "$BENCHES" && -z "$FEATURES" ]] || cargo bench --verbose --features "$FEATURES")
