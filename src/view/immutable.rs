@@ -86,8 +86,8 @@ impl<'a, C, P> Ref<'a, C, P>
 	{
 		let mut result = Buffer::<CO, PO, Vec<_>>::new(self.area.width, self.area.height);
 
-		for (x, y, px) in self.pixels() {
-			result.set(x, y, &px.get().into());
+		for (x, y) in self.area.absolute() {
+			result.set(x, y, &self.get(x, y).into());
 		}
 
 		result
