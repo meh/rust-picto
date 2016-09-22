@@ -44,7 +44,7 @@ mod png {
 			image.set(1, 0, &Rgb::new(0.0, 0.0, 1.0));
 			image.set(1, 1, &Rgb::new(1.0, 0.0, 1.0));
 
-			picto::write::to_path(&image, "tests/test.png").unwrap();
+			picto::write::to_path("tests/test.png", &image).unwrap();
 		}
 
 		{
@@ -143,7 +143,7 @@ mod bmp {
 			image.set(1, 0, &Rgb::new(0.0, 0.0, 1.0));
 			image.set(1, 1, &Rgb::new(1.0, 0.0, 1.0));
 
-			picto::write::to_path(&image, "tests/test.bmp").unwrap();
+			picto::write::to_path("tests/test.bmp", &image).unwrap();
 		}
 
 		{
@@ -209,7 +209,7 @@ mod tga {
 			image.set(1, 0, &Rgb::new(0.0, 0.0, 1.0));
 			image.set(1, 1, &Rgb::new(1.0, 0.0, 1.0));
 
-			picto::write::to_path(&image, "tests/test.tga").unwrap();
+			picto::write::to_path("tests/test.tga", &image).unwrap();
 		}
 
 		{
@@ -219,23 +219,25 @@ mod tga {
 			assert_eq!(2, image.height());
 
 			assert_relative_eq!(Rgb::new(1.0, 0.0, 0.0),
-				image.get(0, 0), max_relative = 0.01);
+				image.get(0, 0), epsilon = 0.01);
 
 			assert_relative_eq!(Rgb::new(0.0, 1.0, 0.0),
-				image.get(0, 1), max_relative = 0.01);
+				image.get(0, 1), epsilon = 0.01);
 
 			assert_relative_eq!(Rgb::new(0.0, 0.0, 1.0),
-				image.get(1, 0), max_relative = 0.01);
+				image.get(1, 0), epsilon = 0.01);
 
 			assert_relative_eq!(Rgb::new(1.0, 0.0, 1.0),
-				image.get(1, 1), max_relative = 0.01);
+				image.get(1, 1), epsilon = 0.01);
 		}
 	}
 }
 
 mod gif {
+	use std::fs::File;
 	use picto;
 	use picto::color::*;
+	use picto::HasParameters;
 
 	#[test]
 	fn read_as_is() {
@@ -275,7 +277,9 @@ mod gif {
 			image.set(1, 0, &Rgb::new(0.0, 0.0, 1.0));
 			image.set(1, 1, &Rgb::new(1.0, 0.0, 1.0));
 
-			picto::write::to_path(&image, "tests/test.gif").unwrap();
+			picto::write::gif(File::create("tests/test.gif").unwrap(), &image, |gif| {
+				gif.set(vec![255u8, 0, 0, 0, 255, 0, 0, 0, 255, 255, 0, 0]).unwrap();
+			}).unwrap();
 		}
 
 		{
