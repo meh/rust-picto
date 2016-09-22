@@ -12,7 +12,7 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-use std::io::Write;
+use std::io::{Write, BufWriter};
 use std::path::Path;
 use std::fs::File;
 use std::ops::Deref;
@@ -65,7 +65,7 @@ pub fn to_path<C, P, D, W>(path: W, buffer: &Buffer<C, P, D>) -> error::Result<(
 			return Err(Error::Unsupported("unsupported image format".into()))
 	};
 
-	with_format(try!(File::create(path)), format, buffer)
+	with_format(BufWriter::new(try!(File::create(path))), format, buffer)
 }
 
 #[inline]
