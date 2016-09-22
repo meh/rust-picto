@@ -12,6 +12,8 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
+use iter::Coordinates;
+
 #[derive(Eq, PartialEq, Copy, Clone, Debug)]
 pub struct Area {
 	pub x: u32,
@@ -36,6 +38,25 @@ impl Area {
 			height: height,
 		}
 	}
+
+	/// Get an iterator over relative coordinates, based on the coordinates
+	/// within the parent view.
+	#[inline]
+	pub fn relative(&self) -> Coordinates {
+		Coordinates::new(*self)
+	}
+
+	/// Get an iterator over absolute coordinates.
+	#[inline]
+	pub fn absolute(&self) -> Coordinates {
+		Coordinates::new(Area {
+			x: 0,
+			y: 0,
+
+			width:  self.width,
+			height: self.height,
+		})
+	}
 }
 
 #[derive(Eq, PartialEq, Copy, Clone, Default, Debug)]
@@ -59,27 +80,55 @@ impl Builder {
 		}
 	}
 
+	pub fn unwrap(self) -> Area {
+		Area {
+			x: self.x.unwrap(),
+			y: self.y.unwrap(),
+
+			width:  self.width.unwrap(),
+			height: self.height.unwrap(),
+		}
+	}
+
 	#[inline]
-	pub fn x(&mut self, value: u32) -> &mut Self {
+	pub fn x(mut self, value: u32) -> Self {
 		self.x = Some(value);
 		self
 	}
 
 	#[inline]
-	pub fn y(&mut self, value: u32) -> &mut Self {
+	pub fn y(mut self, value: u32) -> Self {
 		self.y = Some(value);
 		self
 	}
 
 	#[inline]
-	pub fn width(&mut self, value: u32) -> &mut Self {
+	pub fn width(mut self, value: u32) -> Self {
 		self.width = Some(value);
 		self
 	}
 
 	#[inline]
-	pub fn height(&mut self, value: u32) -> &mut Self {
+	pub fn height(mut self, value: u32) -> Self {
 		self.height = Some(value);
 		self
 	}
+}
+
+#[cfg(test)]
+mod test {
+	use super::*;
+
+	#[test]
+	fn relative() {
+		assert_eq!(vec![(2, 4), (3, 4), (2, 5), (3, 5), (2, 6), (3, 6), (2, 7), (3, 7)],
+		 Area::new().x(2).y(4).width(2).height(4).unwrap().relative().collect::<Vec<(u32, u32)>>());
+	}
+
+	#[test]
+	fn absolute() {
+		assert_eq!(vec![(0, 0), (1, 0), (0, 1), (1, 1), (0, 2), (1, 2), (0, 3), (1, 3)],
+		 Area::new().x(2).y(4).width(2).height(4).unwrap().absolute().collect::<Vec<(u32, u32)>>());
+	}
+
 }

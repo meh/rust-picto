@@ -17,14 +17,12 @@ use std::marker::PhantomData;
 
 use pixel::{self, Pixel};
 use area::Area;
+use iter::Coordinates;
 
 /// Mutable iterator over pixels.
 pub struct Iter<'a, C: pixel::Channel, P: Pixel<C> + pixel::Read<C> + pixel::Write<C>> {
-	x: u32,
-	y: u32,
-
-	area: Area,
-	data: &'a mut [C],
+	inner: Coordinates,
+	data:  &'a mut [C],
 
 	_channel: PhantomData<C>,
 	_pixel:   PhantomData<P>,
@@ -38,11 +36,8 @@ impl<'a, C, P> Iter<'a, C, P>
 	#[inline]
 	pub fn new(data: &mut [C], area: Area) -> Iter<C, P> {
 		Iter {
-			x: area.x,
-			y: area.y,
-
-			area: area,
-			data: data,
+			inner: Coordinates::new(area),
+			data:  data,
 
 			_channel: PhantomData,
 			_pixel:   PhantomData,
@@ -74,11 +69,13 @@ impl<'a, C, P> Item<'a, C, P>
 	}
 
 	/// Get the pixel value.
+	#[inline]
 	pub fn get(&self) -> P {
 		P::read(self.data)
 	}
 
 	/// Set the pixel value.
+	#[inline]
 	pub fn set(&mut self, pixel: &P) {
 		pixel.write(self.data)
 	}
@@ -91,28 +88,24 @@ impl<'a, C, P> Iterator for Iter<'a, C, P>
 	type Item = (u32, u32, Item<'a, C, P>);
 
 	fn next(&mut self) -> Option<Self::Item> {
-		if self.x == self.area.width {
-			self.x  = 0;
-			self.y += 1;
+		let (x, y) = if let Some((x, y)) = self.inner.next() {
+			(x, y)
 		}
-
-		if self.y == self.area.height {
+		else {
 			return None;
-		}
+		};
 
 		let channels = P::channels();
-		let index    = channels * ((self.area.y + self.y) as usize * self.area.width as usize + (self.area.x + self.x) as usize);
-		let item     = (
-			self.x - self.area.x,
-			self.y - self.area.y,
+		let index    = channels * (y as usize * self.inner.area().width as usize + x as usize);
+
+		Some((
+			x - self.inner.area().x,
+			y - self.inner.area().y,
 
 			Item::new(unsafe {
 				let slice = &self.data[index .. index + channels];
 				slice::from_raw_parts_mut(slice.as_ptr() as *mut _, slice.len())
 			})
-		);
-
-		self.x += 1;
-		Some(item)
+		))
 	}
 }
