@@ -253,6 +253,36 @@ impl<C, P, D> Buffer<C, P, D>
 	}
 }
 
+impl<'a, C, P, D> From<&'a Buffer<C, P, D>> for view::Ref<'a, C, P>
+	where C: pixel::Channel,
+	      P: Pixel<C> + pixel::Read<C>,
+	      D: Deref<Target = [C]>
+{
+	fn from(value: &'a Buffer<C, P, D>) -> view::Ref<'a, C, P> {
+		value.as_ref(Default::default())
+	}
+}
+
+impl<'a, C, P, D> From<&'a mut Buffer<C, P, D>> for view::Mut<'a, C, P>
+	where C: pixel::Channel,
+	      P: Pixel<C> + pixel::Write<C>,
+	      D: DerefMut<Target = [C]>,
+{
+	fn from(mut value: &'a mut Buffer<C, P, D>) -> view::Mut<'a, C, P> {
+		value.as_mut(Default::default())
+	}
+}
+
+impl<'a, C, P, D> From<&'a mut Buffer<C, P, D>> for View<'a, C, P>
+	where C: pixel::Channel,
+	      P: Pixel<C> + pixel::Write<C> + pixel::Read<C>,
+	      D: DerefMut<Target = [C]>
+{
+	fn from(mut value: &'a mut Buffer<C, P, D>) -> View<'a, C, P> {
+		value.view(Default::default())
+	}
+}
+
 impl<C, P, D> Deref for Buffer<C, P, D>
 	where C: pixel::Channel,
 	      P: Pixel<C>,
