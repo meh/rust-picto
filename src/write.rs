@@ -105,7 +105,7 @@ pub fn png<C, P, D, F, W>(output: W, buffer: &Buffer<C, P, D>, func: F) -> error
 	      P: Pixel<C> + pixel::Read<C>,
 	      P: Into<color::Rgb> + Into<color::Rgba> + Into<color::Luma> + Into<color::Lumaa>,
 	      D: Deref<Target = [C]>,
-	      for<'r> F: FnOnce(&'r mut encoder::png::Encoder<W>),
+	      F: FnOnce(&mut encoder::png::Encoder<W>),
 	      W: Write
 {
 	let mut encoder = encoder::png::Encoder::new(output);
@@ -120,7 +120,7 @@ pub fn bmp<C, P, D, F, W>(output: W, buffer: &Buffer<C, P, D>, func: F) -> error
 	      P: Pixel<C> + pixel::Read<C>,
 	      P: Into<color::Rgb> + Into<color::Rgba>,
 	      D: Deref<Target = [C]>,
-	      for<'r> F: FnOnce(&'r mut encoder::bmp::Encoder<W>),
+	      F: FnOnce(&mut encoder::bmp::Encoder<W>),
 	      W: Write
 {
 	let mut encoder = encoder::bmp::Encoder::new(output);
@@ -135,7 +135,7 @@ pub fn tga<C, P, D, F, W>(output: W, buffer: &Buffer<C, P, D>, func: F) -> error
 	      P: Pixel<C> + pixel::Read<C>,
 	      P: Into<color::Rgb> + Into<color::Rgba> + Into<color::Luma> + Into<color::Lumaa>,
 	      D: Deref<Target = [C]>,
-	      for<'r> F: FnOnce(&'r mut encoder::tga::Encoder<W>),
+	      F: FnOnce(&mut encoder::tga::Encoder<W>),
 	      W: Write
 {
 	let mut encoder = encoder::tga::Encoder::new(output);
@@ -150,7 +150,7 @@ pub fn gif<C, P, D, F, W>(output: W, buffer: &Buffer<C, P, D>, func: F) -> error
 	      P: Pixel<C> + pixel::Read<C>,
 	      P: Into<color::Rgb> + Into<color::Rgba> + Into<color::Luma> + Into<color::Lumaa>,
 	      D: Deref<Target = [C]>,
-	      for<'r> F: FnOnce(&'r mut encoder::gif::Encoder<W>),
+	      F: FnOnce(&mut encoder::gif::Encoder<W>),
 	      W: Write
 {
 	let mut encoder = encoder::gif::Encoder::new(output);
