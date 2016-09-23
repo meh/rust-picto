@@ -12,8 +12,6 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-use std::fmt;
-
 use pixel::{self, Pixel};
 use view::View;
 
@@ -23,8 +21,8 @@ pub enum Orientation {
 }
 
 pub fn it<'a, C, P, T>(value: T, mode: Orientation)
-	where C: pixel::Channel + fmt::Debug,
-	      P: Pixel<C> + pixel::Write<C> + pixel::Read<C> + fmt::Debug,
+	where C: pixel::Channel,
+	      P: Pixel<C> + pixel::Write<C> + pixel::Read<C>,
 	      T: Into<View<'a, C, P>>
 {
 	let mut view   = value.into();
