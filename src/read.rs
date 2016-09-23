@@ -98,7 +98,7 @@ pub fn png<C, P, F, R>(input: R, func: F) -> error::Result<Buffer<C, P, Vec<C>>>
 	where C: pixel::Channel,
 	      P: Pixel<C> + pixel::Write<C>,
 	      P: From<color::Rgb> + From<color::Rgba> + From<color::Luma> + From<color::Lumaa>,
-	      for<'r> F: FnOnce(&'r mut decoder::png::Decoder<R>),
+	      F: FnOnce(&mut decoder::png::Decoder<R>),
 	      R: Read
 {
 	let mut decoder = decoder::png::Decoder::new(input);
@@ -114,7 +114,7 @@ pub fn jpeg<C, P, F, R>(input: R, func: F) -> error::Result<Buffer<C, P, Vec<C>>
 	where C: pixel::Channel,
 	      P: Pixel<C> + pixel::Write<C>,
 	      P: From<color::Rgb> + From<color::Luma>,
-	      for<'r> F: FnOnce(&'r mut decoder::jpeg::Decoder<R>),
+	      F: FnOnce(&mut decoder::jpeg::Decoder<R>),
 	      R: Read
 {
 	let mut decoder = decoder::jpeg::Decoder::new(input);
@@ -130,7 +130,7 @@ pub fn bmp<C, P, F, R>(input: R, func: F) -> error::Result<Buffer<C, P, Vec<C>>>
 	where C: pixel::Channel,
 	      P: Pixel<C> + pixel::Write<C>,
 	      P: From<color::Rgb> + From<color::Rgba>,
-	      for<'r> F: FnOnce(&'r mut decoder::bmp::Decoder<R>),
+	      F: FnOnce(&mut decoder::bmp::Decoder<R>),
 	      R: Read + Seek
 {
 	let mut decoder = decoder::bmp::Decoder::new(input);
@@ -146,7 +146,7 @@ pub fn tga<C, P, F, R>(input: R, func: F) -> error::Result<Buffer<C, P, Vec<C>>>
 	where C: pixel::Channel,
 	      P: Pixel<C> + pixel::Write<C>,
 	      P: From<color::Rgb> + From<color::Rgba> + From<color::Luma> + From<color::Lumaa>,
-	      for<'r> F: FnOnce(&'r mut decoder::tga::Decoder<R>),
+	      F: FnOnce(&mut decoder::tga::Decoder<R>),
 	      R: Read + Seek
 {
 	let mut decoder = decoder::tga::Decoder::new(input);
@@ -162,7 +162,7 @@ pub fn gif<C, P, F, R>(input: R, func: F) -> error::Result<Buffer<C, P, Vec<C>>>
 	where C: pixel::Channel,
 	      P: Pixel<C> + pixel::Write<C>,
 	      P: From<color::Rgb> + From<color::Rgba> + From<color::Luma> + From<color::Lumaa>,
-	      for<'r> F: FnOnce(&'r mut decoder::gif::Decoder<R>),
+	      F: FnOnce(&mut decoder::gif::Decoder<R>),
 	      R: Read
 {
 	let mut decoder = decoder::gif::Decoder::new(input);
@@ -178,7 +178,7 @@ pub fn xyz<C, P, F, R>(input: R, func: F) -> error::Result<Buffer<C, P, Vec<C>>>
 	where C: pixel::Channel,
 	      P: Pixel<C> + pixel::Write<C>,
 	      P: From<color::Rgb> + From<color::Rgba>,
-	      for<'r> F: FnOnce(&'r mut decoder::xyz::Decoder<R>),
+	      F: FnOnce(&mut decoder::xyz::Decoder<R>),
 	      R: Read
 {
 	let mut decoder = decoder::xyz::Decoder::new(input);
