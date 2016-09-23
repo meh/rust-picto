@@ -156,6 +156,42 @@ impl<'a, C, P> View<'a, C, P>
 	}
 }
 
+impl<'a, C, P> From<View<'a, C, P>> for Ref<'a, C, P>
+	where C: pixel::Channel,
+	      P: Pixel<C> + pixel::Read<C> + pixel::Write<C>
+{
+	fn from(value: View<'a, C, P>) -> Ref<'a, C, P> {
+		Ref::new(value.data, value.area)
+	}
+}
+
+impl<'a, C, P> From<&'a View<'a, C, P>> for Ref<'a, C, P>
+	where C: pixel::Channel,
+	      P: Pixel<C> + pixel::Read<C> + pixel::Write<C>
+{
+	fn from(value: &'a View<'a, C, P>) -> Ref<'a, C, P> {
+		value.as_ref(Default::default())
+	}
+}
+
+impl<'a, C, P> From<View<'a, C, P>> for Mut<'a, C, P>
+	where C: pixel::Channel,
+	      P: Pixel<C> + pixel::Read<C> + pixel::Write<C>
+{
+	fn from(value: View<'a, C, P>) -> Mut<'a, C, P> {
+		Mut::new(value.data, value.area)
+	}
+}
+
+impl<'a, C, P> From<&'a mut View<'a, C, P>> for Mut<'a, C, P>
+	where C: pixel::Channel,
+	      P: Pixel<C> + pixel::Read<C> + pixel::Write<C>
+{
+	fn from(value: &'a mut View<'a, C, P>) -> Mut<'a, C, P> {
+		value.as_mut(Default::default())
+	}
+}
+
 #[cfg(test)]
 mod test {
 	use buffer::*;
