@@ -55,6 +55,8 @@ pub mod iter;
 mod buffer;
 pub use buffer::Buffer;
 
+pub mod processing;
+
 pub mod format;
 pub use format::Format;
 
