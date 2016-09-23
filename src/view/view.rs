@@ -170,7 +170,7 @@ impl<'a, C, P> From<&'a View<'a, C, P>> for Ref<'a, C, P>
 	      P: Pixel<C> + pixel::Read<C> + pixel::Write<C>
 {
 	fn from(value: &'a View<'a, C, P>) -> Ref<'a, C, P> {
-		value.as_ref(Default::default())
+		Ref::new(value.data, value.area)
 	}
 }
 
@@ -188,7 +188,7 @@ impl<'a, C, P> From<&'a mut View<'a, C, P>> for Mut<'a, C, P>
 	      P: Pixel<C> + pixel::Read<C> + pixel::Write<C>
 {
 	fn from(value: &'a mut View<'a, C, P>) -> Mut<'a, C, P> {
-		value.as_mut(Default::default())
+		Mut::new(value.data, value.area)
 	}
 }
 
