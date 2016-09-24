@@ -15,7 +15,7 @@
 use view;
 use pixel::{self, Pixel};
 use processing::util::GetClamped;
-use color::Rgba;
+use color::{Limited, Rgba};
 
 pub struct Linear;
 
@@ -63,5 +63,5 @@ fn lerp(A: &Rgba, B: &Rgba, t: f32) -> Rgba {
 		it(A.green, B.green, t),
 		it(A.blue, B.blue, t),
 		it(A.alpha, B.alpha, t)
-	)
+	).clamp()
 }

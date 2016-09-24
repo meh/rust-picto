@@ -14,8 +14,8 @@
 
 use view;
 use pixel::{self, Pixel};
-use processing::util::{self, GetClamped};
-use color::Rgba;
+use processing::util::GetClamped;
+use color::{Limited, Rgba};
 
 pub struct Cubic;
 
@@ -77,7 +77,7 @@ fn hermite(A: &Rgba, B: &Rgba, C: &Rgba, D: &Rgba, t: f32) -> Rgba {
     let c = (-A / 2.0) + (C / 2.0);
     let d = B;
 
-		util::clamp((a * t * t * t) + (b * t * t) + (c * t) + d, 0.0, 1.0)
+		(a * t * t * t) + (b * t * t) + (c * t) + d
 	}
 
 	Rgba::new(
@@ -85,5 +85,5 @@ fn hermite(A: &Rgba, B: &Rgba, C: &Rgba, D: &Rgba, t: f32) -> Rgba {
 		it(A.green, B.green, C.green, D.green, t),
 		it(A.blue, B.blue, C.blue, D.blue, t),
 		it(A.alpha, B.alpha, C.alpha, D.alpha, t),
-	)
+	).clamp()
 }
