@@ -74,7 +74,6 @@ pub fn resize<'i, A, CO, PO, CI, PI, I>(input: I, width: u32, height: u32) -> Bu
 #[cfg(test)]
 mod test {
 	use super::*;
-	use processing::sample::Nearest;
 	use buffer::Buffer;
 	use color::Rgb;
 
@@ -82,9 +81,31 @@ mod test {
 	fn nearest() {
 		let mut buffer = Buffer::<u8, Rgb, _>::new(2, 2);
 
-		buffer.set(0, 0, &Rgb::new(1.0, 1.0, 1.0));
-		buffer.set(1, 0, &Rgb::new(1.0, 1.0, 1.0));
-		buffer.set(0, 1, &Rgb::new(0.0, 0.0, 0.0));
-		buffer.set(1, 1, &Rgb::new(0.0, 0.0, 0.0));
+		buffer.set(0, 0, &Rgb::new(1.0, 0.0, 0.0));
+		buffer.set(1, 0, &Rgb::new(0.0, 1.0, 0.0));
+		buffer.set(0, 1, &Rgb::new(0.0, 0.0, 1.0));
+		buffer.set(1, 1, &Rgb::new(1.0, 0.0, 1.0));
+
+		let result = buffer.resize::<Nearest, u8, Rgb>(4, 4);
+
+		assert_eq!(Rgb::new(1.0, 0.0, 0.0), result.get(0, 0));
+		assert_eq!(Rgb::new(1.0, 0.0, 0.0), result.get(1, 0));
+		assert_eq!(Rgb::new(1.0, 0.0, 0.0), result.get(0, 1));
+		assert_eq!(Rgb::new(1.0, 0.0, 0.0), result.get(1, 1));
+
+		assert_eq!(Rgb::new(0.0, 1.0, 0.0), result.get(2, 0));
+		assert_eq!(Rgb::new(0.0, 1.0, 0.0), result.get(3, 0));
+		assert_eq!(Rgb::new(0.0, 1.0, 0.0), result.get(2, 1));
+		assert_eq!(Rgb::new(0.0, 1.0, 0.0), result.get(3, 1));
+
+		assert_eq!(Rgb::new(0.0, 0.0, 1.0), result.get(0, 2));
+		assert_eq!(Rgb::new(0.0, 0.0, 1.0), result.get(1, 2));
+		assert_eq!(Rgb::new(0.0, 0.0, 1.0), result.get(0, 3));
+		assert_eq!(Rgb::new(0.0, 0.0, 1.0), result.get(1, 3));
+
+		assert_eq!(Rgb::new(1.0, 0.0, 1.0), result.get(2, 2));
+		assert_eq!(Rgb::new(1.0, 0.0, 1.0), result.get(3, 2));
+		assert_eq!(Rgb::new(1.0, 0.0, 1.0), result.get(2, 3));
+		assert_eq!(Rgb::new(1.0, 0.0, 1.0), result.get(3, 3));
 	}
 }
