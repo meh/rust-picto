@@ -27,6 +27,7 @@ impl<'a, C, P, T> Get<C, P> for T
 	      P: Pixel<C> + pixel::Read<C>,
 	      T: Into<view::Ref<'a, C, P>>
 {
+	#[inline]
 	fn get_clamped(self, x: i64, y: i64) -> P {
 		let view   = self.into();
 		let width  = view.width() as i64;
@@ -46,6 +47,7 @@ impl<'a, C, P, T> Set<C, P> for T
 	      P: Pixel<C> + pixel::Write<C>,
 	      T: Into<view::Mut<'a, C, P>>
 {
+	#[inline]
 	fn set_clamped(self, x: i64, y: i64, value: &P) {
 		let mut view   = self.into();
 		let     width  = view.width() as i64;
