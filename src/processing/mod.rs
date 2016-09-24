@@ -15,3 +15,4 @@
 pub mod prelude;
 
 pub mod flip;
+pub mod scale;
