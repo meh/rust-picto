@@ -30,6 +30,9 @@ pub trait Scaler<CI, PI, CO, PO, T: Float = f32>
 mod nearest;
 pub use self::nearest::Nearest;
 
+mod linear;
+pub use self::linear::Linear;
+
 pub trait Scale<CI, PI>
 	where CI: pixel::Channel,
 	      PI: Pixel<CI> + pixel::Read<CI>,

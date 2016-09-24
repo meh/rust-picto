@@ -22,4 +22,5 @@ pub mod flip {
 
 pub mod scaler {
 	pub use processing::scale::Nearest;
+	pub use processing::scale::Linear;
 }
