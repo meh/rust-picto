@@ -39,6 +39,18 @@ pub trait Scale<CI, PI>
 		      CO: pixel::Channel,
 		      PO: Pixel<CO> + pixel::Write<CO>,
 		      PO: From<PI>;
+
+	fn scale_by<A, CO, PO>(self, factor: f32) -> Buffer<CO, PO, Vec<CO>>
+		where A:  Scaler<CI, PI, CO, PO>,
+		      CO: pixel::Channel,
+		      PO: Pixel<CO> + pixel::Write<CO>,
+		      PO: From<PI>;
+
+	fn scale_to<A, CO, PO>(self, width: u32, height: u32) -> Buffer<CO, PO, Vec<CO>>
+		where A:  Scaler<CI, PI, CO, PO>,
+		      CO: pixel::Channel,
+		      PO: Pixel<CO> + pixel::Write<CO>,
+		      PO: From<PI>;
 }
 
 impl<'i, CI, PI, I> Scale<CI, PI> for I
@@ -54,6 +66,24 @@ impl<'i, CI, PI, I> Scale<CI, PI> for I
 	{
 		resize::<A, CO, PO, CI, PI, I>(self, width, height)
 	}
+
+	fn scale_by<A, CO, PO>(self, factor: f32) -> Buffer<CO, PO, Vec<CO>>
+		where A:  Scaler<CI, PI, CO, PO>,
+		      CO: pixel::Channel,
+		      PO: Pixel<CO> + pixel::Write<CO>,
+		      PO: From<PI>
+	{
+		by::<A, CO, PO, CI, PI, I>(self, factor)
+	}
+
+	fn scale_to<A, CO, PO>(self, width: u32, height: u32) -> Buffer<CO, PO, Vec<CO>>
+		where A:  Scaler<CI, PI, CO, PO>,
+		      CO: pixel::Channel,
+		      PO: Pixel<CO> + pixel::Write<CO>,
+		      PO: From<PI>
+	{
+		to::<A, CO, PO, CI, PI, I>(self, width, height)
+	}
 }
 
 pub fn resize<'i, A, CO, PO, CI, PI, I>(input: I, width: u32, height: u32) -> Buffer<CO, PO, Vec<CO>>
@@ -67,6 +97,54 @@ pub fn resize<'i, A, CO, PO, CI, PI, I>(input: I, width: u32, height: u32) -> Bu
 {
 	let mut result = Buffer::<CO, PO, _>::new(width, height);
 	A::scale(input.into(), result.as_mut(Default::default()));
+
+	result
+}
+
+pub fn by<'i, A, CO, PO, CI, PI, I>(input: I, factor: f32) -> Buffer<CO, PO, Vec<CO>>
+	where A:  Scaler<CI, PI, CO, PO>,
+	      CO: pixel::Channel,
+	      PO: Pixel<CO> + pixel::Write<CO>,
+	      PO: From<PI>,
+	      CI: pixel::Channel,
+	      PI: Pixel<CI> + pixel::Read<CI>,
+	      I:  Into<view::Ref<'i, CI, PI>>
+{
+	let input  = input.into();
+	let width  = input.width() as f32 * factor;
+	let height = input.height() as f32 * factor;
+
+	let mut result = Buffer::<CO, PO, _>::new(width as u32, height as u32);
+	A::scale(input, result.as_mut(Default::default()));
+
+	result
+}
+
+pub fn to<'i, A, CO, PO, CI, PI, I>(input: I, width: u32, height: u32) -> Buffer<CO, PO, Vec<CO>>
+	where A:  Scaler<CI, PI, CO, PO>,
+	      CO: pixel::Channel,
+	      PO: Pixel<CO> + pixel::Write<CO>,
+	      PO: From<PI>,
+	      CI: pixel::Channel,
+	      PI: Pixel<CI> + pixel::Read<CI>,
+	      I:  Into<view::Ref<'i, CI, PI>>
+{
+	let input = input.into();
+	let r_old = input.width() as f32 / input.height() as f32;
+	let r_new = width as f32 / height as f32;
+
+	let scale = if r_new > r_old {
+		height as f32 / input.height() as f32
+	}
+	else {
+		width as f32 / input.width() as f32
+	};
+
+	let width  = width as f32 * scale;
+	let height = height as f32 * scale;
+
+	let mut result = Buffer::<CO, PO, _>::new(width as u32, height as u32);
+	A::scale(input, result.as_mut(Default::default()));
 
 	result
 }
