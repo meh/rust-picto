@@ -153,7 +153,7 @@ mod test {
 		buffer.set(0, 1, &Rgb::new(0.0, 0.0, 1.0));
 		buffer.set(1, 1, &Rgb::new(1.0, 0.0, 1.0));
 
-		let result = buffer.resize::<u8, Rgb, _>(Nearest, 4, 4);
+		let result = buffer.resize::<Nearest, u8, Rgb>(4, 4);
 
 		assert_eq!(Rgb::new(1.0, 0.0, 0.0), result.get(0, 0));
 		assert_eq!(Rgb::new(1.0, 0.0, 0.0), result.get(1, 0));
