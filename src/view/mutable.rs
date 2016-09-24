@@ -18,6 +18,7 @@ use pixel::{self, Pixel};
 use area::{self, Area};
 
 /// A mutable view into a `Buffer`.
+#[derive(PartialEq, Debug)]
 pub struct Ref<'a, C: pixel::Channel, P: Pixel<C>> {
 	area: Area,
 	data: &'a mut [C],

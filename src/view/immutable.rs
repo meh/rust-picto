@@ -20,6 +20,7 @@ use area::{self, Area};
 use iter::pixel::Iter as Pixels;
 
 /// An immutable view into a `Buffer`.
+#[derive(PartialEq, Debug)]
 pub struct Ref<'a, C: pixel::Channel, P: Pixel<C>> {
 	area: Area,
 	data: &'a [C],

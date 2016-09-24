@@ -21,6 +21,7 @@ use iter::pixel::{Iter as Pixels, IterMut as PixelsMut};
 use super::{Ref, Mut};
 
 /// A view into a `Buffer`.
+#[derive(PartialEq, Debug)]
 pub struct View<'a, C: pixel::Channel, P: Pixel<C>> {
 	area: Area,
 	data: &'a mut [C],
