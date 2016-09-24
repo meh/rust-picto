@@ -156,6 +156,16 @@ impl<'a, C, P> View<'a, C, P>
 	}
 }
 
+impl<'a, C, P> From<&'a mut View<'a, C, P>> for View<'a, C, P>
+	where C: pixel::Channel,
+	      P: Pixel<C> + pixel::Read<C> + pixel::Write<C>
+{
+	#[inline]
+	fn from(value: &'a mut View<'a, C, P>) -> View<'a, C, P> {
+		View::new(value.data, value.area)
+	}
+}
+
 impl<'a, C, P> From<View<'a, C, P>> for Ref<'a, C, P>
 	where C: pixel::Channel,
 	      P: Pixel<C> + pixel::Read<C> + pixel::Write<C>
