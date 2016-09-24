@@ -70,7 +70,7 @@ impl<CI, PI, CO, PO> super::Sampler<CI, PI, CO, PO> for Cubic
 #[inline]
 #[allow(non_snake_case)]
 fn hermite(A: &Rgba, B: &Rgba, C: &Rgba, D: &Rgba, t: f32) -> Rgba {
-	#[inline(always)]
+	#[inline]
 	fn it(A: f32, B: f32, C: f32, D: f32, t: f32) -> f32 {
     let a = (-A / 2.0) + ((3.0 * B) / 2.0) - ((3.0 * C) / 2.0) + (D / 2.0);
     let b = A - ((5.0 * B) / 2.0) + (2.0 * C) - (D / 2.0);
