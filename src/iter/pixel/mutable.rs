@@ -97,7 +97,7 @@ impl<'a, C, P> Iterator for Iter<'a, C, P>
 		};
 
 		let channels = P::channels();
-		let index    = channels * (y as usize * self.inner.area().width as usize + x as usize);
+		let index    = channels * (y as usize * self.inner.width() as usize + x as usize);
 
 		Some((
 			x - self.inner.area().x,

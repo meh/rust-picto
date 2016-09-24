@@ -51,6 +51,18 @@ impl<'a, C, P> View<'a, C, P>
 	pub fn area(&self) -> Area {
 		self.area
 	}
+
+	/// Get the width.
+	#[inline]
+	pub fn width(&self) -> u32 {
+		self.area.width
+	}
+
+	/// Get the height.
+	#[inline]
+	pub fn height(&self) -> u32 {
+		self.area.height
+	}
 }
 
 impl<'a, C, P> View<'a, C, P>
