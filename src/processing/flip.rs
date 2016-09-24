@@ -15,9 +15,24 @@
 use pixel::{self, Pixel};
 use view::View;
 
+#[derive(Eq, PartialEq, Copy, Clone, Debug)]
 pub enum Orientation {
 	Vertical,
 	Horizontal,
+}
+
+pub trait Flip<C: pixel::Channel, P: Pixel<C> + pixel::Read<C> + pixel::Write<C>> {
+	fn flip(self, mode: Orientation);
+}
+
+impl<'a, C, P, T> Flip<C, P> for T
+	where C: pixel::Channel,
+	      P: Pixel<C> + pixel::Read<C> + pixel::Write<C>,
+	      T: Into<View<'a, C, P>>
+{
+	fn flip(self, mode: Orientation) {
+		it(self, mode)
+	}
 }
 
 pub fn it<'a, C, P, T>(value: T, mode: Orientation)
@@ -26,8 +41,8 @@ pub fn it<'a, C, P, T>(value: T, mode: Orientation)
 	      T: Into<View<'a, C, P>>
 {
 	let mut view   = value.into();
-	let     width  = view.area().width;
-	let     height = view.area().height;
+	let     width  = view.width();
+	let     height = view.height();
 
 	match mode {
 		Orientation::Vertical => {
@@ -78,6 +93,7 @@ pub fn it<'a, C, P, T>(value: T, mode: Orientation)
 
 #[cfg(test)]
 mod test {
+	use super::*;
 	use buffer::Buffer;
 	use color::Rgb;
 
@@ -87,7 +103,7 @@ mod test {
 		image.set(0, 0, &Rgb::new(1.0, 1.0, 1.0));
 		image.set(1, 0, &Rgb::new(1.0, 1.0, 1.0));
 
-		super::it(&mut image, super::Orientation::Vertical);
+		image.flip(super::Orientation::Vertical);
 
 		assert_eq!(Rgb::new(1.0, 1.0, 1.0), image.get(0, 0));
 		assert_eq!(Rgb::new(1.0, 1.0, 1.0), image.get(1, 0));
@@ -101,7 +117,7 @@ mod test {
 		image.set(0, 1, &Rgb::new(0.0, 0.0, 0.0));
 		image.set(1, 1, &Rgb::new(0.0, 0.0, 0.0));
 
-		super::it(&mut image, super::Orientation::Vertical);
+		image.flip(super::Orientation::Vertical);
 
 		assert_eq!(Rgb::new(0.0, 0.0, 0.0), image.get(0, 0));
 		assert_eq!(Rgb::new(0.0, 0.0, 0.0), image.get(1, 0));
@@ -119,7 +135,7 @@ mod test {
 		image.set(0, 2, &Rgb::new(0.0, 1.0, 0.0));
 		image.set(1, 2, &Rgb::new(0.0, 1.0, 0.0));
 
-		super::it(&mut image, super::Orientation::Vertical);
+		image.flip(super::Orientation::Vertical);
 
 		assert_eq!(Rgb::new(0.0, 1.0, 0.0), image.get(0, 0));
 		assert_eq!(Rgb::new(0.0, 1.0, 0.0), image.get(1, 0));
@@ -135,7 +151,7 @@ mod test {
 		image.set(0, 0, &Rgb::new(1.0, 1.0, 1.0));
 		image.set(0, 1, &Rgb::new(1.0, 1.0, 1.0));
 
-		super::it(&mut image, super::Orientation::Horizontal);
+		image.flip(super::Orientation::Horizontal);
 
 		assert_eq!(Rgb::new(1.0, 1.0, 1.0), image.get(0, 0));
 		assert_eq!(Rgb::new(1.0, 1.0, 1.0), image.get(0, 1));
@@ -149,7 +165,7 @@ mod test {
 		image.set(0, 1, &Rgb::new(1.0, 1.0, 1.0));
 		image.set(1, 1, &Rgb::new(0.0, 0.0, 0.0));
 
-		super::it(&mut image, super::Orientation::Horizontal);
+		image.flip(super::Orientation::Horizontal);
 
 		assert_eq!(Rgb::new(0.0, 0.0, 0.0), image.get(0, 0));
 		assert_eq!(Rgb::new(1.0, 1.0, 1.0), image.get(1, 0));
@@ -167,7 +183,7 @@ mod test {
 		image.set(1, 1, &Rgb::new(0.0, 0.0, 0.0));
 		image.set(2, 1, &Rgb::new(0.0, 1.0, 0.0));
 
-		super::it(&mut image, super::Orientation::Horizontal);
+		image.flip(super::Orientation::Horizontal);
 
 		assert_eq!(Rgb::new(0.0, 1.0, 0.0), image.get(0, 0));
 		assert_eq!(Rgb::new(0.0, 0.0, 0.0), image.get(1, 0));
