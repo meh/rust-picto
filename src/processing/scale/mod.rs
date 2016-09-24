@@ -21,8 +21,7 @@ pub trait Scaler<CI, PI, CO, PO, T: Float = f32>
 	where CI: pixel::Channel,
 	      PI: Pixel<CI> + pixel::Read<CI>,
 	      CO: pixel::Channel,
-	      PO: Pixel<CO> + pixel::Write<CO>,
-	      PO: From<PI>
+	      PO: Pixel<CO> + pixel::Write<CO>
 {
 	fn scale(input: view::Ref<CI, PI>, output: view::Mut<CO, PO>);
 }
@@ -40,20 +39,17 @@ pub trait Scale<CI, PI>
 	fn resize<A, CO, PO>(self, width: u32, height: u32) -> Buffer<CO, PO, Vec<CO>>
 		where A:  Scaler<CI, PI, CO, PO>,
 		      CO: pixel::Channel,
-		      PO: Pixel<CO> + pixel::Write<CO>,
-		      PO: From<PI>;
+		      PO: Pixel<CO> + pixel::Write<CO>;
 
 	fn scale_by<A, CO, PO>(self, factor: f32) -> Buffer<CO, PO, Vec<CO>>
 		where A:  Scaler<CI, PI, CO, PO>,
 		      CO: pixel::Channel,
-		      PO: Pixel<CO> + pixel::Write<CO>,
-		      PO: From<PI>;
+		      PO: Pixel<CO> + pixel::Write<CO>;
 
 	fn scale_to<A, CO, PO>(self, width: u32, height: u32) -> Buffer<CO, PO, Vec<CO>>
 		where A:  Scaler<CI, PI, CO, PO>,
 		      CO: pixel::Channel,
-		      PO: Pixel<CO> + pixel::Write<CO>,
-		      PO: From<PI>;
+		      PO: Pixel<CO> + pixel::Write<CO>;
 }
 
 impl<'i, CI, PI, I> Scale<CI, PI> for I
@@ -64,8 +60,7 @@ impl<'i, CI, PI, I> Scale<CI, PI> for I
 	fn resize<A, CO, PO>(self, width: u32, height: u32) -> Buffer<CO, PO, Vec<CO>>
 		where A:  Scaler<CI, PI, CO, PO>,
 		      CO: pixel::Channel,
-		      PO: Pixel<CO> + pixel::Write<CO>,
-		      PO: From<PI>
+		      PO: Pixel<CO> + pixel::Write<CO>
 	{
 		resize::<A, CO, PO, CI, PI, I>(self, width, height)
 	}
@@ -73,8 +68,7 @@ impl<'i, CI, PI, I> Scale<CI, PI> for I
 	fn scale_by<A, CO, PO>(self, factor: f32) -> Buffer<CO, PO, Vec<CO>>
 		where A:  Scaler<CI, PI, CO, PO>,
 		      CO: pixel::Channel,
-		      PO: Pixel<CO> + pixel::Write<CO>,
-		      PO: From<PI>
+		      PO: Pixel<CO> + pixel::Write<CO>
 	{
 		by::<A, CO, PO, CI, PI, I>(self, factor)
 	}
@@ -82,8 +76,7 @@ impl<'i, CI, PI, I> Scale<CI, PI> for I
 	fn scale_to<A, CO, PO>(self, width: u32, height: u32) -> Buffer<CO, PO, Vec<CO>>
 		where A:  Scaler<CI, PI, CO, PO>,
 		      CO: pixel::Channel,
-		      PO: Pixel<CO> + pixel::Write<CO>,
-		      PO: From<PI>
+		      PO: Pixel<CO> + pixel::Write<CO>
 	{
 		to::<A, CO, PO, CI, PI, I>(self, width, height)
 	}
@@ -93,7 +86,6 @@ pub fn resize<'i, A, CO, PO, CI, PI, I>(input: I, width: u32, height: u32) -> Bu
 	where A:  Scaler<CI, PI, CO, PO>,
 	      CO: pixel::Channel,
 	      PO: Pixel<CO> + pixel::Write<CO>,
-	      PO: From<PI>,
 	      CI: pixel::Channel,
 	      PI: Pixel<CI> + pixel::Read<CI>,
 	      I:  Into<view::Ref<'i, CI, PI>>
@@ -108,7 +100,6 @@ pub fn by<'i, A, CO, PO, CI, PI, I>(input: I, factor: f32) -> Buffer<CO, PO, Vec
 	where A:  Scaler<CI, PI, CO, PO>,
 	      CO: pixel::Channel,
 	      PO: Pixel<CO> + pixel::Write<CO>,
-	      PO: From<PI>,
 	      CI: pixel::Channel,
 	      PI: Pixel<CI> + pixel::Read<CI>,
 	      I:  Into<view::Ref<'i, CI, PI>>
@@ -127,7 +118,6 @@ pub fn to<'i, A, CO, PO, CI, PI, I>(input: I, width: u32, height: u32) -> Buffer
 	where A:  Scaler<CI, PI, CO, PO>,
 	      CO: pixel::Channel,
 	      PO: Pixel<CO> + pixel::Write<CO>,
-	      PO: From<PI>,
 	      CI: pixel::Channel,
 	      PI: Pixel<CI> + pixel::Read<CI>,
 	      I:  Into<view::Ref<'i, CI, PI>>

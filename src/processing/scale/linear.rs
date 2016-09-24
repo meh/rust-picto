@@ -25,7 +25,7 @@ impl<CI, PI, CO, PO, T: Float> super::Scaler<CI, PI, CO, PO, T> for Linear
 	      PI: Into<Rgba>,
 	      CO: pixel::Channel,
 	      PO: Pixel<CO> + pixel::Write<CO>,
-	      PO: From<PI> + From<Rgba>
+	      PO: From<Rgba>
 {
 	fn scale(input: view::Ref<CI, PI>, mut output: view::Mut<CO, PO>) {
 		let x_ratio = num::cast::<_, T>(input.width() - 1).unwrap() / num::cast(output.width()).unwrap();
