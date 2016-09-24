@@ -12,7 +12,7 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-use num::{NumCast, Float, Zero};
+use num::{self, Float, Zero};
 
 use color::{Luma, Rgb, Hsl, Hsv, Hwb, Lab, Lch, Xyz, Yxy};
 use color::{Lumaa, Rgba, Hsla, Hsva, Hwba, Laba, Lcha, Xyza, Yxya};
@@ -27,25 +27,25 @@ pub trait Channel: Zero + Copy + 'static {
 
 impl Channel for u8 {
 	fn from<T: Float + 'static>(value: T) -> Self {
-		NumCast::from(value * NumCast::from(u8::max_value()).unwrap()).unwrap()
+		num::cast(value * num::cast(u8::max_value()).unwrap()).unwrap()
 	}
 }
 
 impl Channel for u16 {
 	fn from<T: Float + 'static>(value: T) -> Self {
-		NumCast::from(value * NumCast::from(u16::max_value()).unwrap()).unwrap()
+		num::cast(value * num::cast(u16::max_value()).unwrap()).unwrap()
 	}
 }
 
 impl Channel for f32 {
 	fn from<T: Float + 'static>(value: T) -> Self {
-		NumCast::from(value).unwrap()
+		num::cast(value).unwrap()
 	}
 }
 
 impl Channel for f64 {
 	fn from<T: Float + 'static>(value: T) -> Self {
-		NumCast::from(value).unwrap()
+		num::cast(value).unwrap()
 	}
 }
 
