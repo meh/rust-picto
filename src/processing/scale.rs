@@ -12,42 +12,28 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-use num::Float;
 use buffer::Buffer;
 use pixel::{self, Pixel};
 use view;
 
-pub trait Scaler<CI, PI, CO, PO, T: Float = f32>
-	where CI: pixel::Channel,
-	      PI: Pixel<CI> + pixel::Read<CI>,
-	      CO: pixel::Channel,
-	      PO: Pixel<CO> + pixel::Write<CO>
-{
-	fn scale(input: view::Ref<CI, PI>, output: view::Mut<CO, PO>);
-}
-
-mod nearest;
-pub use self::nearest::Nearest;
-
-mod linear;
-pub use self::linear::Linear;
+use processing::sampler::Sampler;
 
 pub trait Scale<CI, PI>
 	where CI: pixel::Channel,
 	      PI: Pixel<CI> + pixel::Read<CI>,
 {
 	fn resize<A, CO, PO>(self, width: u32, height: u32) -> Buffer<CO, PO, Vec<CO>>
-		where A:  Scaler<CI, PI, CO, PO>,
+		where A:  Sampler<CI, PI, CO, PO>,
 		      CO: pixel::Channel,
 		      PO: Pixel<CO> + pixel::Write<CO>;
 
 	fn scale_by<A, CO, PO>(self, factor: f32) -> Buffer<CO, PO, Vec<CO>>
-		where A:  Scaler<CI, PI, CO, PO>,
+		where A:  Sampler<CI, PI, CO, PO>,
 		      CO: pixel::Channel,
 		      PO: Pixel<CO> + pixel::Write<CO>;
 
 	fn scale_to<A, CO, PO>(self, width: u32, height: u32) -> Buffer<CO, PO, Vec<CO>>
-		where A:  Scaler<CI, PI, CO, PO>,
+		where A:  Sampler<CI, PI, CO, PO>,
 		      CO: pixel::Channel,
 		      PO: Pixel<CO> + pixel::Write<CO>;
 }
@@ -57,24 +43,27 @@ impl<'i, CI, PI, I> Scale<CI, PI> for I
 	      PI: Pixel<CI> + pixel::Read<CI>,
 	      I:  Into<view::Ref<'i, CI, PI>>
 {
+	#[inline]
 	fn resize<A, CO, PO>(self, width: u32, height: u32) -> Buffer<CO, PO, Vec<CO>>
-		where A:  Scaler<CI, PI, CO, PO>,
+		where A:  Sampler<CI, PI, CO, PO>,
 		      CO: pixel::Channel,
 		      PO: Pixel<CO> + pixel::Write<CO>
 	{
 		resize::<A, CO, PO, CI, PI, I>(self, width, height)
 	}
 
+	#[inline]
 	fn scale_by<A, CO, PO>(self, factor: f32) -> Buffer<CO, PO, Vec<CO>>
-		where A:  Scaler<CI, PI, CO, PO>,
+		where A:  Sampler<CI, PI, CO, PO>,
 		      CO: pixel::Channel,
 		      PO: Pixel<CO> + pixel::Write<CO>
 	{
 		by::<A, CO, PO, CI, PI, I>(self, factor)
 	}
 
+	#[inline]
 	fn scale_to<A, CO, PO>(self, width: u32, height: u32) -> Buffer<CO, PO, Vec<CO>>
-		where A:  Scaler<CI, PI, CO, PO>,
+		where A:  Sampler<CI, PI, CO, PO>,
 		      CO: pixel::Channel,
 		      PO: Pixel<CO> + pixel::Write<CO>
 	{
@@ -83,21 +72,32 @@ impl<'i, CI, PI, I> Scale<CI, PI> for I
 }
 
 pub fn resize<'i, A, CO, PO, CI, PI, I>(input: I, width: u32, height: u32) -> Buffer<CO, PO, Vec<CO>>
-	where A:  Scaler<CI, PI, CO, PO>,
+	where A:  Sampler<CI, PI, CO, PO>,
 	      CO: pixel::Channel,
 	      PO: Pixel<CO> + pixel::Write<CO>,
 	      CI: pixel::Channel,
 	      PI: Pixel<CI> + pixel::Read<CI>,
 	      I:  Into<view::Ref<'i, CI, PI>>
 {
-	let mut result = Buffer::<CO, PO, _>::new(width, height);
-	A::scale(input.into(), result.as_mut(Default::default()));
+	let     input  = input.into();
+	let mut output = Buffer::<CO, PO, _>::new(width, height);
 
-	result
+	for y in 0 .. height {
+		let v = y as f32 / (height - 1) as f32;
+
+		for x in 0 .. width {
+			let u = x as f32 / (width - 1) as f32;
+
+			output.set(x, y, &A::sample(&input, u, v));
+		}
+	}
+
+	output
 }
 
+#[inline]
 pub fn by<'i, A, CO, PO, CI, PI, I>(input: I, factor: f32) -> Buffer<CO, PO, Vec<CO>>
-	where A:  Scaler<CI, PI, CO, PO>,
+	where A:  Sampler<CI, PI, CO, PO>,
 	      CO: pixel::Channel,
 	      PO: Pixel<CO> + pixel::Write<CO>,
 	      CI: pixel::Channel,
@@ -108,14 +108,12 @@ pub fn by<'i, A, CO, PO, CI, PI, I>(input: I, factor: f32) -> Buffer<CO, PO, Vec
 	let width  = input.width() as f32 * factor;
 	let height = input.height() as f32 * factor;
 
-	let mut result = Buffer::<CO, PO, _>::new(width as u32, height as u32);
-	A::scale(input, result.as_mut(Default::default()));
-
-	result
+	resize::<A, CO, PO, CI, PI, _>(input, width as u32, height as u32)
 }
 
+#[inline]
 pub fn to<'i, A, CO, PO, CI, PI, I>(input: I, width: u32, height: u32) -> Buffer<CO, PO, Vec<CO>>
-	where A:  Scaler<CI, PI, CO, PO>,
+	where A:  Sampler<CI, PI, CO, PO>,
 	      CO: pixel::Channel,
 	      PO: Pixel<CO> + pixel::Write<CO>,
 	      CI: pixel::Channel,
@@ -136,15 +134,13 @@ pub fn to<'i, A, CO, PO, CI, PI, I>(input: I, width: u32, height: u32) -> Buffer
 	let width  = width as f32 * scale;
 	let height = height as f32 * scale;
 
-	let mut result = Buffer::<CO, PO, _>::new(width as u32, height as u32);
-	A::scale(input, result.as_mut(Default::default()));
-
-	result
+	resize::<A, CO, PO, CI, PI, _>(input, width as u32, height as u32)
 }
 
 #[cfg(test)]
 mod test {
 	use super::*;
+	use processing::sampler::Nearest;
 	use buffer::Buffer;
 	use color::Rgb;
 
@@ -157,7 +153,7 @@ mod test {
 		buffer.set(0, 1, &Rgb::new(0.0, 0.0, 1.0));
 		buffer.set(1, 1, &Rgb::new(1.0, 0.0, 1.0));
 
-		let result = buffer.resize::<Nearest, u8, Rgb>(4, 4);
+		let result = buffer.resize::<u8, Rgb, _>(Nearest, 4, 4);
 
 		assert_eq!(Rgb::new(1.0, 0.0, 0.0), result.get(0, 0));
 		assert_eq!(Rgb::new(1.0, 0.0, 0.0), result.get(1, 0));

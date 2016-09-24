@@ -14,5 +14,8 @@
 
 pub mod prelude;
 
+pub mod util;
+pub mod sampler;
+
 pub mod flip;
 pub mod scale;

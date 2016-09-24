@@ -12,13 +12,23 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-pub use processing::sampler;
+use view;
+use pixel::{self, Pixel};
 
-pub use processing::flip::Flip;
-
-pub mod flip {
-	pub use processing::flip::Orientation::Vertical as Vertically;
-	pub use processing::flip::Orientation::Horizontal as Horizontally;
+pub trait Sampler<CI, PI, CO, PO>
+	where CI: pixel::Channel,
+	      PI: Pixel<CI> + pixel::Read<CI>,
+	      CO: pixel::Channel,
+	      PO: Pixel<CO> + pixel::Write<CO>
+{
+	fn sample(from: &view::Ref<CI, PI>, u: f32, v: f32) -> PO;
 }
 
-pub use processing::scale::Scale;
+mod nearest;
+pub use self::nearest::Nearest;
+
+mod linear;
+pub use self::linear::Linear;
+
+mod cubic;
+pub use self::cubic::Cubic;
