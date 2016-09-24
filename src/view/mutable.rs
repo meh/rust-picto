@@ -87,6 +87,16 @@ impl<'a, C, P> Ref<'a, C, P>
 	}
 }
 
+impl<'a, C, P> From<&'a mut Ref<'a, C, P>> for Ref<'a, C, P>
+	where C: pixel::Channel,
+	      P: Pixel<C> + pixel::Write<C>
+{
+	#[inline]
+	fn from(value: &'a mut Ref<'a, C, P>) -> Ref<'a, C, P> {
+		Ref::new(value.data, value.area)
+	}
+}
+
 #[cfg(test)]
 mod test {
 	use buffer::*;
