@@ -25,6 +25,7 @@ pub struct Decoder<R: Read + Seek> {
 }
 
 impl<R: Read + Seek> Decoder<R> {
+	#[inline]
 	pub fn new(input: R) -> Self {
 		Decoder {
 			inner: input

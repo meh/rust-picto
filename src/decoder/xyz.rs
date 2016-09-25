@@ -25,6 +25,7 @@ pub struct Decoder<R: Read> {
 }
 
 impl<R: Read> Decoder<R> {
+	#[inline]
 	pub fn new(input: R) -> Self {
 		Decoder {
 			inner: input
@@ -38,6 +39,7 @@ impl<C, P, R> super::Decoder<C, P> for Decoder<R>
 	      P: From<color::Rgb> + From<color::Rgba>,
 	      R: Read
 {
+	#[inline]
 	fn frame(&mut self) -> error::Result<Buffer<C, P, Vec<C>>> {
 		let image = try!(xyz::read(self.inner.by_ref()));
 

@@ -28,6 +28,7 @@ pub struct Encoder<W: Write> {
 }
 
 impl<W: Write> Encoder<W> {
+	#[inline]
 	pub fn new(output: W) -> Self {
 		Encoder {
 			inner:   output,
@@ -37,6 +38,7 @@ impl<W: Write> Encoder<W> {
 }
 
 impl<W: Write> Parameter<Encoder<W>> for Vec<u8> {
+	#[inline]
 	fn set(self, to: &mut Encoder<W>) -> error::Result<()> {
 		to.palette = self;
 

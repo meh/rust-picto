@@ -30,6 +30,7 @@ pub struct Decoder<R: Read> {
 }
 
 impl<R: Read> Decoder<R> {
+	#[inline]
 	pub fn new(input: R) -> Self {
 		let mut decoder = gif::Decoder::new(input);
 		decoder.set(gif::ColorOutput::RGBA);
@@ -71,6 +72,7 @@ impl<C, P, R> super::Decoder<C, P> for Decoder<R>
 	      P: From<color::Rgb> + From<color::Rgba> + From<color::Luma> + From<color::Lumaa>,
 	      R: Read
 {
+	#[inline]
 	fn frame(&mut self) -> error::Result<Buffer<C, P, Vec<C>>> {
 		let frame = try!(try!(try!(self.reader()).read_next_frame()).ok_or(Error::Format("no frames".into())));
 
