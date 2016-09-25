@@ -26,6 +26,7 @@ pub struct Decoder<R: Read> {
 }
 
 impl<R: Read> Decoder<R> {
+	#[inline]
 	pub fn new(input: R) -> Self {
 		Decoder {
 			inner:    jpeg::Decoder::new(input),
@@ -33,6 +34,7 @@ impl<R: Read> Decoder<R> {
 		}
 	}
 
+	#[inline]
 	pub fn metadata(&mut self) -> error::Result<jpeg::ImageInfo> {
 		if self.metadata.is_none() {
 			try!(self.inner.read_info());

@@ -30,6 +30,7 @@ pub struct Decoder<R: Read> {
 }
 
 impl<R: Read> Decoder<R> {
+	#[inline]
 	pub fn new(input: R) -> Self {
 		Decoder {
 			state: Some(State::Decoder(png::Decoder::new(input))),
