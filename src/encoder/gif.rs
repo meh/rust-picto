@@ -57,6 +57,7 @@ impl<C, P, D, W> super::Encoder<C, P, D> for Encoder<W>
 	      D: Deref<Target = [C]>,
 	      W: Write
 {
+	#[inline]
 	fn frame(&mut self, buffer: &Buffer<C, P, D>) -> error::Result<()> {
 		let mut buffer  = buffer.convert::<u8, color::Rgba>();
 		let mut encoder = try!(gif::Encoder::new(self.inner.by_ref(),

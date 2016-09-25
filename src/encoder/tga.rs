@@ -26,6 +26,7 @@ pub struct Encoder<W: Write> {
 }
 
 impl<W: Write> Encoder<W> {
+	#[inline]
 	pub fn new(output: W) -> Self {
 		Encoder {
 			inner: output,
