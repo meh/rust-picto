@@ -21,6 +21,7 @@ use iter::Coordinates;
 /// Immutable iterator over pixels.
 pub struct Iter<'a, C: pixel::Channel, P: Pixel<C> + pixel::Read<C>> {
 	inner: Coordinates,
+	owner: Area,
 	data:  &'a [C],
 
 	_channel: PhantomData<C>,
@@ -33,9 +34,10 @@ impl<'a, C, P> Iter<'a, C, P>
 {
 	#[doc(hidden)]
 	#[inline]
-	pub fn new(data: &[C], area: Area) -> Iter<C, P> {
+	pub fn new(data: &[C], owner: Area, area: Area) -> Iter<C, P> {
 		Iter {
 			inner: Coordinates::new(area),
+			owner: owner,
 			data:  data,
 
 			_channel: PhantomData,
@@ -89,7 +91,7 @@ impl<'a, C, P> Iterator for Iter<'a, C, P>
 		};
 
 		let channels = P::channels();
-		let index    = channels * (y as usize * self.inner.width() as usize + x as usize);
+		let index    = channels * (y as usize * self.owner.width as usize + x as usize);
 
 		Some((
 			x - self.inner.area().x,

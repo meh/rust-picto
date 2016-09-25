@@ -23,8 +23,9 @@ use super::{Ref, Mut};
 /// A view into a `Buffer`.
 #[derive(PartialEq, Debug)]
 pub struct View<'a, C: pixel::Channel, P: Pixel<C>> {
-	area: Area,
-	data: &'a mut [C],
+	owner: Area,
+	area:  Area,
+	data:  &'a mut [C],
 
 	_channel: PhantomData<C>,
 	_pixel:   PhantomData<P>,
@@ -36,10 +37,11 @@ impl<'a, C, P> View<'a, C, P>
 {
 	#[doc(hidden)]
 	#[inline]
-	pub fn new(data: &mut [C], area: Area) -> View<C, P> {
+	pub fn new(data: &mut [C], owner: Area, area: Area) -> View<C, P> {
 		View {
-			area: area,
-			data: data,
+			owner: owner,
+			area:  area,
+			data:  data,
 
 			_channel: PhantomData,
 			_pixel:   PhantomData,
@@ -76,7 +78,7 @@ impl<'a, C, P> View<'a, C, P>
 	/// Requires that `x < self.width()` and `y < self.height()`, otherwise it will panic.
 	#[inline]
 	pub fn get(&self, x: u32, y: u32) -> P {
-		Ref::new(self.data, self.area).get(x, y)
+		Ref::new(self.data, self.owner, self.area).get(x, y)
 	}
 
 	/// Set the `Pixel` at the given coordinates.
@@ -86,7 +88,7 @@ impl<'a, C, P> View<'a, C, P>
 	/// Requires that `x < self.width()` and `y < self.height()`, otherwise it will panic.
 	#[inline]
 	pub fn set(&mut self, x: u32, y: u32, pixel: &P) {
-		Mut::new(self.data, self.area).set(x, y, pixel)
+		Mut::new(self.data, self.owner, self.area).set(x, y, pixel)
 	}
 
 	/// Get an immutable view of the given sub-image.
@@ -102,7 +104,7 @@ impl<'a, C, P> View<'a, C, P>
 			panic!("out of bounds");
 		}
 
-		Ref::new(&self.data, Area { x: area.x + self.area.x, y: area.y + self.area.y, .. area })
+		Ref::new(&self.data, self.owner, Area { x: area.x + self.area.x, y: area.y + self.area.y, .. area })
 	}
 
 	/// Get a mutable view of the given sub-image.
@@ -118,7 +120,7 @@ impl<'a, C, P> View<'a, C, P>
 			panic!("out of bounds");
 		}
 
-		Mut::new(&mut self.data, Area { x: area.x + self.area.x, y: area.y + self.area.y, .. area })
+		Mut::new(&mut self.data, self.owner, Area { x: area.x + self.area.x, y: area.y + self.area.y, .. area })
 	}
 
 	/// Get a mutable view of the given sub-image.
@@ -134,17 +136,17 @@ impl<'a, C, P> View<'a, C, P>
 			panic!("out of bounds");
 		}
 
-		View::new(&mut self.data, Area { x: area.x + self.area.x, y: area.y + self.area.y, .. area })
+		View::new(&mut self.data, self.owner, Area { x: area.x + self.area.x, y: area.y + self.area.y, .. area })
 	}
 
 	/// Get a mutable iterator over the view's pixels.
 	pub fn pixels(&self) -> Pixels<C, P> {
-		Pixels::new(self.data, self.area)
+		Pixels::new(self.data, self.owner, self.area)
 	}
 
 	/// Get a mutable iterator over the view's pixels.
 	pub fn pixels_mut(&mut self) -> PixelsMut<C, P> {
-		PixelsMut::new(self.data, self.area)
+		PixelsMut::new(self.data, self.owner, self.area)
 	}
 
 	/// Create a `Buffer` from the `View`.
@@ -165,7 +167,7 @@ impl<'a, C, P> View<'a, C, P>
 		      PO: Pixel<CO> + pixel::Write<CO>,
 		      P: Into<PO>
 	{
-		Ref::<C, P>::new(self.data, self.area).convert()
+		Ref::<C, P>::new(self.data, self.owner, self.area).convert()
 	}
 }
 
@@ -175,7 +177,7 @@ impl<'a, C, P> From<&'a mut View<'a, C, P>> for View<'a, C, P>
 {
 	#[inline]
 	fn from(value: &'a mut View<'a, C, P>) -> View<'a, C, P> {
-		View::new(value.data, value.area)
+		View::new(value.data, value.owner, value.area)
 	}
 }
 
@@ -185,7 +187,7 @@ impl<'a, C, P> From<View<'a, C, P>> for Ref<'a, C, P>
 {
 	#[inline]
 	fn from(value: View<'a, C, P>) -> Ref<'a, C, P> {
-		Ref::new(value.data, value.area)
+		Ref::new(value.data, value.owner, value.area)
 	}
 }
 
@@ -195,7 +197,7 @@ impl<'a, C, P> From<&'a View<'a, C, P>> for Ref<'a, C, P>
 {
 	#[inline]
 	fn from(value: &'a View<'a, C, P>) -> Ref<'a, C, P> {
-		Ref::new(value.data, value.area)
+		Ref::new(value.data, value.owner, value.area)
 	}
 }
 
@@ -205,7 +207,7 @@ impl<'a, C, P> From<View<'a, C, P>> for Mut<'a, C, P>
 {
 	#[inline]
 	fn from(value: View<'a, C, P>) -> Mut<'a, C, P> {
-		Mut::new(value.data, value.area)
+		Mut::new(value.data, value.owner, value.area)
 	}
 }
 
@@ -215,7 +217,7 @@ impl<'a, C, P> From<&'a mut View<'a, C, P>> for Mut<'a, C, P>
 {
 	#[inline]
 	fn from(value: &'a mut View<'a, C, P>) -> Mut<'a, C, P> {
-		Mut::new(value.data, value.area)
+		Mut::new(value.data, value.owner, value.area)
 	}
 }
 

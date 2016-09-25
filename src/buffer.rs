@@ -152,7 +152,7 @@ impl<C, P, D> Buffer<C, P, D>
 	/// Requires that `x < self.width()` and `y < self.height()`, otherwise it will panic.
 	#[inline]
 	pub fn get(&self, x: u32, y: u32) -> P {
-		view::Ref::new(&self.data, self.area).get(x, y)
+		view::Ref::new(&self.data, self.area, self.area).get(x, y)
 	}
 
 	/// Get an immutable view of the given sub-image.
@@ -168,13 +168,13 @@ impl<C, P, D> Buffer<C, P, D>
 			panic!("out of bounds");
 		}
 
-		view::Ref::new(&self.data, area)
+		view::Ref::new(&self.data, self.area, area)
 	}
 
 	/// Get an immutable iterator over the `Buffer` pixels.
 	#[inline]
 	pub fn pixels(&self) -> Pixels<C, P> {
-		Pixels::new(&self.data, self.area)
+		Pixels::new(&self.data, self.area, self.area)
 	}
 
 	/// Convert the `Buffer` to another `Buffer` with different channel and pixel type.
@@ -206,7 +206,7 @@ impl<C, P, D> Buffer<C, P, D>
 	/// Requires that `x < self.width()` and `y < self.height()`, otherwise it will panic.
 	#[inline]
 	pub fn set(&mut self, x: u32, y: u32, pixel: &P) {
-		view::Mut::new(&mut self.data, self.area).set(x, y, pixel)
+		view::Mut::new(&mut self.data, self.area, self.area).set(x, y, pixel)
 	}
 
 	/// Get a mutable view of the given sub-image.
@@ -222,7 +222,7 @@ impl<C, P, D> Buffer<C, P, D>
 			panic!("out of bounds");
 		}
 
-		view::Mut::new(&mut self.data, area)
+		view::Mut::new(&mut self.data, self.area, area)
 	}
 }
 
@@ -244,12 +244,12 @@ impl<C, P, D> Buffer<C, P, D>
 			panic!("out of bounds");
 		}
 
-		View::new(&mut self.data, area)
+		View::new(&mut self.data, self.area, area)
 	}
 
 	#[inline]
 	pub fn pixels_mut(&mut self) -> PixelsMut<C, P> {
-		PixelsMut::new(&mut self.data, self.area)
+		PixelsMut::new(&mut self.data, self.area, self.area)
 	}
 }
 

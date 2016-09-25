@@ -22,8 +22,9 @@ use iter::pixel::Iter as Pixels;
 /// An immutable view into a `Buffer`.
 #[derive(PartialEq, Debug)]
 pub struct Ref<'a, C: pixel::Channel, P: Pixel<C>> {
-	area: Area,
-	data: &'a [C],
+	owner: Area,
+	area:  Area,
+	data:  &'a [C],
 
 	_channel: PhantomData<C>,
 	_pixel:   PhantomData<P>,
@@ -35,10 +36,11 @@ impl<'a, C, P> Ref<'a, C, P>
 {
 	#[doc(hidden)]
 	#[inline]
-	pub fn new(data: &[C], area: Area) -> Ref<C, P> {
+	pub fn new(data: &[C], owner: Area, area: Area) -> Ref<C, P> {
 		Ref {
-			area: area,
-			data: data,
+			owner: owner,
+			area:  area,
+			data:  data,
 
 			_channel: PhantomData,
 			_pixel:   PhantomData,
@@ -81,7 +83,7 @@ impl<'a, C, P> Ref<'a, C, P>
 		}
 
 		let channels = P::channels();
-		let index    = channels * ((self.area.y + y) as usize * self.area.width as usize + (self.area.x + x) as usize);
+		let index    = channels * ((self.area.y + y) as usize * self.owner.width as usize + (self.area.x + x) as usize);
 
 		P::read(&self.data[index .. index + channels])
 	}
@@ -99,12 +101,12 @@ impl<'a, C, P> Ref<'a, C, P>
 			panic!("out of bounds");
 		}
 
-		Ref::new(&self.data, Area { x: area.x + self.area.x, y: area.y + self.area.y, .. area })
+		Ref::new(&self.data, self.owner, Area { x: area.x + self.area.x, y: area.y + self.area.y, .. area })
 	}
 
 	/// Get an immutable iterator over the view's pixels.
 	pub fn pixels(&self) -> Pixels<C, P> {
-		Pixels::new(self.data, self.area)
+		Pixels::new(self.data, self.owner, self.area)
 	}
 
 	/// Convert the `Buffer` to another `Buffer` with different channel and pixel type.
@@ -130,7 +132,7 @@ impl<'a, C, P> From<&'a Ref<'a, C, P>> for Ref<'a, C, P>
 {
 	#[inline]
 	fn from(value: &'a Ref<'a, C, P>) -> Ref<'a, C, P> {
-		Ref::new(value.data, value.area)
+		Ref::new(value.data, value.owner, value.area)
 	}
 }
 
@@ -142,11 +144,14 @@ mod test {
 
 	#[test]
 	fn get() {
-		assert_eq!(Rgb::new(1.0, 0.0, 1.0),
-			Buffer::<u8, Rgb, _>::from_raw(1, 1, vec![255, 0, 255]).unwrap().get(0, 0));
+		let image = Buffer::<u8, Rgba, _>::from_fn(20, 20, |x, y| {
+			let w = (x as f32 + y as f32) / 40.0;
+			Rgba::new(w, w, w, w)
+		});
 
-		assert_eq!(Rgba::new(0.0, 1.0, 1.0, 0.0),
-			Buffer::<u8, Rgba, _>::from_raw(1, 2, vec![255, 0, 255, 0, 0, 255, 255, 0]).unwrap().get(0, 1));
+		let view = image.as_ref(Area::new().x(10).y(10).width(10).height(10));
+		assert_relative_eq!(Rgba::new(0.5, 0.5, 0.5, 0.5),
+			view.get(0, 0), epsilon = 0.01);
 	}
 
 	#[test]

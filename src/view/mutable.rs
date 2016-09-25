@@ -20,8 +20,9 @@ use area::{self, Area};
 /// A mutable view into a `Buffer`.
 #[derive(PartialEq, Debug)]
 pub struct Ref<'a, C: pixel::Channel, P: Pixel<C>> {
-	area: Area,
-	data: &'a mut [C],
+	owner: Area,
+	area:  Area,
+	data:  &'a mut [C],
 
 	_channel: PhantomData<C>,
 	_pixel:   PhantomData<P>,
@@ -33,10 +34,11 @@ impl<'a, C, P> Ref<'a, C, P>
 {
 	#[doc(hidden)]
 	#[inline]
-	pub fn new(data: &mut [C], area: Area) -> Ref<C, P> {
+	pub fn new(data: &mut [C], owner: Area, area: Area) -> Ref<C, P> {
 		Ref {
-			area: area,
-			data: data,
+			owner: owner,
+			area:  area,
+			data:  data,
 
 			_channel: PhantomData,
 			_pixel:   PhantomData,
@@ -78,7 +80,7 @@ impl<'a, C, P> Ref<'a, C, P>
 		}
 
 		let channels = P::channels();
-		let index    = channels * ((self.area.y + y) as usize * self.area.width as usize + (self.area.x + x) as usize);
+		let index    = channels * ((self.area.y + y) as usize * self.owner.width as usize + (self.area.x + x) as usize);
 
 		value.write(&mut self.data[index .. index + channels]);
 	}
@@ -96,7 +98,7 @@ impl<'a, C, P> Ref<'a, C, P>
 			panic!("out of bounds");
 		}
 
-		Ref::new(&mut self.data, Area { x: area.x + self.area.x, y: area.y + self.area.y, .. area })
+		Ref::new(&mut self.data, self.owner, Area { x: area.x + self.area.x, y: area.y + self.area.y, .. area })
 	}
 }
 
@@ -106,7 +108,7 @@ impl<'a, C, P> From<&'a mut Ref<'a, C, P>> for Ref<'a, C, P>
 {
 	#[inline]
 	fn from(value: &'a mut Ref<'a, C, P>) -> Ref<'a, C, P> {
-		Ref::new(value.data, value.area)
+		Ref::new(value.data, value.owner, value.area)
 	}
 }
 
