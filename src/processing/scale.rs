@@ -15,93 +15,93 @@
 use buffer::Buffer;
 use pixel::{self, Pixel};
 use view;
-
-use processing::sampler::Sampler;
+use color::Rgba;
+use super::Scaler;
 
 pub trait Scale<CI, PI>
 	where CI: pixel::Channel,
 	      PI: Pixel<CI> + pixel::Read<CI>,
+	      PI: Into<Rgba>
 {
 	fn resize<A, CO, PO>(self, width: u32, height: u32) -> Buffer<CO, PO, Vec<CO>>
-		where A:  Sampler<CI, PI, CO, PO>,
+		where A:  Scaler<CI, PI, CO, PO>,
 		      CO: pixel::Channel,
-		      PO: Pixel<CO> + pixel::Write<CO>;
+		      PO: Pixel<CO> + pixel::Write<CO>,
+		      PO: From<Rgba>;
 
 	fn scale_by<A, CO, PO>(self, factor: f32) -> Buffer<CO, PO, Vec<CO>>
-		where A:  Sampler<CI, PI, CO, PO>,
+		where A:  Scaler<CI, PI, CO, PO>,
 		      CO: pixel::Channel,
-		      PO: Pixel<CO> + pixel::Write<CO>;
+		      PO: Pixel<CO> + pixel::Write<CO>,
+		      PO: From<Rgba>;
 
 	fn scale_to<A, CO, PO>(self, width: u32, height: u32) -> Buffer<CO, PO, Vec<CO>>
-		where A:  Sampler<CI, PI, CO, PO>,
+		where A:  Scaler<CI, PI, CO, PO>,
 		      CO: pixel::Channel,
-		      PO: Pixel<CO> + pixel::Write<CO>;
+		      PO: Pixel<CO> + pixel::Write<CO>,
+		      PO: From<Rgba>;
 }
 
 impl<'i, CI, PI, I> Scale<CI, PI> for I
 	where CI: pixel::Channel,
 	      PI: Pixel<CI> + pixel::Read<CI>,
+	      PI: Into<Rgba>,
 	      I:  Into<view::Ref<'i, CI, PI>>
 {
 	#[inline]
 	fn resize<A, CO, PO>(self, width: u32, height: u32) -> Buffer<CO, PO, Vec<CO>>
-		where A:  Sampler<CI, PI, CO, PO>,
+		where A:  Scaler<CI, PI, CO, PO>,
 		      CO: pixel::Channel,
-		      PO: Pixel<CO> + pixel::Write<CO>
+		      PO: Pixel<CO> + pixel::Write<CO>,
+		      PO: From<Rgba>
 	{
 		resize::<A, CO, PO, CI, PI, I>(self, width, height)
 	}
 
 	#[inline]
 	fn scale_by<A, CO, PO>(self, factor: f32) -> Buffer<CO, PO, Vec<CO>>
-		where A:  Sampler<CI, PI, CO, PO>,
+		where A:  Scaler<CI, PI, CO, PO>,
 		      CO: pixel::Channel,
-		      PO: Pixel<CO> + pixel::Write<CO>
+		      PO: Pixel<CO> + pixel::Write<CO>,
+		      PO: From<Rgba>
 	{
 		by::<A, CO, PO, CI, PI, I>(self, factor)
 	}
 
 	#[inline]
 	fn scale_to<A, CO, PO>(self, width: u32, height: u32) -> Buffer<CO, PO, Vec<CO>>
-		where A:  Sampler<CI, PI, CO, PO>,
+		where A:  Scaler<CI, PI, CO, PO>,
 		      CO: pixel::Channel,
-		      PO: Pixel<CO> + pixel::Write<CO>
+		      PO: Pixel<CO> + pixel::Write<CO>,
+		      PO: From<Rgba>
 	{
 		to::<A, CO, PO, CI, PI, I>(self, width, height)
 	}
 }
 
+#[inline]
 pub fn resize<'i, A, CO, PO, CI, PI, I>(input: I, width: u32, height: u32) -> Buffer<CO, PO, Vec<CO>>
-	where A:  Sampler<CI, PI, CO, PO>,
+	where A:  Scaler<CI, PI, CO, PO>,
 	      CO: pixel::Channel,
 	      PO: Pixel<CO> + pixel::Write<CO>,
+	      PO: From<Rgba>,
 	      CI: pixel::Channel,
 	      PI: Pixel<CI> + pixel::Read<CI>,
+	      PI: Into<Rgba>,
 	      I:  Into<view::Ref<'i, CI, PI>>
 {
-	let     input  = input.into();
-	let mut output = Buffer::<CO, PO, _>::new(width, height);
-
-	for y in 0 .. height {
-		let v = y as f32 / (height - 1) as f32;
-
-		for x in 0 .. width {
-			let u = x as f32 / (width - 1) as f32;
-
-			output.set(x, y, &A::sample(&input, u, v));
-		}
-	}
-
-	output
+	A::scale(&input.into(), width, height)
 }
 
 #[inline]
 pub fn by<'i, A, CO, PO, CI, PI, I>(input: I, factor: f32) -> Buffer<CO, PO, Vec<CO>>
-	where A:  Sampler<CI, PI, CO, PO>,
+	where A:  Scaler<CI, PI, CO, PO>,
 	      CO: pixel::Channel,
 	      PO: Pixel<CO> + pixel::Write<CO>,
+	      PO: From<Rgba>,
 	      CI: pixel::Channel,
 	      PI: Pixel<CI> + pixel::Read<CI>,
+	      PI: Into<Rgba>,
 	      I:  Into<view::Ref<'i, CI, PI>>
 {
 	let input  = input.into();
@@ -113,11 +113,13 @@ pub fn by<'i, A, CO, PO, CI, PI, I>(input: I, factor: f32) -> Buffer<CO, PO, Vec
 
 #[inline]
 pub fn to<'i, A, CO, PO, CI, PI, I>(input: I, width: u32, height: u32) -> Buffer<CO, PO, Vec<CO>>
-	where A:  Sampler<CI, PI, CO, PO>,
+	where A:  Scaler<CI, PI, CO, PO>,
 	      CO: pixel::Channel,
 	      PO: Pixel<CO> + pixel::Write<CO>,
+	      PO: From<Rgba>,
 	      CI: pixel::Channel,
 	      PI: Pixel<CI> + pixel::Read<CI>,
+	      PI: Into<Rgba>,
 	      I:  Into<view::Ref<'i, CI, PI>>
 {
 	let input = input.into();
@@ -140,7 +142,7 @@ pub fn to<'i, A, CO, PO, CI, PI, I>(input: I, width: u32, height: u32) -> Buffer
 #[cfg(test)]
 mod test {
 	use super::*;
-	use processing::sampler::Nearest;
+	use processing::scaler::Nearest;
 	use buffer::Buffer;
 	use color::Rgb;
 

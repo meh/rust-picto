@@ -12,5 +12,35 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
+macro_rules! num {
+	($value:expr => $to:ident) => (
+		$crate::num::cast::<_, $to>($value).unwrap()
+	);
+
+	($value:expr) => (
+		$crate::num::cast($value).unwrap()
+	);
+}
+
+macro_rules! zero {
+	() => (
+		$crate::num::zero()
+	);
+
+	($ty:ty) => (
+		$crate::num::zero::<$ty>()
+	)
+}
+
+macro_rules! one {
+	() => (
+		$crate::num::one()
+	);
+
+	($ty:ty) => (
+		$crate::num::one::<$ty>()
+	)
+}
+
 mod clamping;
 pub use self::clamping::{clamp, Clamped, Get as GetClamped, Set as SetClamped};

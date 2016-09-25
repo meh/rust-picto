@@ -12,16 +12,11 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-use view;
-use pixel::{self, Pixel};
+use num::Float;
 
-pub trait Sampler<CI, PI, CO, PO>
-	where CI: pixel::Channel,
-	      PI: Pixel<CI> + pixel::Read<CI>,
-	      CO: pixel::Channel,
-	      PO: Pixel<CO> + pixel::Write<CO>
-{
-	fn sample(from: &view::Ref<CI, PI>, u: f32, v: f32) -> PO;
+pub trait Sampler<T: Float = f32> {
+	fn kernel(value: T) -> T;
+	fn support() -> T;
 }
 
 mod nearest;
@@ -32,3 +27,6 @@ pub use self::linear::Linear;
 
 mod cubic;
 pub use self::cubic::Cubic;
+
+mod lanczos;
+pub use self::lanczos::{Lanczos2, Lanczos3};

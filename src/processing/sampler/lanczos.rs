@@ -13,13 +13,15 @@
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
 use num::Float;
+use num::traits::FloatConst;
 
-pub struct Cubic;
+pub struct Lanczos2;
+pub struct Lanczos3;
 
-impl<T: Float> super::Sampler<T> for Cubic {
+impl<T: Float + FloatConst> super::Sampler<T> for Lanczos2 {
 	#[inline]
 	fn kernel(x: T) -> T {
-		spline(x, zero!(), num!(0.5))
+		lanczos(x, num!(2.0))
 	}
 
 	#[inline]
@@ -28,22 +30,36 @@ impl<T: Float> super::Sampler<T> for Cubic {
 	}
 }
 
-pub fn spline<T: Float>(x: T, b: T, c: T) -> T {
-	let a = x.abs();
-	let k = if a < one!() {
-		(num!(12.0 => T) - num!(9.0 => T) * b - num!(6.0 => T) * c) * a.powi(3) +
-		(num!(-18.0 => T) + num!(12.0 => T) * b + num!(6.0 => T) * c) * a.powi(2) +
-		(num!(6.0 => T) - num!(2.0 => T) * b)
+impl<T: Float + FloatConst> super::Sampler<T> for Lanczos3 {
+	#[inline]
+	fn kernel(x: T) -> T {
+		lanczos(x, num!(3.0))
 	}
-	else if a < num!(2.0) {
-		(-b - num!(6.0 => T) * c) * a.powi(3) +
-		(num!(6.0 => T) * b + num!(30.0 => T) * c) * a.powi(2) +
-		(num!(-12.0 => T) * b - num!(48.0 => T) * c) * a +
-		(num!(8.0 => T) * b + num!(24.0 => T) * c)
+
+	#[inline]
+	fn support() -> T {
+		num!(3.0)
+	}
+}
+
+#[inline]
+pub fn lanczos<T: Float + FloatConst>(x: T, t: T) -> T {
+	if x.abs() < t {
+		sinc(x) * sinc(x / t)
 	}
 	else {
 		zero!()
-	};
+	}
+}
 
-	k / num!(6.0)
+#[inline]
+pub fn sinc<T: Float + FloatConst>(t: T) -> T {
+	let a = t * T::PI();
+
+	if t == zero!() {
+		one!()
+	}
+	else {
+		a.sin() / a
+	}
 }

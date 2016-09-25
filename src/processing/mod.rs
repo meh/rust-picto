@@ -12,10 +12,20 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
+#[macro_use]
+pub mod util;
 pub mod prelude;
 
-pub mod util;
 pub mod sampler;
+pub use self::sampler::Sampler;
+
+pub mod scaler;
+pub use self::scaler::Scaler;
 
 pub mod flip;
+pub use self::flip::Flip;
+
 pub mod scale;
+pub use self::scale::Scale;
+
+pub mod sample;

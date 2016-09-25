@@ -13,12 +13,12 @@
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
 pub use processing::sampler;
+pub use processing::scaler;
 
-pub use processing::flip::Flip;
+pub use processing::Flip;
+pub use processing::Scale;
 
 pub mod flip {
 	pub use processing::flip::Orientation::Vertical as Vertically;
 	pub use processing::flip::Orientation::Horizontal as Horizontally;
 }
-
-pub use processing::scale::Scale;
