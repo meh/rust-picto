@@ -13,6 +13,7 @@
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
 #![cfg_attr(feature = "nightly", feature(specialization))]
+#[cfg(test)] #[macro_use] extern crate approx;
 
 extern crate byteorder;
 extern crate num;
