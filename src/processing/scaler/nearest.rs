@@ -30,17 +30,14 @@ impl<CI, PI, CO, PO> super::Scaler<CI, PI, CO, PO> for Nearest
 	fn scale(input: &view::Ref<CI, PI>, width: u32, height: u32) -> Buffer<CO, PO, Vec<CO>> {
 		let mut output = Buffer::<CO, PO, _>::new(width, height);
 
-		for y in 0 .. height {
+		for (x, y) in output.area().absolute() {
 			let v = y as f32 / (height - 1) as f32;
+			let u = x as f32 / (width - 1) as f32;
 
-			for x in 0 .. width {
-				let u = x as f32 / (width - 1) as f32;
-
-				output.set(x, y, &input.get_clamped(
-					(u * input.width() as f32) as i64,
-					(v * input.height() as f32) as i64
-				).into());
-			}
+			output.set(x, y, &input.get_clamped(
+				(u * input.width() as f32) as i64,
+				(v * input.height() as f32) as i64
+			).into());
 		}
 
 		output
