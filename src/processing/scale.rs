@@ -133,8 +133,8 @@ pub fn to<'i, A, CO, PO, CI, PI, I>(input: I, width: u32, height: u32) -> Buffer
 		width as f32 / input.width() as f32
 	};
 
-	let width  = width as f32 * scale;
-	let height = height as f32 * scale;
+	let width  = input.width() as f32 * scale;
+	let height = input.height() as f32 * scale;
 
 	resize::<A, CO, PO, CI, PI, _>(input, width as u32, height as u32)
 }
