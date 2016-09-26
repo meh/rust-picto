@@ -17,22 +17,26 @@ use pixel::{self, Pixel};
 use view;
 use super::Scaler;
 
+/// Trait for scalable types.
 pub trait Scale<CI, PI>
 	where CI: pixel::Channel,
 	      PI: Pixel<CI> + pixel::Read<CI>
 {
+	/// Resize to the given width and height.
 	fn resize<A, CO, PO>(self, width: u32, height: u32) -> Buffer<CO, PO, Vec<CO>>
 		where A:  Scaler<CI, PI, CO, PO>,
 		      CO: pixel::Channel,
 		      PO: Pixel<CO> + pixel::Write<CO>,
 		      PO: From<PI>;
 
+	/// Scale by the given factor.
 	fn scale_by<A, CO, PO>(self, factor: f32) -> Buffer<CO, PO, Vec<CO>>
 		where A:  Scaler<CI, PI, CO, PO>,
 		      CO: pixel::Channel,
 		      PO: Pixel<CO> + pixel::Write<CO>,
 		      PO: From<PI>;
 
+	/// Scale to the given width and height, maintaining the aspect ratio.
 	fn scale_to<A, CO, PO>(self, width: u32, height: u32) -> Buffer<CO, PO, Vec<CO>>
 		where A:  Scaler<CI, PI, CO, PO>,
 		      CO: pixel::Channel,
@@ -76,6 +80,7 @@ impl<'i, CI, PI, I> Scale<CI, PI> for I
 	}
 }
 
+/// Resize to the given width and height.
 #[inline]
 pub fn resize<'i, A, CO, PO, CI, PI, I>(input: I, width: u32, height: u32) -> Buffer<CO, PO, Vec<CO>>
 	where A:  Scaler<CI, PI, CO, PO>,
@@ -95,6 +100,7 @@ pub fn resize<'i, A, CO, PO, CI, PI, I>(input: I, width: u32, height: u32) -> Bu
 	A::scale(&input.into(), width, height)
 }
 
+/// Scale by the given factor.
 #[inline]
 pub fn by<'i, A, CO, PO, CI, PI, I>(input: I, factor: f32) -> Buffer<CO, PO, Vec<CO>>
 	where A:  Scaler<CI, PI, CO, PO>,
@@ -112,6 +118,7 @@ pub fn by<'i, A, CO, PO, CI, PI, I>(input: I, factor: f32) -> Buffer<CO, PO, Vec
 	resize::<A, CO, PO, CI, PI, _>(input, width as u32, height as u32)
 }
 
+/// Scale to the given width and height, maintaining the aspect ratio.
 #[inline]
 pub fn to<'i, A, CO, PO, CI, PI, I>(input: I, width: u32, height: u32) -> Buffer<CO, PO, Vec<CO>>
 	where A:  Scaler<CI, PI, CO, PO>,
