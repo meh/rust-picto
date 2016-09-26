@@ -13,23 +13,24 @@
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
 use num::Float;
+use num::traits::FloatConst;
 
-pub trait Sampler<T: Float = f32> {
-	fn kernel(value: T) -> T;
-	fn support() -> T;
+pub struct Gaussian;
+
+impl<T: Float + FloatConst> super::Sampler<T> for Gaussian {
+	#[inline]
+	fn kernel(x: T) -> T {
+		function(x, num!(1.0))
+	}
+
+	#[inline]
+	fn support() -> T {
+		num!(3.0)
+	}
 }
 
-mod nearest;
-pub use self::nearest::Nearest;
-
-mod linear;
-pub use self::linear::Linear;
-
-mod cubic;
-pub use self::cubic::Cubic;
-
-mod gaussian;
-pub use self::gaussian::Gaussian;
-
-mod lanczos;
-pub use self::lanczos::{Lanczos2, Lanczos3};
+#[inline]
+pub fn function<T: Float + FloatConst>(x: T, r: T) -> T {
+	((num!(2.0 => T) * T::PI()).sqrt() * r).recip() *
+	(-x.powi(2) / (num!(2.0 => T) * r.powi(2))).exp()
+}

@@ -28,6 +28,7 @@ pub trait Scaler<CI, PI, CO, PO>
 mod sampler;
 pub use super::sampler::Linear;
 pub use super::sampler::Cubic;
+pub use super::sampler::Gaussian;
 pub use super::sampler::Lanczos2;
 pub use super::sampler::Lanczos3;
 
