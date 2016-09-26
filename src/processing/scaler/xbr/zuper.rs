@@ -37,9 +37,7 @@ impl<CI, PI, CO, PO> Scaler<CI, PI, CO, PO> for Super
 		let y_factor = height as f32 / input.height() as f32;
 		let factor   = x_factor as u32;
 
-		if x_factor < 2.0 || x_factor != y_factor || (factor & (factor - 1)) != 0 {
-			panic!("only power of two upscaling allowed");
-		}
+		debug_assert!(x_factor != y_factor || x_factor.fract() != 0.0 || (factor & (factor - 1)) != 0);
 
 		let mut factor = factor / 2;
 		let mut output = scale::<CI, PI, CO, PO>(input);
