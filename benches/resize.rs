@@ -25,6 +25,16 @@ macro_rules! picto {
 			(height as f32 * $by) as u32
 		));
 	);
+
+	($b:expr, $path:expr, $module:ident::$algorithm:ident, $by:expr) => (
+		let image           = picto::read::from_path::<u8, Rgba, _>($path).unwrap();
+		let (width, height) = image.dimensions();
+
+		$b.iter(|| image.resize::<scaler::$module::$algorithm, u8, Rgba>(
+			(width as f32 * $by) as u32,
+			(height as f32 * $by) as u32
+		));
+	);
 }
 
 mod nearest {
@@ -201,6 +211,64 @@ mod cubic {
 	}
 }
 
+mod gaussian {
+	use test::Bencher;
+	use image::{self, GenericImage};
+	use picto;
+	use picto::color::Rgba;
+	use picto::processing::prelude::*;
+
+	#[bench]
+	fn image_0x(b: &mut Bencher) {
+		image!(b, "tests/rainbow.png", Gaussian, 0.5);
+	}
+
+	#[bench]
+	fn image_1x(b: &mut Bencher) {
+		image!(b, "tests/rainbow.png", Gaussian, 1.0);
+	}
+
+	#[bench]
+	fn image_2x(b: &mut Bencher) {
+		image!(b, "tests/rainbow.png", Gaussian, 2.0);
+	}
+
+	#[bench]
+	fn image_3x(b: &mut Bencher) {
+		image!(b, "tests/rainbow.png", Gaussian, 3.0);
+	}
+
+	#[bench]
+	fn image_4x(b: &mut Bencher) {
+		image!(b, "tests/rainbow.png", Gaussian, 4.0);
+	}
+
+	#[bench]
+	fn picto_0x(b: &mut Bencher) {
+		picto!(b, "tests/rainbow.png", Gaussian, 0.5);
+	}
+
+	#[bench]
+	fn picto_1x(b: &mut Bencher) {
+		picto!(b, "tests/rainbow.png", Gaussian, 1.0);
+	}
+
+	#[bench]
+	fn picto_2x(b: &mut Bencher) {
+		picto!(b, "tests/rainbow.png", Gaussian, 2.0);
+	}
+
+	#[bench]
+	fn picto_3x(b: &mut Bencher) {
+		picto!(b, "tests/rainbow.png", Gaussian, 3.0);
+	}
+
+	#[bench]
+	fn picto_4x(b: &mut Bencher) {
+		picto!(b, "tests/rainbow.png", Gaussian, 4.0);
+	}
+}
+
 mod lanczos2 {
 	use test::Bencher;
 	use picto;
@@ -288,5 +356,24 @@ mod lanczos3 {
 	#[bench]
 	fn picto_4x(b: &mut Bencher) {
 		picto!(b, "tests/rainbow.png", Lanczos3, 4.0);
+	}
+}
+
+mod xbr {
+	mod zuper {
+		use test::Bencher;
+		use picto;
+		use picto::color::Rgba;
+		use picto::processing::prelude::*;
+
+		#[bench]
+		fn picto_2x(b: &mut Bencher) {
+			picto!(b, "tests/rainbow.png", xbr::Super, 2.0);
+		}
+
+		#[bench]
+		fn picto_4x(b: &mut Bencher) {
+			picto!(b, "tests/rainbow.png", xbr::Super, 4.0);
+		}
 	}
 }
