@@ -18,11 +18,17 @@ fn main() {
 		"cubic" =>
 			image.scale_by::<scaler::Cubic, u8, Rgba>(by),
 
+		"gaussian" =>
+			image.scale_by::<scaler::Gaussian, u8, Rgba>(by),
+
 		"lanczos2" =>
 			image.scale_by::<scaler::Lanczos2, u8, Rgba>(by),
 
 		"lanczos3" =>
 			image.scale_by::<scaler::Lanczos3, u8, Rgba>(by),
+
+		"super-xbr" =>
+			image.scale_by::<scaler::xbr::Super, u8, Rgba>(by),
 
 		_ =>
 			panic!("unknown scaler")
