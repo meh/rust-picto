@@ -24,6 +24,7 @@ use buffer::Buffer;
 use format::Format;
 use error::{self, Error};
 
+/// Write the buffer to the output stream in PNG format.
 #[inline]
 pub fn to<C, P, D, W>(output: W, buffer: &Buffer<C, P, D>) -> error::Result<()>
 	where C: pixel::Channel,
@@ -35,6 +36,8 @@ pub fn to<C, P, D, W>(output: W, buffer: &Buffer<C, P, D>) -> error::Result<()>
 	with_format(output, Format::Png, buffer)
 }
 
+/// Write the buffer to the given path guessing the format based on the file
+/// extension.
 #[inline]
 pub fn to_path<C, P, D, W>(path: W, buffer: &Buffer<C, P, D>) -> error::Result<()>
 	where C: pixel::Channel,
@@ -68,6 +71,7 @@ pub fn to_path<C, P, D, W>(path: W, buffer: &Buffer<C, P, D>) -> error::Result<(
 	with_format(BufWriter::new(try!(File::create(path))), format, buffer)
 }
 
+/// Write the buffer to the output stream using the given format.
 #[inline]
 pub fn with_format<C, P, D, W>(output: W, format: Format, buffer: &Buffer<C, P, D>) -> error::Result<()>
 	where C: pixel::Channel,
@@ -98,6 +102,8 @@ pub fn with_format<C, P, D, W>(output: W, format: Format, buffer: &Buffer<C, P, 
 	}
 }
 
+/// Write a PNG image to an output stream, with the ability to set the
+/// parameters on the encoder.
 #[cfg(feature = "png")]
 #[inline]
 pub fn png<C, P, D, F, W>(output: W, buffer: &Buffer<C, P, D>, func: F) -> error::Result<()>
@@ -113,6 +119,8 @@ pub fn png<C, P, D, F, W>(output: W, buffer: &Buffer<C, P, D>, func: F) -> error
 	encoder.frame(buffer)
 }
 
+/// Write a BMP image to an output stream, with the ability to set the
+/// parameters on the encoder.
 #[cfg(feature = "bmp")]
 #[inline]
 pub fn bmp<C, P, D, F, W>(output: W, buffer: &Buffer<C, P, D>, func: F) -> error::Result<()>
@@ -128,6 +136,8 @@ pub fn bmp<C, P, D, F, W>(output: W, buffer: &Buffer<C, P, D>, func: F) -> error
 	encoder.frame(buffer)
 }
 
+/// Write a TGA image to an output stream, with the ability to set the
+/// parameters on the encoder.
 #[cfg(feature = "tga")]
 #[inline]
 pub fn tga<C, P, D, F, W>(output: W, buffer: &Buffer<C, P, D>, func: F) -> error::Result<()>
@@ -143,6 +153,8 @@ pub fn tga<C, P, D, F, W>(output: W, buffer: &Buffer<C, P, D>, func: F) -> error
 	encoder.frame(buffer)
 }
 
+/// Write a GIF image to an output stream, with the ability to set the
+/// parameters on the encoder.
 #[cfg(feature = "gif")]
 #[inline]
 pub fn gif<C, P, D, F, W>(output: W, buffer: &Buffer<C, P, D>, func: F) -> error::Result<()>
