@@ -14,24 +14,28 @@
 
 use error::{self, Error};
 
-/// An encoder with parameters.
+/// A value with parameters.
 pub trait HasParameters {
+	/// Set a parameter.
 	fn set<T: Parameter<Self>>(&mut self, value: T) -> error::Result<()> {
 		value.set(self)
 	}
 
+	/// Get a parameter.
 	fn get<T: Parameter<Self>>(&mut self) -> error::Result<T> {
 		T::get(self)
 	}
 }
 
-/// An encoder parameter.
+/// A parameter for a value.
 pub trait Parameter<T: ?Sized>: Sized {
+	/// Set the parameter on the value.
 	#[allow(unused_variables)]
 	fn set(self, to: &mut T) -> error::Result<()> {
 		Err(Error::Unsupported("parameter not supported".into()))
 	}
 
+	/// Get the parameter on the value.
 	#[allow(unused_variables)]
 	fn get(from: &mut T) -> error::Result<Self> {
 		Err(Error::Unsupported("parameter not supported".into()))
