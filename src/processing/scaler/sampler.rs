@@ -29,7 +29,12 @@ impl<A, CI, PI, CO, PO> super::Scaler<CI, PI, CO, PO> for A
 {
 	#[inline]
 	fn scale(input: &view::Ref<CI, PI>, width: u32, height: u32) -> Buffer<CO, PO, Vec<CO>> {
-		let tmp = sample::vertically::<A, u8, Rgba, _, _, _>(input, height);
-		sample::horizontally::<A, _, _, _, _, _>(&tmp, width)
+		let mut tmp = Buffer::<u8, Rgba, _>::new(input.width(), height);
+		sample::vertically::<A, _, _, _, _, _, _>(input, &mut tmp);
+
+		let mut out = Buffer::<CO, PO, _>::new(width, height);
+		sample::horizontally::<A, _, _, _, _, _, _>(&tmp, &mut out);
+
+		out
 	}
 }

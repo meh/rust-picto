@@ -12,7 +12,6 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-use buffer::Buffer;
 use pixel::{self, Pixel};
 use view;
 use color::{Limited, Rgba};
@@ -20,7 +19,7 @@ use super::Sampler;
 use super::util::GetClamped;
 
 #[inline]
-pub fn vertically<'i, A, CO, PO, CI, PI, I>(input: I, height: u32) -> Buffer<CO, PO, Vec<CO>>
+pub fn vertically<'i, 'o, A, CO, PO, CI, PI, I, O>(input: I, output: O)
 	where A:  Sampler,
 	      CO: pixel::Channel,
 	      PO: Pixel<CO> + pixel::Write<CO>,
@@ -28,12 +27,13 @@ pub fn vertically<'i, A, CO, PO, CI, PI, I>(input: I, height: u32) -> Buffer<CO,
 	      CI: pixel::Channel,
 	      PI: Pixel<CI> + pixel::Read<CI>,
 	      PI: Into<Rgba>,
-	      I:  Into<view::Ref<'i, CI, PI>>
+	      I:  Into<view::Ref<'i, CI, PI>>,
+	      O:  Into<view::Mut<'o, CO, PO>>
 {
-	vertically_with(input, height, A::support(), A::kernel)
+	vertically_with(input, output, A::support(), A::kernel)
 }
 
-pub fn vertically_with<'i, CO, PO, CI, PI, I, F>(input: I, height: u32, support: f32, mut kernel: F) -> Buffer<CO, PO, Vec<CO>>
+pub fn vertically_with<'i, 'o, CO, PO, CI, PI, I, O, F>(input: I, output: O, support: f32, mut kernel: F)
 	where CO: pixel::Channel,
 	      PO: Pixel<CO> + pixel::Write<CO>,
 	      PO: From<Rgba>,
@@ -41,18 +41,21 @@ pub fn vertically_with<'i, CO, PO, CI, PI, I, F>(input: I, height: u32, support:
 	      PI: Pixel<CI> + pixel::Read<CI>,
 	      PI: Into<Rgba>,
 	      I:  Into<view::Ref<'i, CI, PI>>,
+	      O:  Into<view::Mut<'o, CO, PO>>,
 	      F:  FnMut(f32) -> f32
 {
 	let     input  = input.into();
 	let     input  = &input;
-	let mut output = Buffer::<CO, PO, _>::new(input.width(), height);
+	let mut output = output.into();
 
-	let ratio  = input.height() as f32 / height as f32;
+	debug_assert_eq!(input.width(), output.width());
+
+	let ratio  = input.height() as f32 / output.height() as f32;
 	let scale  = if ratio > 1.0 { ratio } else { 1.0 };
 	let radius = (support * scale).ceil();
 
 	for x in 0 .. input.width() as i64 {
-		for y_out in 0 .. height {
+		for y_out in 0 .. output.height() {
 			let y_in = (y_out as f32 + 0.5) * ratio;
 
 			let left  = (y_in - radius) as i64;
@@ -81,12 +84,10 @@ pub fn vertically_with<'i, CO, PO, CI, PI, I, F>(input: I, height: u32, support:
 			output.set(x as u32, y_out, &Rgba::new(t.0 / sum.0, t.1 / sum.1, t.2 / sum.2, t.3 / sum.3).clamp().into());
 		}
 	}
-
-	output
 }
 
 #[inline]
-pub fn horizontally<'i, A, CO, PO, CI, PI, I>(input: I, width: u32) -> Buffer<CO, PO, Vec<CO>>
+pub fn horizontally<'i, 'o, A, CO, PO, CI, PI, I, O>(input: I, output: O)
 	where A:  Sampler,
 	      CO: pixel::Channel,
 	      PO: Pixel<CO> + pixel::Write<CO>,
@@ -94,12 +95,13 @@ pub fn horizontally<'i, A, CO, PO, CI, PI, I>(input: I, width: u32) -> Buffer<CO
 	      CI: pixel::Channel,
 	      PI: Pixel<CI> + pixel::Read<CI>,
 	      PI: Into<Rgba>,
-	      I:  Into<view::Ref<'i, CI, PI>>
+	      I:  Into<view::Ref<'i, CI, PI>>,
+	      O:  Into<view::Mut<'o, CO, PO>>
 {
-	horizontally_with(input, width, A::support(), A::kernel)
+	horizontally_with(input, output, A::support(), A::kernel)
 }
 
-pub fn horizontally_with<'i, CO, PO, CI, PI, I, F>(input: I, width: u32, support: f32, mut kernel: F) -> Buffer<CO, PO, Vec<CO>>
+pub fn horizontally_with<'i, 'o, CO, PO, CI, PI, I, O, F>(input: I, output: O, support: f32, mut kernel: F)
 	where CO: pixel::Channel,
 	      PO: Pixel<CO> + pixel::Write<CO>,
 	      PO: From<Rgba>,
@@ -107,18 +109,21 @@ pub fn horizontally_with<'i, CO, PO, CI, PI, I, F>(input: I, width: u32, support
 	      PI: Pixel<CI> + pixel::Read<CI>,
 	      PI: Into<Rgba>,
 	      I:  Into<view::Ref<'i, CI, PI>>,
+	      O:  Into<view::Mut<'o, CO, PO>>,
 	      F:  FnMut(f32) -> f32
 {
 	let     input  = input.into();
 	let     input  = &input;
-	let mut output = Buffer::<CO, PO, _>::new(width, input.height());
+	let mut output = output.into();
 
-	let ratio  = input.width() as f32 / width as f32;
+	debug_assert_eq!(input.height(), output.height());
+
+	let ratio  = input.width() as f32 / output.width() as f32;
 	let scale  = if ratio > 1.0 { ratio } else { 1.0 };
 	let radius = (support * scale).ceil();
 
 	for y in 0 .. input.height() as i64 {
-		for x_out in 0 .. width {
+		for x_out in 0 .. output.width() {
 			let x_in = (x_out as f32 + 0.5) * ratio;
 
 			let left  = (x_in - radius) as i64;
@@ -147,6 +152,4 @@ pub fn horizontally_with<'i, CO, PO, CI, PI, I, F>(input: I, width: u32, support
 			output.set(x_out, y as u32, &Rgba::new(t.0 / sum.0, t.1 / sum.1, t.2 / sum.2, t.3 / sum.3).clamp().into());
 		}
 	}
-
-	output
 }
