@@ -21,7 +21,7 @@ pub struct Lanczos3;
 impl<T: Float + FloatConst> super::Sampler<T> for Lanczos2 {
 	#[inline]
 	fn kernel(x: T) -> T {
-		lanczos(x, num!(2.0))
+		function(x, num!(2.0))
 	}
 
 	#[inline]
@@ -33,7 +33,7 @@ impl<T: Float + FloatConst> super::Sampler<T> for Lanczos2 {
 impl<T: Float + FloatConst> super::Sampler<T> for Lanczos3 {
 	#[inline]
 	fn kernel(x: T) -> T {
-		lanczos(x, num!(3.0))
+		function(x, num!(3.0))
 	}
 
 	#[inline]
@@ -43,7 +43,7 @@ impl<T: Float + FloatConst> super::Sampler<T> for Lanczos3 {
 }
 
 #[inline]
-pub fn lanczos<T: Float + FloatConst>(x: T, t: T) -> T {
+pub fn function<T: Float + FloatConst>(x: T, t: T) -> T {
 	if x.abs() < t {
 		sinc(x) * sinc(x / t)
 	}
