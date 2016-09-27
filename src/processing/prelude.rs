@@ -18,6 +18,7 @@ pub use processing::scaler;
 pub use processing::Flip;
 pub use processing::Scale;
 
+/// Flipping orientation.
 pub mod flip {
 	pub use processing::flip::Orientation::Vertical as Vertically;
 	pub use processing::flip::Orientation::Horizontal as Horizontally;
