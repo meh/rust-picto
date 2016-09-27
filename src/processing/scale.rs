@@ -47,7 +47,7 @@ pub trait Scale<CI, PI>
 impl<'i, CI, PI, I> Scale<CI, PI> for I
 	where CI: pixel::Channel,
 	      PI: pixel::Read<CI>,
-	      I:  Into<view::Ref<'i, CI, PI>>
+	      I:  Into<view::Read<'i, CI, PI>>
 {
 	#[inline]
 	fn resize<A, CO, PO>(self, width: u32, height: u32) -> Buffer<CO, PO, Vec<CO>>
@@ -89,7 +89,7 @@ pub fn resize<'i, A, CO, PO, CI, PI, I>(input: I, width: u32, height: u32) -> Bu
 	      PO: From<PI>,
 	      CI: pixel::Channel,
 	      PI: pixel::Read<CI>,
-	      I:  Into<view::Ref<'i, CI, PI>>
+	      I:  Into<view::Read<'i, CI, PI>>
 {
 	let input = input.into();
 
@@ -109,7 +109,7 @@ pub fn by<'i, A, CO, PO, CI, PI, I>(input: I, factor: f32) -> Buffer<CO, PO, Vec
 	      PO: From<PI>,
 	      CI: pixel::Channel,
 	      PI: pixel::Read<CI>,
-	      I:  Into<view::Ref<'i, CI, PI>>
+	      I:  Into<view::Read<'i, CI, PI>>
 {
 	let input  = input.into();
 	let width  = input.width() as f32 * factor;
@@ -127,7 +127,7 @@ pub fn to<'i, A, CO, PO, CI, PI, I>(input: I, width: u32, height: u32) -> Buffer
 	      PO: From<PI>,
 	      CI: pixel::Channel,
 	      PI: pixel::Read<CI>,
-	      I:  Into<view::Ref<'i, CI, PI>>
+	      I:  Into<view::Read<'i, CI, PI>>
 {
 	let input = input.into();
 	let r_old = input.width() as f32 / input.height() as f32;

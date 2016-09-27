@@ -28,7 +28,7 @@ impl<A, CI, PI, CO, PO> super::Scaler<CI, PI, CO, PO> for A
 	      PO: From<Rgba>
 {
 	#[inline]
-	fn scale(input: &view::Ref<CI, PI>, width: u32, height: u32) -> Buffer<CO, PO, Vec<CO>> {
+	fn scale(input: &view::Read<CI, PI>, width: u32, height: u32) -> Buffer<CO, PO, Vec<CO>> {
 		let mut tmp = Buffer::<u8, Rgba, _>::new(input.width(), height);
 		sample::vertically::<A, _, _, _, _, _, _>(input, &mut tmp);
 

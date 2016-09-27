@@ -155,23 +155,23 @@ impl<C, P, D> Buffer<C, P, D>
 	/// Requires that `x < self.width()` and `y < self.height()`, otherwise it will panic.
 	#[inline]
 	pub fn get(&self, x: u32, y: u32) -> P {
-		view::Ref::new(&self.data, self.area, self.area).get(x, y)
+		view::Read::new(&self.data, self.area, self.area).get(x, y)
 	}
 
-	/// Get an immutable view of the given sub-image.
+	/// Get a read-only of the given area.
 	///
 	/// # Panics
 	///
 	/// Requires that `x + width <= self.width()` and `y + height <= self.height()`, otherwise it will panic.
 	#[inline]
-	pub fn as_ref(&self, area: area::Builder) -> view::Ref<C, P> {
+	pub fn readable(&self, area: area::Builder) -> view::Read<C, P> {
 		let area = area.complete(self.area);
 
 		if area.x + area.width > self.area.width || area.y + area.height > self.area.height {
 			panic!("out of bounds");
 		}
 
-		view::Ref::new(&self.data, self.area, area)
+		view::Read::new(&self.data, self.area, area)
 	}
 
 	/// Get an immutable iterator over the `Buffer` pixels.
@@ -209,23 +209,23 @@ impl<C, P, D> Buffer<C, P, D>
 	/// Requires that `x < self.width()` and `y < self.height()`, otherwise it will panic.
 	#[inline]
 	pub fn set(&mut self, x: u32, y: u32, pixel: &P) {
-		view::Mut::new(&mut self.data, self.area, self.area).set(x, y, pixel)
+		view::Write::new(&mut self.data, self.area, self.area).set(x, y, pixel)
 	}
 
-	/// Get a mutable view of the given sub-image.
+	/// Get a write-only view of the given area.
 	///
 	/// # Panics
 	///
 	/// Requires that `x + width <= self.width()` and `y + height <= self.height()`, otherwise it will panic.
 	#[inline]
-	pub fn as_mut(&mut self, area: area::Builder) -> view::Mut<C, P> {
+	pub fn writable(&mut self, area: area::Builder) -> view::Write<C, P> {
 		let area = area.complete(self.area);
 
 		if area.x + area.width > self.area.width || area.y + area.height > self.area.height {
 			panic!("out of bounds");
 		}
 
-		view::Mut::new(&mut self.data, self.area, area)
+		view::Write::new(&mut self.data, self.area, area)
 	}
 }
 
@@ -256,25 +256,25 @@ impl<C, P, D> Buffer<C, P, D>
 	}
 }
 
-impl<'a, C, P, D> From<&'a Buffer<C, P, D>> for view::Ref<'a, C, P>
+impl<'a, C, P, D> From<&'a Buffer<C, P, D>> for view::Read<'a, C, P>
 	where C: pixel::Channel,
 	      P: pixel::Read<C>,
 	      D: Deref<Target = [C]>
 {
 	#[inline]
-	fn from(value: &'a Buffer<C, P, D>) -> view::Ref<'a, C, P> {
-		value.as_ref(Default::default())
+	fn from(value: &'a Buffer<C, P, D>) -> view::Read<'a, C, P> {
+		value.readable(Default::default())
 	}
 }
 
-impl<'a, C, P, D> From<&'a mut Buffer<C, P, D>> for view::Mut<'a, C, P>
+impl<'a, C, P, D> From<&'a mut Buffer<C, P, D>> for view::Write<'a, C, P>
 	where C: pixel::Channel,
 	      P: pixel::Write<C>,
 	      D: DerefMut<Target = [C]>,
 {
 	#[inline]
-	fn from(mut value: &'a mut Buffer<C, P, D>) -> view::Mut<'a, C, P> {
-		value.as_mut(Default::default())
+	fn from(mut value: &'a mut Buffer<C, P, D>) -> view::Write<'a, C, P> {
+		value.writable(Default::default())
 	}
 }
 

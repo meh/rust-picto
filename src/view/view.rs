@@ -14,15 +14,18 @@
 
 use std::marker::PhantomData;
 
-use pixel::{self, Pixel};
+use pixel;
 use area::{self, Area};
 use buffer::Buffer;
 use iter::pixel::{Iter as Pixels, IterMut as PixelsMut};
-use super::{Ref, Mut};
+use super::{Read, Write};
 
 /// A view into a `Buffer`.
 #[derive(PartialEq, Debug)]
-pub struct View<'a, C: pixel::Channel, P: Pixel<C>> {
+pub struct View<'a, C, P>
+	where C: pixel::Channel,
+	      P: pixel::Read<C> + pixel::Write<C>
+{
 	owner: Area,
 	area:  Area,
 	data:  &'a mut [C],
@@ -33,7 +36,7 @@ pub struct View<'a, C: pixel::Channel, P: Pixel<C>> {
 
 impl<'a, C, P> View<'a, C, P>
 	where C: pixel::Channel,
-	      P: Pixel<C>
+	      P: pixel::Read<C> + pixel::Write<C>
 {
 	#[doc(hidden)]
 	#[inline]
@@ -65,12 +68,7 @@ impl<'a, C, P> View<'a, C, P>
 	pub fn height(&self) -> u32 {
 		self.area.height
 	}
-}
 
-impl<'a, C, P> View<'a, C, P>
-	where C: pixel::Channel,
-	      P: Pixel<C> + pixel::Read<C> + pixel::Write<C>
-{
 	/// Get the `Pixel` at the given coordinates.
 	///
 	/// # Panics
@@ -78,7 +76,7 @@ impl<'a, C, P> View<'a, C, P>
 	/// Requires that `x < self.width()` and `y < self.height()`, otherwise it will panic.
 	#[inline]
 	pub fn get(&self, x: u32, y: u32) -> P {
-		Ref::new(self.data, self.owner, self.area).get(x, y)
+		Read::new(self.data, self.owner, self.area).get(x, y)
 	}
 
 	/// Set the `Pixel` at the given coordinates.
@@ -88,39 +86,39 @@ impl<'a, C, P> View<'a, C, P>
 	/// Requires that `x < self.width()` and `y < self.height()`, otherwise it will panic.
 	#[inline]
 	pub fn set(&mut self, x: u32, y: u32, pixel: &P) {
-		Mut::new(self.data, self.owner, self.area).set(x, y, pixel)
+		Write::new(self.data, self.owner, self.area).set(x, y, pixel)
 	}
 
-	/// Get an immutable view of the given sub-image.
+	/// Get a read-only view of the given area.
 	///
 	/// # Panics
 	///
 	/// Requires that `x + width <= self.width()` and `y + height <= self.height()`, otherwise it will panic.
 	#[inline]
-	pub fn as_ref(&self, area: area::Builder) -> Ref<C, P> {
+	pub fn readable(&self, area: area::Builder) -> Read<C, P> {
 		let area = area.complete(Area::from(0, 0, self.area.width, self.area.height));
 
 		if area.x + area.width > self.area.width || area.y + area.height > self.area.height {
 			panic!("out of bounds");
 		}
 
-		Ref::new(&self.data, self.owner, Area { x: area.x + self.area.x, y: area.y + self.area.y, .. area })
+		Read::new(&self.data, self.owner, Area { x: area.x + self.area.x, y: area.y + self.area.y, .. area })
 	}
 
-	/// Get a mutable view of the given sub-image.
+	/// Get a write-only view of the given area.
 	///
 	/// # Panics
 	///
 	/// Requires that `x + width <= self.width()` and `y + height <= self.height()`, otherwise it will panic.
 	#[inline]
-	pub fn as_mut(&mut self, area: area::Builder) -> Mut<C, P> {
+	pub fn writable(&mut self, area: area::Builder) -> Write<C, P> {
 		let area = area.complete(Area::from(0, 0, self.area.width, self.area.height));
 
 		if area.x + area.width > self.area.width || area.y + area.height > self.area.height {
 			panic!("out of bounds");
 		}
 
-		Mut::new(&mut self.data, self.owner, Area { x: area.x + self.area.x, y: area.y + self.area.y, .. area })
+		Write::new(&mut self.data, self.owner, Area { x: area.x + self.area.x, y: area.y + self.area.y, .. area })
 	}
 
 	/// Get a mutable view of the given sub-image.
@@ -164,16 +162,16 @@ impl<'a, C, P> View<'a, C, P>
 	#[inline]
 	pub fn convert<CO, PO>(&self) -> Buffer<CO, PO, Vec<CO>>
 		where CO: pixel::Channel,
-		      PO: Pixel<CO> + pixel::Write<CO>,
+		      PO: pixel::Write<CO>,
 		      P: Into<PO>
 	{
-		Ref::<C, P>::new(self.data, self.owner, self.area).convert()
+		Read::<C, P>::new(self.data, self.owner, self.area).convert()
 	}
 }
 
 impl<'a, C, P> From<&'a mut View<'a, C, P>> for View<'a, C, P>
 	where C: pixel::Channel,
-	      P: Pixel<C> + pixel::Read<C> + pixel::Write<C>
+	      P: pixel::Read<C> + pixel::Write<C>
 {
 	#[inline]
 	fn from(value: &'a mut View<'a, C, P>) -> View<'a, C, P> {
@@ -181,43 +179,43 @@ impl<'a, C, P> From<&'a mut View<'a, C, P>> for View<'a, C, P>
 	}
 }
 
-impl<'a, C, P> From<View<'a, C, P>> for Ref<'a, C, P>
+impl<'a, C, P> From<View<'a, C, P>> for Read<'a, C, P>
 	where C: pixel::Channel,
-	      P: Pixel<C> + pixel::Read<C> + pixel::Write<C>
+	      P: pixel::Read<C> + pixel::Write<C>
 {
 	#[inline]
-	fn from(value: View<'a, C, P>) -> Ref<'a, C, P> {
-		Ref::new(value.data, value.owner, value.area)
+	fn from(value: View<'a, C, P>) -> Read<'a, C, P> {
+		Read::new(value.data, value.owner, value.area)
 	}
 }
 
-impl<'a, C, P> From<&'a View<'a, C, P>> for Ref<'a, C, P>
+impl<'a, C, P> From<&'a View<'a, C, P>> for Read<'a, C, P>
 	where C: pixel::Channel,
-	      P: Pixel<C> + pixel::Read<C> + pixel::Write<C>
+	      P: pixel::Read<C> + pixel::Write<C>
 {
 	#[inline]
-	fn from(value: &'a View<'a, C, P>) -> Ref<'a, C, P> {
-		Ref::new(value.data, value.owner, value.area)
+	fn from(value: &'a View<'a, C, P>) -> Read<'a, C, P> {
+		Read::new(value.data, value.owner, value.area)
 	}
 }
 
-impl<'a, C, P> From<View<'a, C, P>> for Mut<'a, C, P>
+impl<'a, C, P> From<View<'a, C, P>> for Write<'a, C, P>
 	where C: pixel::Channel,
-	      P: Pixel<C> + pixel::Read<C> + pixel::Write<C>
+	      P: pixel::Read<C> + pixel::Write<C>
 {
 	#[inline]
-	fn from(value: View<'a, C, P>) -> Mut<'a, C, P> {
-		Mut::new(value.data, value.owner, value.area)
+	fn from(value: View<'a, C, P>) -> Write<'a, C, P> {
+		Write::new(value.data, value.owner, value.area)
 	}
 }
 
-impl<'a, C, P> From<&'a mut View<'a, C, P>> for Mut<'a, C, P>
+impl<'a, C, P> From<&'a mut View<'a, C, P>> for Write<'a, C, P>
 	where C: pixel::Channel,
-	      P: Pixel<C> + pixel::Read<C> + pixel::Write<C>
+	      P: pixel::Read<C> + pixel::Write<C>
 {
 	#[inline]
-	fn from(value: &'a mut View<'a, C, P>) -> Mut<'a, C, P> {
-		Mut::new(value.data, value.owner, value.area)
+	fn from(value: &'a mut View<'a, C, P>) -> Write<'a, C, P> {
+		Write::new(value.data, value.owner, value.area)
 	}
 }
 
@@ -246,7 +244,7 @@ mod test {
 	}
 
 	#[test]
-	fn as_ref() {
+	fn readable() {
 		let mut image = Buffer::<u8, Rgb, Vec<_>>::new(50, 50);
 		let     image = image.view(Area::new().x(10).y(10).width(4).height(4));
 
@@ -257,14 +255,14 @@ mod test {
 			(10, 13), (11, 13), (12, 13), (13, 13),
 		], image.area().relative().collect::<Vec<_>>());
 
-		let image = image.as_ref(Area::new().x(1).y(1).width(2).height(2));
+		let image = image.readable(Area::new().x(1).y(1).width(2).height(2));
 
 		assert_eq!(vec![
 			(11, 11), (12, 11),
 			(11, 12), (12, 12),
 		], image.area().relative().collect::<Vec<_>>());
 
-		let image = image.as_ref(Area::new().width(2).height(1));
+		let image = image.readable(Area::new().width(2).height(1));
 
 		assert_eq!(vec![
 			(11, 11), (12, 11),
@@ -272,7 +270,7 @@ mod test {
 	}
 
 	#[test]
-	fn as_mut() {
+	fn writable() {
 		let mut image = Buffer::<u8, Rgb, Vec<_>>::new(50, 50);
 		let mut image = image.view(Area::new().x(10).y(10).width(4).height(4));
 
@@ -283,14 +281,14 @@ mod test {
 			(10, 13), (11, 13), (12, 13), (13, 13),
 		], image.area().relative().collect::<Vec<_>>());
 
-		let mut image = image.as_mut(Area::new().x(1).y(1).width(2).height(2));
+		let mut image = image.writable(Area::new().x(1).y(1).width(2).height(2));
 
 		assert_eq!(vec![
 			(11, 11), (12, 11),
 			(11, 12), (12, 12),
 		], image.area().relative().collect::<Vec<_>>());
 
-		let image = image.as_mut(Area::new().width(2).height(1));
+		let image = image.writable(Area::new().width(2).height(1));
 
 		assert_eq!(vec![
 			(11, 11), (12, 11),

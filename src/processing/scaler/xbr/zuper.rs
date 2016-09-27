@@ -32,7 +32,7 @@ impl<CI, PI, CO, PO> Scaler<CI, PI, CO, PO> for Super
 	      PO: From<Rgba> + Into<Rgba> + From<PI>
 {
 	#[inline]
-	fn scale(input: &view::Ref<CI, PI>, width: u32, height: u32) -> Buffer<CO, PO, Vec<CO>> {
+	fn scale(input: &view::Read<CI, PI>, width: u32, height: u32) -> Buffer<CO, PO, Vec<CO>> {
 		let x_factor = width as f32 / input.width() as f32;
 		let y_factor = height as f32 / input.height() as f32;
 		let factor   = x_factor as u32;
@@ -43,7 +43,7 @@ impl<CI, PI, CO, PO> Scaler<CI, PI, CO, PO> for Super
 		let mut output = scale::<CI, PI, CO, PO>(input);
 
 		while factor >= 2 {
-			output  = scale::<CO, PO, CO, PO>(&output.as_ref(Default::default()));
+			output  = scale::<CO, PO, CO, PO>(&output.readable(Default::default()));
 			factor /= 2;
 		}
 
@@ -52,7 +52,7 @@ impl<CI, PI, CO, PO> Scaler<CI, PI, CO, PO> for Super
 }
 
 #[allow(non_snake_case)]
-fn scale<CI, PI, CO, PO>(input: &view::Ref<CI, PI>) -> Buffer<CO, PO, Vec<CO>>
+fn scale<CI, PI, CO, PO>(input: &view::Read<CI, PI>) -> Buffer<CO, PO, Vec<CO>>
 	where CI: pixel::Channel,
 	      PI: pixel::Read<CI>,
 	      PI: Into<Rgba> + Into<PO>,
@@ -113,7 +113,7 @@ fn scale<CI, PI, CO, PO>(input: &view::Ref<CI, PI>) -> Buffer<CO, PO, Vec<CO>>
 			let x = x * 2;
 			let y = y * 2;
 
-			let (r, g, b, a, Y) = sample(&output.as_ref(Default::default()),
+			let (r, g, b, a, Y) = sample(&output.readable(Default::default()),
 				1, -1 .. 3, |sx, sy| (sx + sy + x as i64, sx - sy + y as i64));
 
 			let (r_min, r_max) = minmax(&r);
@@ -133,7 +133,7 @@ fn scale<CI, PI, CO, PO>(input: &view::Ref<CI, PI>) -> Buffer<CO, PO, Vec<CO>>
 
 			output.set(x + 1, y, &rgba.into());
 
-			let (r, g, b, a, Y) = sample(&output.as_ref(Default::default()),
+			let (r, g, b, a, Y) = sample(&output.readable(Default::default()),
 				1, -1 .. 3, |sx, sy| (sx + sy - 1 + x as i64, sx - sy + 1 + y as i64));
 
 			let edge         = diagonal(&Y, &[2.0, 0.0, 0.0, 0.0, 0.0, 0.0]);
@@ -153,7 +153,7 @@ fn scale<CI, PI, CO, PO>(input: &view::Ref<CI, PI>) -> Buffer<CO, PO, Vec<CO>>
 	// Third pass.
 	for y in (0 .. input.height() * 2).rev() {
 		for x in (0 .. input.width() * 2).rev() {
-			let (r, g, b, a, Y) = sample(&output.as_ref(Default::default()),
+			let (r, g, b, a, Y) = sample(&output.readable(Default::default()),
 				2, -2 .. 2, |sx, sy| (sx + x as i64, sy + y as i64));
 
 			let (r_min, r_max) = minmax(&r);
@@ -182,7 +182,7 @@ type Matrix = [[f32; 4]; 4];
 
 #[inline]
 #[allow(non_snake_case)]
-fn sample<CI, PI, F>(input: &view::Ref<CI, PI>, offset: i64, range: Range<i64>, func: F) -> (Matrix, Matrix, Matrix, Matrix, Matrix)
+fn sample<CI, PI, F>(input: &view::Read<CI, PI>, offset: i64, range: Range<i64>, func: F) -> (Matrix, Matrix, Matrix, Matrix, Matrix)
 	where CI: pixel::Channel,
 	      PI: pixel::Read<CI>,
 	      PI: Into<Rgba>,

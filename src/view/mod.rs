@@ -15,8 +15,8 @@
 mod view;
 pub use self::view::View;
 
-mod immutable;
-pub use self::immutable::Ref as Ref;
+mod read;
+pub use self::read::Read;
 
-mod mutable;
-pub use self::mutable::Ref as Mut;
+mod write;
+pub use self::write::Write;

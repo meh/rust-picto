@@ -30,7 +30,7 @@ pub trait Get<C, P>
 impl<'a, C, P, T> Get<C, P> for T
 	where C: pixel::Channel,
 	      P: pixel::Read<C>,
-	      T: Into<view::Ref<'a, C, P>>
+	      T: Into<view::Read<'a, C, P>>
 {
 	#[inline]
 	fn get_clamped(self, x: i64, y: i64) -> P {
@@ -53,7 +53,7 @@ pub trait Set<C, P>
 impl<'a, C, P, T> Set<C, P> for T
 	where C: pixel::Channel,
 	      P: pixel::Write<C>,
-	      T: Into<view::Mut<'a, C, P>>
+	      T: Into<view::Write<'a, C, P>>
 {
 	#[inline]
 	fn set_clamped(self, x: i64, y: i64, value: &P) {

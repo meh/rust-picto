@@ -27,8 +27,8 @@ pub fn vertically<'i, 'o, A, CO, PO, CI, PI, I, O>(input: I, output: O)
 	      CI: pixel::Channel,
 	      PI: pixel::Read<CI>,
 	      PI: Into<Rgba>,
-	      I:  Into<view::Ref<'i, CI, PI>>,
-	      O:  Into<view::Mut<'o, CO, PO>>
+	      I:  Into<view::Read<'i, CI, PI>>,
+	      O:  Into<view::Write<'o, CO, PO>>
 {
 	vertically_with(input, output, A::support(), A::kernel)
 }
@@ -40,8 +40,8 @@ pub fn vertically_with<'i, 'o, CO, PO, CI, PI, I, O, F>(input: I, output: O, sup
 	      CI: pixel::Channel,
 	      PI: pixel::Read<CI>,
 	      PI: Into<Rgba>,
-	      I:  Into<view::Ref<'i, CI, PI>>,
-	      O:  Into<view::Mut<'o, CO, PO>>,
+	      I:  Into<view::Read<'i, CI, PI>>,
+	      O:  Into<view::Write<'o, CO, PO>>,
 	      F:  FnMut(f32) -> f32
 {
 	let     input  = input.into();
@@ -95,8 +95,8 @@ pub fn horizontally<'i, 'o, A, CO, PO, CI, PI, I, O>(input: I, output: O)
 	      CI: pixel::Channel,
 	      PI: pixel::Read<CI>,
 	      PI: Into<Rgba>,
-	      I:  Into<view::Ref<'i, CI, PI>>,
-	      O:  Into<view::Mut<'o, CO, PO>>
+	      I:  Into<view::Read<'i, CI, PI>>,
+	      O:  Into<view::Write<'o, CO, PO>>
 {
 	horizontally_with(input, output, A::support(), A::kernel)
 }
@@ -108,8 +108,8 @@ pub fn horizontally_with<'i, 'o, CO, PO, CI, PI, I, O, F>(input: I, output: O, s
 	      CI: pixel::Channel,
 	      PI: pixel::Read<CI>,
 	      PI: Into<Rgba>,
-	      I:  Into<view::Ref<'i, CI, PI>>,
-	      O:  Into<view::Mut<'o, CO, PO>>,
+	      I:  Into<view::Read<'i, CI, PI>>,
+	      O:  Into<view::Write<'o, CO, PO>>,
 	      F:  FnMut(f32) -> f32
 {
 	let     input  = input.into();

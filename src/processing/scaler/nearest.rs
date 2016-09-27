@@ -27,7 +27,7 @@ impl<CI, PI, CO, PO> super::Scaler<CI, PI, CO, PO> for Nearest
 	      PO: From<PI>
 {
 	#[inline]
-	fn scale(input: &view::Ref<CI, PI>, width: u32, height: u32) -> Buffer<CO, PO, Vec<CO>> {
+	fn scale(input: &view::Read<CI, PI>, width: u32, height: u32) -> Buffer<CO, PO, Vec<CO>> {
 		let mut output = Buffer::<CO, PO, _>::new(width, height);
 
 		for (x, y) in output.area().absolute() {

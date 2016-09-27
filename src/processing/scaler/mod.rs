@@ -22,7 +22,7 @@ pub trait Scaler<CI, PI, CO, PO>
 	      CO: pixel::Channel,
 	      PO: pixel::Write<CO>
 {
-	fn scale(input: &view::Ref<CI, PI>, width: u32, height: u32) -> Buffer<CO, PO, Vec<CO>>;
+	fn scale(input: &view::Read<CI, PI>, width: u32, height: u32) -> Buffer<CO, PO, Vec<CO>>;
 }
 
 mod sampler;

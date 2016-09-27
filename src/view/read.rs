@@ -14,14 +14,17 @@
 
 use std::marker::PhantomData;
 
-use pixel::{self, Pixel};
+use pixel;
 use buffer::Buffer;
 use area::{self, Area};
 use iter::pixel::Iter as Pixels;
 
-/// An immutable view into a `Buffer`.
+/// A read-only view into a `Buffer`.
 #[derive(PartialEq, Debug)]
-pub struct Ref<'a, C: pixel::Channel, P: Pixel<C>> {
+pub struct Read<'a, C, P>
+	where C: pixel::Channel,
+	      P: pixel::Read<C>
+{
 	owner: Area,
 	area:  Area,
 	data:  &'a [C],
@@ -30,14 +33,14 @@ pub struct Ref<'a, C: pixel::Channel, P: Pixel<C>> {
 	_pixel:   PhantomData<P>,
 }
 
-impl<'a, C, P> Ref<'a, C, P>
+impl<'a, C, P> Read<'a, C, P>
 	where C: pixel::Channel,
-	      P: Pixel<C>
+	      P: pixel::Read<C>
 {
 	#[doc(hidden)]
 	#[inline]
-	pub fn new(data: &[C], owner: Area, area: Area) -> Ref<C, P> {
-		Ref {
+	pub fn new(data: &[C], owner: Area, area: Area) -> Read<C, P> {
+		Read {
 			owner: owner,
 			area:  area,
 			data:  data,
@@ -54,7 +57,6 @@ impl<'a, C, P> Ref<'a, C, P>
 	}
 
 	/// Get the width.
-	///
 	#[inline]
 	pub fn width(&self) -> u32 {
 		self.area.width
@@ -65,12 +67,7 @@ impl<'a, C, P> Ref<'a, C, P>
 	pub fn height(&self) -> u32 {
 		self.area.height
 	}
-}
 
-impl<'a, C, P> Ref<'a, C, P>
-	where C: pixel::Channel,
-	      P: Pixel<C> + pixel::Read<C>
-{
 	/// Get the `Pixel` at the given coordinates.
 	///
 	/// # Panics
@@ -88,20 +85,20 @@ impl<'a, C, P> Ref<'a, C, P>
 		P::read(&self.data[index .. index + channels])
 	}
 
-	/// Get an immutable view of the given sub-image.
+	/// Get a read-only view of the given area.
 	///
 	/// # Panics
 	///
 	/// Requires that `x + width <= self.width()` and `y + height <= self.height()`, otherwise it will panic.
 	#[inline]
-	pub fn as_ref(&self, area: area::Builder) -> Ref<C, P> {
+	pub fn readable(&self, area: area::Builder) -> Read<C, P> {
 		let area = area.complete(Area::from(0, 0, self.area.width, self.area.height));
 
 		if area.x + area.width > self.area.width || area.y + area.height > self.area.height {
 			panic!("out of bounds");
 		}
 
-		Ref::new(&self.data, self.owner, Area { x: area.x + self.area.x, y: area.y + self.area.y, .. area })
+		Read::new(&self.data, self.owner, Area { x: area.x + self.area.x, y: area.y + self.area.y, .. area })
 	}
 
 	/// Get an immutable iterator over the view's pixels.
@@ -113,7 +110,7 @@ impl<'a, C, P> Ref<'a, C, P>
 	#[inline]
 	pub fn convert<CO, PO>(&self) -> Buffer<CO, PO, Vec<CO>>
 		where CO: pixel::Channel,
-		      PO: Pixel<CO> + pixel::Write<CO>,
+		      PO: pixel::Write<CO>,
 		      P: Into<PO>
 	{
 		let mut result = Buffer::<CO, PO, Vec<_>>::new(self.area.width, self.area.height);
@@ -126,13 +123,13 @@ impl<'a, C, P> Ref<'a, C, P>
 	}
 }
 
-impl<'a, C, P> From<&'a Ref<'a, C, P>> for Ref<'a, C, P>
+impl<'a, C, P> From<&'a Read<'a, C, P>> for Read<'a, C, P>
 	where C: pixel::Channel,
-	      P: Pixel<C> + pixel::Read<C>
+	      P: pixel::Read<C>
 {
 	#[inline]
-	fn from(value: &'a Ref<'a, C, P>) -> Ref<'a, C, P> {
-		Ref::new(value.data, value.owner, value.area)
+	fn from(value: &'a Read<'a, C, P>) -> Read<'a, C, P> {
+		Read::new(value.data, value.owner, value.area)
 	}
 }
 
@@ -149,15 +146,15 @@ mod test {
 			Rgba::new(w, w, w, w)
 		});
 
-		let view = image.as_ref(Area::new().x(10).y(10).width(10).height(10));
+		let view = image.readable(Area::new().x(10).y(10).width(10).height(10));
 		assert_relative_eq!(Rgba::new(0.5, 0.5, 0.5, 0.5),
 			view.get(0, 0), epsilon = 0.01);
 	}
 
 	#[test]
-	fn as_ref() {
+	fn readable() {
 		let image = Buffer::<u8, Rgb, Vec<_>>::new(50, 50);
-		let image = image.as_ref(Area::new().x(10).y(10).width(4).height(4));
+		let image = image.readable(Area::new().x(10).y(10).width(4).height(4));
 
 		assert_eq!(vec![
 			(10, 10), (11, 10), (12, 10), (13, 10),
@@ -166,14 +163,14 @@ mod test {
 			(10, 13), (11, 13), (12, 13), (13, 13),
 		], image.area().relative().collect::<Vec<_>>());
 
-		let image = image.as_ref(Area::new().x(1).y(1).width(2).height(2));
+		let image = image.readable(Area::new().x(1).y(1).width(2).height(2));
 
 		assert_eq!(vec![
 			(11, 11), (12, 11),
 			(11, 12), (12, 12),
 		], image.area().relative().collect::<Vec<_>>());
 
-		let image = image.as_ref(Area::new().width(2).height(1));
+		let image = image.readable(Area::new().width(2).height(1));
 
 		assert_eq!(vec![
 			(11, 11), (12, 11),
