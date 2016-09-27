@@ -61,8 +61,8 @@ impl<C, P> Buffer<C, P, Vec<C>>
 	pub fn from_pixel(width: u32, height: u32, pixel: &P) -> Self {
 		let mut buffer = Self::new(width, height);
 
-		for (x, y) in buffer.area().absolute() {
-			buffer.set(x, y, pixel);
+		for chunk in buffer.chunks_mut(P::channels()) {
+			pixel.write(chunk);
 		}
 
 		buffer
