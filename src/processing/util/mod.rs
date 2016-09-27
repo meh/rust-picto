@@ -12,6 +12,7 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
+/// Helper macro for `num::cast()`.
 macro_rules! num {
 	($value:expr => $to:ident) => (
 		$crate::num::cast::<_, $to>($value).unwrap()
@@ -22,6 +23,7 @@ macro_rules! num {
 	);
 }
 
+/// Helper macro for `num::zero()`.
 macro_rules! zero {
 	() => (
 		$crate::num::zero()
@@ -32,6 +34,7 @@ macro_rules! zero {
 	)
 }
 
+/// Helper macro for `num::one()`.
 macro_rules! one {
 	() => (
 		$crate::num::one()
