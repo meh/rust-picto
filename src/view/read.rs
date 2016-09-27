@@ -72,7 +72,8 @@ impl<'a, C, P> Read<'a, C, P>
 	///
 	/// # Panics
 	///
-	/// Requires that `x < self.width()` and `y < self.height()`, otherwise it will panic.
+	/// Requires that `x < self.width()` and `y < self.height()`, otherwise it
+	/// will panic.
 	#[inline]
 	pub fn get(&self, x: u32, y: u32) -> P {
 		if x >= self.area.width || y >= self.area.height {
@@ -85,11 +86,13 @@ impl<'a, C, P> Read<'a, C, P>
 		P::read(&self.data[index .. index + channels])
 	}
 
-	/// Get a read-only view of the given area.
+	/// Get a read-only view of the given area, refining further from the
+	/// current.
 	///
 	/// # Panics
 	///
-	/// Requires that `x + width <= self.width()` and `y + height <= self.height()`, otherwise it will panic.
+	/// Requires that `x + width <= self.width()` and `y + height <= self.height()`,
+	/// otherwise it will panic.
 	#[inline]
 	pub fn readable(&self, area: area::Builder) -> Read<C, P> {
 		let area = area.complete(Area::from(0, 0, self.area.width, self.area.height));
@@ -101,12 +104,26 @@ impl<'a, C, P> Read<'a, C, P>
 		Read::new(&self.data, self.owner, Area { x: area.x + self.area.x, y: area.y + self.area.y, .. area })
 	}
 
-	/// Get an immutable iterator over the view's pixels.
+	/// Get an immutable `Iterator` over the pixels.
 	pub fn pixels(&self) -> Pixels<C, P> {
 		Pixels::new(self.data, self.owner, self.area)
 	}
 
 	/// Convert the `Buffer` to another `Buffer` with different channel and pixel type.
+	///
+	/// # Example
+	///
+	/// ```
+	/// use picto::read;
+	/// use picto::Area;
+	/// use picto::color::{Rgb, Rgba};
+	///
+	/// let image = read::from_path::<u8, Rgba, _>("tests/rainbow.png").unwrap();
+	/// let view  = image.readable(Area::new().x(10).y(10).width(20).height(20));
+	///
+	/// // Convert the 20x20 area from Rgba to Rgb.
+	/// view.convert::<u8, Rgb>();
+	/// ```
 	#[inline]
 	pub fn convert<CO, PO>(&self) -> Buffer<CO, PO, Vec<CO>>
 		where CO: pixel::Channel,

@@ -121,7 +121,7 @@ impl<'a, C, P> View<'a, C, P>
 		Write::new(&mut self.data, self.owner, Area { x: area.x + self.area.x, y: area.y + self.area.y, .. area })
 	}
 
-	/// Get a mutable view of the given sub-image.
+	/// Get a mutable view of the given area.
 	///
 	/// # Panics
 	///
@@ -138,17 +138,53 @@ impl<'a, C, P> View<'a, C, P>
 	}
 
 	/// Fill the view with the given pixel.
+	///
+	/// # Example
+	///
+	/// ```
+	/// use picto::read;
+	/// use picto::Area;
+	/// use picto::color::Rgb;
+	///
+	/// let mut image = read::from_path::<u8, Rgb, _>("tests/boat.xyz").unwrap();
+	/// let mut view  = image.view(Area::new().x(10).y(10).width(20).height(30));
+	///
+	/// // Make a 20x20 pixel area black at offset 10,10.
+	/// view.fill(&Rgb::new(0.0, 0.0, 0.0));
+	/// ```
 	#[inline]
 	pub fn fill(&mut self, pixel: &P) {
 		self.writable(Default::default()).fill(pixel)
 	}
 
-	/// Get a mutable iterator over the view's pixels.
+	/// Get a mutable `Iterator` over the pixels.
 	pub fn pixels(&self) -> Pixels<C, P> {
 		Pixels::new(self.data, self.owner, self.area)
 	}
 
-	/// Get a mutable iterator over the view's pixels.
+	/// Get a mutable `Iterator` over the pixels.
+	///
+	/// # Example
+	///
+	/// ```
+	/// use picto::read;
+	/// use picto::Area;
+	/// use picto::color::{Mix, Rgb};
+	///
+	/// let mut image = read::from_path::<u8, Rgb, _>("tests/boat.xyz").unwrap();
+	/// let mut view  = image.view(Area::new().x(50).y(20));
+	///
+	/// for (_, _, mut px) in view.pixels_mut() {
+	///     // Get the pixel value.
+	///     let p = px.get();
+	///
+	///     // Mix the color with red.
+	///     let p = p.mix(&Rgb::new(1.0, 0.0, 0.0), 0.5);
+	///
+	///     // Set the pixel value.
+	///     px.set(&p);
+	/// }
+	/// ```
 	pub fn pixels_mut(&mut self) -> PixelsMut<C, P> {
 		PixelsMut::new(self.data, self.owner, self.area)
 	}
@@ -165,6 +201,20 @@ impl<'a, C, P> View<'a, C, P>
 	}
 
 	/// Convert the `View` to a `Buffer` with different channel and pixel type.
+	///
+	/// # Example
+	///
+	/// ```
+	/// use picto::read;
+	/// use picto::Area;
+	/// use picto::color::{Rgb, Rgba};
+	///
+	/// let mut image = read::from_path::<u8, Rgba, _>("tests/rainbow.png").unwrap();
+	/// let     view  = image.view(Area::new().x(10).y(10).width(20).height(20));
+	///
+	/// // Convert the 20x20 area from Rgba to Rgb.
+	/// view.convert::<u8, Rgb>();
+	/// ```
 	#[inline]
 	pub fn convert<CO, PO>(&self) -> Buffer<CO, PO, Vec<CO>>
 		where CO: pixel::Channel,

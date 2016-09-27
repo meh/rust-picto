@@ -70,7 +70,8 @@ impl<'a, C, P> Write<'a, C, P>
 	///
 	/// # Panics
 	///
-	/// Requires that `x < self.width()` and `y < self.height()`, otherwise it will panic.
+	/// Requires that `x < self.width()` and `y < self.height()`, otherwise it
+	/// will panic.
 	#[inline]
 	pub fn set(&mut self, x: u32, y: u32, value: &P) {
 		if x >= self.area.width || y >= self.area.height {
@@ -83,11 +84,13 @@ impl<'a, C, P> Write<'a, C, P>
 		value.write(&mut self.data[index .. index + channels]);
 	}
 
-	/// Get a write-only view of the given area.
+	/// Get a write-only view of the given area, refining further from the
+	/// current.
 	///
 	/// # Panics
 	///
-	/// Requires that `x + width <= self.width()` and `y + height <= self.height()`, otherwise it will panic.
+	/// Requires that `x + width <= self.width()` and `y + height <=
+	/// self.height()`, otherwise it will panic.
 	#[inline]
 	pub fn writable(&mut self, area: area::Builder) -> Write<C, P> {
 		let area = area.complete(Area::from(0, 0, self.area.width, self.area.height));
@@ -100,6 +103,20 @@ impl<'a, C, P> Write<'a, C, P>
 	}
 
 	/// Fill the view with the given pixel.
+	///
+	/// # Example
+	///
+	/// ```
+	/// use picto::read;
+	/// use picto::Area;
+	/// use picto::color::Rgb;
+	///
+	/// let mut image = read::from_path::<u8, Rgb, _>("tests/boat.xyz").unwrap();
+	/// let mut view  = image.writable(Area::new().x(10).y(10).width(20).height(30));
+	///
+	/// // Make a 20x20 pixel area black at offset 10,10.
+	/// view.fill(&Rgb::new(0.0, 0.0, 0.0));
+	/// ```
 	#[inline]
 	pub fn fill(&mut self, pixel: &P) {
 		for (x, y) in self.area.absolute() {
