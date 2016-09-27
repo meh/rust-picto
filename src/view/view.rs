@@ -137,6 +137,12 @@ impl<'a, C, P> View<'a, C, P>
 		View::new(&mut self.data, self.owner, Area { x: area.x + self.area.x, y: area.y + self.area.y, .. area })
 	}
 
+	/// Fill the view with the given pixel.
+	#[inline]
+	pub fn fill(&mut self, pixel: &P) {
+		self.writable(Default::default()).fill(pixel)
+	}
+
 	/// Get a mutable iterator over the view's pixels.
 	pub fn pixels(&self) -> Pixels<C, P> {
 		Pixels::new(self.data, self.owner, self.area)

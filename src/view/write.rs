@@ -98,6 +98,14 @@ impl<'a, C, P> Write<'a, C, P>
 
 		Write::new(&mut self.data, self.owner, Area { x: area.x + self.area.x, y: area.y + self.area.y, .. area })
 	}
+
+	/// Fill the view with the given pixel.
+	#[inline]
+	pub fn fill(&mut self, pixel: &P) {
+		for (x, y) in self.area.absolute() {
+			self.set(x, y, pixel);
+		}
+	}
 }
 
 impl<'a, C, P> From<&'a mut Write<'a, C, P>> for Write<'a, C, P>
@@ -149,5 +157,20 @@ mod test {
 		assert_eq!(vec![
 			(11, 11), (12, 11),
 		], image.area().relative().collect::<Vec<_>>());
+	}
+
+	#[test]
+	fn fill() {
+		let mut image = Buffer::<u8, Rgb, Vec<_>>::new(50, 50);
+		{
+			let mut view = image.writable(Area::new().x(10).y(10).width(4).height(4));
+			view.fill(&Rgb::new(1.0, 1.0, 1.0));
+		}
+
+		assert_eq!(Rgb::new(0.0, 0.0, 0.0),
+			image.get(0, 0));
+
+		assert_eq!(Rgb::new(1.0, 1.0, 1.0),
+			image.get(10, 10));
 	}
 }

@@ -60,10 +60,7 @@ impl<C, P> Buffer<C, P, Vec<C>>
 	#[inline]
 	pub fn from_pixel(width: u32, height: u32, pixel: &P) -> Self {
 		let mut buffer = Self::new(width, height);
-
-		for chunk in buffer.chunks_mut(P::channels()) {
-			pixel.write(chunk);
-		}
+		buffer.fill(pixel);
 
 		buffer
 	}
@@ -226,6 +223,14 @@ impl<C, P, D> Buffer<C, P, D>
 		}
 
 		view::Write::new(&mut self.data, self.area, area)
+	}
+
+	/// Fill the buffer with the given pixel.
+	#[inline]
+	pub fn fill(&mut self, pixel: &P) {
+		for chunk in self.chunks_mut(P::channels()) {
+			pixel.write(chunk);
+		}
 	}
 }
 
