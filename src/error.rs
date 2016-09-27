@@ -16,13 +16,20 @@ use std::fmt;
 use std::error;
 use std::io;
 
+/// Error enumeration type.
 #[derive(Debug)]
 pub enum Error {
+	/// An IO error.
 	Io(io::Error),
+
+	/// An image format error.
 	Format(String),
+
+	/// An unsupported error.
 	Unsupported(String),
 }
 
+/// `Result`s from the library.
 pub type Result<T> = ::std::result::Result<T, Error>;
 
 impl From<io::Error> for Error {
