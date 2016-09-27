@@ -76,13 +76,43 @@ impl Builder {
 	/// `Area`.
 	#[inline]
 	pub fn complete(&self, area: Area) -> Area {
-		Area {
-			x: self.x.unwrap_or(area.x),
-			y: self.y.unwrap_or(area.y),
-
-			width:  self.width.unwrap_or(area.width),
-			height: self.height.unwrap_or(area.height),
+		let (x, width) = if let Some(x) = self.x {
+			if let Some(width) = self.width {
+				(x, width)
+			}
+			else {
+				(x, area.width - x)
+			}
 		}
+		else {
+			(area.x, self.width.unwrap_or(area.width))
+		};
+
+		let (y, height) = if let Some(y) = self.y {
+			if let Some(height) = self.height {
+				(y, height)
+			}
+			else {
+				(y, area.height - y)
+			}
+		}
+		else {
+			(area.y, self.height.unwrap_or(area.height))
+		};
+
+		Area {
+			x: x,
+			y: y,
+
+			width:  width,
+			height: height,
+		}
+	}
+
+	/// Create an `Area` based on the `Builder` state.
+	#[inline]
+	pub fn with<F: FnMut(&Builder) -> Area>(&self, mut func: F) -> Area {
+		func(self)
 	}
 
 	/// Builds an `Area` panicking if any fields are missing.
@@ -129,6 +159,15 @@ impl Builder {
 #[cfg(test)]
 mod test {
 	use super::*;
+
+	#[test]
+	fn complete() {
+		assert_eq!(Area::from(5, 0, 5, 10),
+			Area::new().x(5).complete(Area::from(0, 0, 10, 10)));
+
+		assert_eq!(Area::from(0, 0, 5, 10),
+			Area::new().width(5).complete(Area::from(0, 0, 10, 10)));
+	}
 
 	#[test]
 	fn relative() {
