@@ -17,8 +17,8 @@ use std::ops::Deref;
 
 use png::{self, HasParameters};
 use error;
-use pixel::{self, Pixel};
-use buffer::Buffer;
+use pixel;
+use buffer::{Buffer, cast};
 use color;
 
 pub struct Encoder<W: Write> {
@@ -51,7 +51,7 @@ impl<C, P, D, W> super::Encoder<C, P, D> for Encoder<W>
 
 		macro_rules! write {
 			($ch:ty, $ty:path) => (
-				try!(writer.write_image_data(Cast::<$ty>::cast(buffer).as_ref()))
+				try!(writer.write_image_data(cast::Bytes::<$ty>::bytes(buffer).as_ref()))
 			);
 		}
 
@@ -151,9 +151,4 @@ mod nightly {
 	impl_for!(u16, Lumaa => GrayscaleAlpha, Sixteen);
 	impl_for!(u16, Rgb => RGB, Sixteen);
 	impl_for!(u16, Rgba => RGBA, Sixteen);
-}
-
-cast! {
-	(u8,  Luma), (u8,  Lumaa), (u8,  Rgb), (u8,  Rgba),
-	(u16, Luma), (u16, Lumaa), (u16, Rgb), (u16, Rgba),
 }

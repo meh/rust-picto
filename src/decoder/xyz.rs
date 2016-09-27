@@ -16,8 +16,8 @@ use std::io::Read;
 
 use xyz;
 use error::{self, Error};
-use buffer::Buffer;
-use pixel::{self, Pixel};
+use buffer::{Buffer, cast};
+use pixel;
 use color;
 
 pub struct Decoder<R: Read> {
@@ -43,13 +43,9 @@ impl<C, P, R> super::Decoder<C, P> for Decoder<R>
 	fn frame(&mut self) -> error::Result<Buffer<C, P, Vec<C>>> {
 		let image = try!(xyz::read(self.inner.by_ref()));
 
-		Ok(Cast::<C, P>::cast(try!(Buffer::<u8, color::Rgb, _>::from_raw(
+		Ok(cast::Into::<C, P>::into(try!(Buffer::<u8, color::Rgb, _>::from_raw(
 			image.width as u32, image.height as u32,
 			image.to_rgb_buffer())
 				.map_err(|_| Error::Format("wrong dimensions".into())))))
 	}
-}
-
-cast! {
-	(u8, Rgb)
 }

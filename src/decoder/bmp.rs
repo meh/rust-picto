@@ -16,8 +16,8 @@ use std::io::{Read, Seek};
 
 use imagefmt::{bmp, ColFmt};
 use error::{self, Error};
-use buffer::Buffer;
-use pixel::{self, Pixel};
+use buffer::{Buffer, cast};
+use pixel;
 use color;
 
 pub struct Decoder<R: Read + Seek> {
@@ -44,7 +44,7 @@ impl<C, P, R> super::Decoder<C, P> for Decoder<R>
 
 		macro_rules! buffer {
 			($ch:ty, $ty:path) => ({
-				Ok(Cast::<C, P>::cast(try!(Buffer::<$ch, $ty, _>::from_raw(
+				Ok(cast::Into::<C, P>::into(try!(Buffer::<$ch, $ty, _>::from_raw(
 					image.w as u32,
 					image.h as u32,
 					image.buf).map_err(|_| Error::Format("wrong dimensions".into())))))
@@ -62,8 +62,4 @@ impl<C, P, R> super::Decoder<C, P> for Decoder<R>
 				Err(Error::Unsupported("unsupported color type".into()))
 		}
 	}
-}
-
-cast! {
-	(u8, Rgb), (u8, Rgba)
 }

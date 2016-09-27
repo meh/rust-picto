@@ -16,8 +16,8 @@ use std::io::Read;
 
 use png;
 use error::{self, Error};
-use buffer::Buffer;
-use pixel::{self, Pixel};
+use buffer::{Buffer, cast};
+use pixel;
 use color;
 
 enum State<R: Read> {
@@ -76,7 +76,7 @@ impl<C, P, R> super::Decoder<C, P> for Decoder<R>
 
 		macro_rules! buffer {
 			($ch:ty, $ty:path) => ({
-				Ok(Cast::<C, P>::cast(try!(Buffer::<_, $ty, _>::from_raw(
+				Ok(cast::Into::<C, P>::into(try!(Buffer::<_, $ty, _>::from_raw(
 					try!(self.reader()).info().size().0,
 					try!(self.reader()).info().size().1,
 					buffer).map_err(|_| Error::Format("wrong dimensions".into())))))
@@ -112,9 +112,4 @@ impl<C, P, R> super::Decoder<C, P> for Decoder<R>
 				Err(Error::Unsupported("unsupported color type".into()))
 		}
 	}
-}
-
-cast! {
-	(u8,  Luma), (u8,  Lumaa), (u8,  Rgb), (u8,  Rgba),
-	(u16, Luma), (u16, Lumaa), (u16, Rgb), (u16, Rgba),
 }

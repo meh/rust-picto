@@ -16,8 +16,8 @@ use std::io::Read;
 
 use jpeg_decoder as jpeg;
 use error::{self, Error};
-use buffer::Buffer;
-use pixel::{self, Pixel};
+use buffer::{Buffer, cast};
+use pixel;
 use color;
 
 pub struct Decoder<R: Read> {
@@ -90,7 +90,7 @@ impl<C, P, R> super::Decoder<C, P> for Decoder<R>
 
 		macro_rules! buffer {
 			($ch:ty, $ty:path) => ({
-				Ok(Cast::<C, P>::cast(try!(Buffer::<$ch, $ty, _>::from_raw(
+				Ok(cast::Into::<C, P>::into(try!(Buffer::<$ch, $ty, _>::from_raw(
 					try!(self.metadata()).width as u32,
 					try!(self.metadata()).height as u32,
 					buffer).map_err(|_| Error::Format("wrong dimensions".into())))))
@@ -111,5 +111,3 @@ impl<C, P, R> super::Decoder<C, P> for Decoder<R>
 		}
 	}
 }
-
-cast! { (u8, Luma), (u8, Rgb) }

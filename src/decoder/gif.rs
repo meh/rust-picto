@@ -16,8 +16,8 @@ use std::io::Read;
 
 use gif::{self, SetParameter};
 use error::{self, Error};
-use buffer::Buffer;
-use pixel::{self, Pixel};
+use buffer::{Buffer, cast};
+use pixel;
 use color;
 
 enum State<R: Read> {
@@ -76,13 +76,9 @@ impl<C, P, R> super::Decoder<C, P> for Decoder<R>
 	fn frame(&mut self) -> error::Result<Buffer<C, P, Vec<C>>> {
 		let frame = try!(try!(try!(self.reader()).read_next_frame()).ok_or(Error::Format("no frames".into())));
 
-		Ok(Cast::<C, P>::cast(try!(Buffer::<u8, color::Rgba, _>::from_raw(
+		Ok(cast::Into::<C, P>::into(try!(Buffer::<u8, color::Rgba, _>::from_raw(
 			frame.width as u32, frame.height as u32,
 			frame.buffer.clone().into_owned())
 				.map_err(|_| Error::Format("wrong dimensions".into())))))
 	}
-}
-
-cast! {
-	(u8, Rgba)
 }

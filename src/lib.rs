@@ -53,7 +53,7 @@ pub use view::View;
 
 pub mod iter;
 
-mod buffer;
+pub mod buffer;
 pub use buffer::Buffer;
 
 pub mod processing;
