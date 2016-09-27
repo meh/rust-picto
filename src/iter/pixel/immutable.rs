@@ -47,6 +47,7 @@ impl<'a, C, P> Iter<'a, C, P>
 }
 
 /// A readable pixel from the iterator.
+#[derive(Eq, PartialEq, Debug)]
 pub struct Item<'a, C: pixel::Channel, P: Pixel<C> + pixel::Read<C>> {
 	data: &'a [C],
 
