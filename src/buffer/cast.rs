@@ -16,16 +16,22 @@ use std::borrow::Cow;
 use pixel::{self, Pixel};
 use buffer::Buffer;
 
+/// This trait is used for optimizations where turning a `Buffer` into another
+/// can just reuse the inner data as is.
 pub trait Into<C, P>
 	where C: pixel::Channel,
 	      P: Pixel<C>
 {
+	/// Convert `Self` into a `Buffer`.
 	fn into(self) -> Buffer<C, P, Vec<C>>;
 }
 
+/// This trait is used for optimizations where the type can be converted to an
+/// `&[u8]` as is without going through any conversions.
 pub trait Bytes<P>
 	where P: Pixel<u8>
 {
+	/// Convert `Self` to a byte slice.
 	fn bytes(&self) -> Cow<[u8]>;
 }
 

@@ -38,7 +38,17 @@ impl<C, P> Buffer<C, P, Vec<C>>
 	where C: pixel::Channel,
 	      P: Pixel<C>,
 {
-	/// Create a new `Buffer` with the requested space allocated.
+	/// Create a new `Buffer` with the requested space allocated and all channels
+	/// set to `0`.
+	///
+	/// # Example
+	///
+	/// ```
+	/// use picto::Buffer;
+	/// use picto::color::Rgb;
+	///
+	/// Buffer::<u8, Rgb, _>::new(1024, 1024);
+	/// ```
 	#[inline]
 	pub fn new(width: u32, height: u32) -> Self {
 		Buffer {
@@ -57,6 +67,15 @@ impl<C, P> Buffer<C, P, Vec<C>>
 {
 	/// Create a new `Buffer` with the request space allocated and filled with
 	/// the given pixel.
+	///
+	/// # Example
+	///
+	/// ```
+	/// use picto::Buffer;
+	/// use picto::color::Rgb;
+	///
+	/// Buffer::<u8, Rgb, _>::from_pixel(1024, 1024, &Rgb::new(1.0, 0.0, 0.0));
+	/// ```
 	#[inline]
 	pub fn from_pixel(width: u32, height: u32, pixel: &P) -> Self {
 		let mut buffer = Self::new(width, height);
@@ -69,6 +88,18 @@ impl<C, P> Buffer<C, P, Vec<C>>
 	/// the pixel returned by the given function.
 	///
 	/// The function takes the coordinates and returns a pixel.
+	///
+	/// # Example
+	///
+	/// ```
+	/// use picto::Buffer;
+	/// use picto::color::Rgb;
+	///
+	/// Buffer::<u8, Rgb, _>::from_fn(1024, 1024, |x, y| {
+	///     let w = (x as f32 + y as f32) / 2048.0;
+	///     Rgb::new(w, w, w)
+	/// });
+	/// ```
 	#[inline]
 	pub fn from_fn<T, F>(width: u32, height: u32, mut func: F) -> Self
 		where T: Into<P>,
@@ -90,6 +121,23 @@ impl<C, P, D> Buffer<C, P, D>
 	      D: Deref<Target = [C]>
 {
 	/// Use an existing container as backing storage for an image `Buffer`.
+	///
+	/// The size of the storage is compared against the supplied dimensions and
+	/// `P::channel()`.
+	///
+	/// # Example
+	///
+	/// ```
+	/// use picto::Buffer;
+	/// use picto::color::Rgb;
+	///
+	/// Buffer::<u8, Rgb, _>::from_raw(2, 2, vec![
+	///     255,   0,   0,
+	///       0, 255,   0,
+	///       0,   0, 255,
+	///     255,   0, 255,
+	/// ]).unwrap();
+	/// ```
 	#[inline]
 	pub fn from_raw(width: u32, height: u32, data: D) -> Result<Self, ()> {
 		if width as usize * height as usize * P::channels() != data.len() {
@@ -116,12 +164,13 @@ impl<C, P, D> Buffer<C, P, D>
 		self.data
 	}
 
+	/// Get the `Area` of the `Buffer`.
 	#[inline]
 	pub fn area(&self) -> Area {
 		self.area
 	}
 
-	/// Get the dimensions.
+	/// Get the dimensions as a tuple containing width and height.
 	#[inline]
 	pub fn dimensions(&self) -> (u32, u32) {
 		(self.area.width, self.area.height)
@@ -171,13 +220,26 @@ impl<C, P, D> Buffer<C, P, D>
 		view::Read::new(&self.data, self.area, area)
 	}
 
-	/// Get an immutable iterator over the `Buffer` pixels.
+	/// Get an immutable `Iterator` over the pixels.
 	#[inline]
 	pub fn pixels(&self) -> Pixels<C, P> {
 		Pixels::new(&self.data, self.area, self.area)
 	}
 
 	/// Convert the `Buffer` to another `Buffer` with different channel and pixel type.
+	///
+	/// # Example
+	///
+	/// ```
+	/// use picto::read;
+	/// use picto::Area;
+	/// use picto::color::{Rgb, Lumaa};
+	///
+	/// let image = read::from_path::<u8, Rgb, _>("tests/boat.xyz").unwrap();
+	///
+	/// // Convert the `Buffer` from Rgb to grayscale with alpha.
+	/// image.convert::<u8, Lumaa>();
+	/// ```
 	#[inline]
 	pub fn convert<CO, PO>(&self) -> Buffer<CO, PO, Vec<CO>>
 		where CO: pixel::Channel,
@@ -226,6 +288,16 @@ impl<C, P, D> Buffer<C, P, D>
 	}
 
 	/// Fill the buffer with the given pixel.
+	///
+	/// # Example
+	///
+	/// ```
+	/// use picto::read;
+	/// use picto::color::Rgb;
+	///
+	/// let mut image = read::from_path::<u8, Rgb, _>("tests/boat.xyz").unwrap();
+	/// image.fill(&Rgb::new(1.0, 1.0, 1.0));
+	/// ```
 	#[inline]
 	pub fn fill(&mut self, pixel: &P) {
 		for chunk in self.chunks_mut(P::channels()) {
@@ -239,11 +311,31 @@ impl<C, P, D> Buffer<C, P, D>
 	      P: pixel::Write<C> + pixel::Read<C>,
 	      D: DerefMut<Target = [C]>
 {
-	/// Get a view of the given sub-image.
+	/// Get a view of the given area.
 	///
 	/// # Panics
 	///
-	/// Requires that `x + width <= self.width()` and `y + height <= self.height()`, otherwise it will panic.
+	/// Requires that `x + width <= self.width()` and `y + height <= self.height()`,
+	/// otherwise it will panic.
+	///
+	/// # Example
+	///
+	/// ```
+	/// use picto::read;
+	/// use picto::Area;
+	/// use picto::color::Rgba;
+	///
+	/// let mut image = read::from_path::<u8, Rgba, _>("tests/boat.xyz").unwrap();
+	/// let mut view  = image.view(Area::new().x(10).y(10).width(20).height(30));
+	///
+	/// for (_, _, mut px) in view.pixels_mut() {
+	///     // Get the current value.
+	///     let p = px.get();
+	///
+	///     // Make it opaque.
+	///     px.set(&Rgba { alpha: 0.5, .. p });
+	/// }
+	/// ```
 	#[inline]
 	pub fn view(&mut self, area: area::Builder) -> View<C, P> {
 		let area = area.complete(self.area);
@@ -255,6 +347,27 @@ impl<C, P, D> Buffer<C, P, D>
 		View::new(&mut self.data, self.area, area)
 	}
 
+	/// Get a mutable `Iterator` over the pixels.
+	///
+	/// # Example
+	///
+	/// ```
+	/// use picto::read;
+	/// use picto::color::{IntoColor, Hue, RgbHue, Rgb};
+	///
+	/// let mut image = read::from_path::<u8, Rgb, _>("tests/boat.xyz").unwrap();
+	///
+	/// for (x, y, mut px) in image.pixels_mut() {
+	///     // Get the pixel value.
+	///     let p = px.get();
+	///
+	///     // Convert to HSL and shift the hue.
+	///     let p = p.into_hsl().shift_hue(RgbHue::from_radians(90.0));
+	///
+	///     // Set the pixel value.
+	///     px.set(&p.into());
+	/// }
+	/// ```
 	#[inline]
 	pub fn pixels_mut(&mut self) -> PixelsMut<C, P> {
 		PixelsMut::new(&mut self.data, self.area, self.area)
