@@ -23,6 +23,20 @@ pub trait Scale<CI, PI>
 	      PI: pixel::Read<CI>
 {
 	/// Resize to the given width and height.
+	///
+	/// # Example
+	///
+	/// ```
+	/// use picto::read;
+	/// use picto::color::Rgb;
+	/// use picto::processing::prelude::*;
+	///
+	/// let image   = read::from_path::<u8, Rgb, _>("tests/boat.xyz").unwrap();
+	/// let resized = image.resize::<scaler::Lanczos3, u8, Rgb>(100, 100);
+	///
+	/// assert_eq!(resized.width(), 100);
+	/// assert_eq!(resized.height(), 100);
+	/// ```
 	fn resize<A, CO, PO>(self, width: u32, height: u32) -> Buffer<CO, PO, Vec<CO>>
 		where A:  Scaler<CI, PI, CO, PO>,
 		      CO: pixel::Channel,
@@ -30,6 +44,20 @@ pub trait Scale<CI, PI>
 		      PO: From<PI>;
 
 	/// Scale by the given factor.
+	///
+	/// # Example
+	///
+	/// ```
+	/// use picto::read;
+	/// use picto::color::Rgb;
+	/// use picto::processing::prelude::*;
+	///
+	/// let image   = read::from_path::<u8, Rgb, _>("tests/boat.xyz").unwrap();
+	/// let resized = image.scale_by::<scaler::Lanczos3, u8, Rgb>(0.5);
+	///
+	/// assert_eq!(resized.width(), 160);
+	/// assert_eq!(resized.height(), 120);
+	/// ```
 	fn scale_by<A, CO, PO>(self, factor: f32) -> Buffer<CO, PO, Vec<CO>>
 		where A:  Scaler<CI, PI, CO, PO>,
 		      CO: pixel::Channel,
@@ -37,6 +65,20 @@ pub trait Scale<CI, PI>
 		      PO: From<PI>;
 
 	/// Scale to the given width and height, maintaining the aspect ratio.
+	///
+	/// # Example
+	///
+	/// ```
+	/// use picto::read;
+	/// use picto::color::Rgb;
+	/// use picto::processing::prelude::*;
+	///
+	/// let image   = read::from_path::<u8, Rgb, _>("tests/boat.xyz").unwrap();
+	/// let resized = image.scale_to::<scaler::Lanczos3, u8, Rgb>(160, 160);
+	///
+	/// assert_eq!(resized.width(), 160);
+	/// assert_eq!(resized.height(), 120);
+	/// ```
 	fn scale_to<A, CO, PO>(self, width: u32, height: u32) -> Buffer<CO, PO, Vec<CO>>
 		where A:  Scaler<CI, PI, CO, PO>,
 		      CO: pixel::Channel,
