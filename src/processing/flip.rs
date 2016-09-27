@@ -16,7 +16,23 @@ use pixel;
 use view::View;
 use orientation::Orientation;
 
-pub trait Flip<C: pixel::Channel, P: pixel::Read<C> + pixel::Write<C>> {
+/// Trait for flippable types.
+pub trait Flip<C, P>
+	where C: pixel::Channel,
+	      P: pixel::Read<C> + pixel::Write<C>
+{
+	/// Flip on the given orientation.
+	///
+	/// # Example
+	///
+	/// ```
+	/// use picto::read;
+	/// use picto::color::Rgb;
+	/// use picto::processing::prelude::*;
+	///
+	/// let mut image = read::from_path::<u8, Rgb, _>("tests/boat.xyz").unwrap();
+	/// image.flip(flip::Vertically);
+	/// ```
 	fn flip(self, mode: Orientation);
 }
 
@@ -30,6 +46,7 @@ impl<'a, C, P, T> Flip<C, P> for T
 	}
 }
 
+/// Flip the given value on the given orientation.
 pub fn it<'a, C, P, T>(value: T, mode: Orientation)
 	where C: pixel::Channel,
 	      P: pixel::Write<C> + pixel::Read<C>,
