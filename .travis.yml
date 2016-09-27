@@ -2,17 +2,31 @@ language: rust
 sudo: false
 
 matrix:
+  fast_finish: true
+
+  allow_failures:
+    - env: [BENCH=resize]
+
   include:
     - rust: stable
     - rust: beta
     - rust: nightly
-      env:
-       - FEATURES='nightly'
-       - BENCHES=1
+
+    # Benchmarks.
+    - rust: nightly
+      env:  [BENCH=read]
+    - rust: nightly
+      env:  [BENCH=create]
+    - rust: nightly
+      env:  [BENCH=resize]
+    - rust: nightly
+      env:  [BENCH=iter]
 
 script:
-  - |
-      cargo test --verbose &&
-      ([[ -z "$FEATURES"                  ]] || cargo test --verbose --features "$FEATURES") &&
-      ([[ -z "$BENCHES"                   ]] || cargo bench --verbose) &&
-      ([[ -z "$BENCHES" && -z "$FEATURES" ]] || cargo bench --verbose --features "$FEATURES")
+  - if [[ ! -z "$BENCH" ]]; then
+      cargo bench --features "nightly" --bench "$BENCH";
+    elif [[ "$TRAVIS_RUST_VERSION" = "nightly" ]]; then
+      cargo test --verbose --features nightly;
+    else
+      cargo test --verbose;
+    fi
