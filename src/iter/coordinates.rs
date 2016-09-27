@@ -14,6 +14,7 @@
 
 use area::Area;
 
+/// Iterator over X and Y coordinates within an `Area`.
 #[derive(Eq, PartialEq, Debug)]
 pub struct Coordinates {
 	x: u32,
@@ -23,6 +24,7 @@ pub struct Coordinates {
 }
 
 impl Coordinates {
+	/// Create a new `Iterator` for the given `Area`.
 	#[inline]
 	pub fn new(area: Area) -> Self {
 		Coordinates {
@@ -33,6 +35,7 @@ impl Coordinates {
 		}
 	}
 
+	/// The `Area` being iterated over.
 	#[inline]
 	pub fn area(&self) -> Area {
 		self.area
