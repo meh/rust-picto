@@ -14,10 +14,99 @@
 
 use pixel;
 use view;
+use orientation::Orientation;
 use color::{Limited, Rgba};
 use super::Sampler;
 use super::util::GetClamped;
 
+/// Trait for samplable types.
+pub trait Sample<CI, PI, CO, PO>
+	where CI: pixel::Channel,
+	      PI: pixel::Read<CI>,
+	      CO: pixel::Channel,
+	      PO: pixel::Write<CO>
+{
+	/// Sample in the given direction.
+	///
+	/// # Example
+	///
+	/// ```
+	/// use picto::read;
+	/// use picto::Buffer;
+	/// use picto::color::Rgb;
+	/// use picto::processing::prelude::*;
+	///
+	/// let     image    = read::from_path::<u8, Rgb, _>("tests/boat.xyz").unwrap();
+	/// let mut vertical = Buffer::<u8, Rgb, _>::new(image.width(), image.height() * 2);
+	/// let mut resized  = Buffer::<u8, Rgb, _>::new(image.width() * 2, image.height() * 2);
+	///
+	/// image.sample::<sampler::Gaussian, _>(&mut vertical, sample::Vertically);
+	/// vertical.sample::<sampler::Gaussian, _>(&mut resized, sample::Horizontally);
+	/// ```
+	fn sample<'o, A, O>(self, output: O, mode: Orientation)
+		where A: Sampler,
+		      O: Into<view::Write<'o, CO, PO>>;
+
+	/// Sample in the given direction with the given support and kernel function.
+	///
+	/// # Example
+	///
+	/// ```
+	/// use picto::read;
+	/// use picto::Buffer;
+	/// use picto::color::Rgb;
+	/// use picto::processing::prelude::*;
+	///
+	/// let     image    = read::from_path::<u8, Rgb, _>("tests/boat.xyz").unwrap();
+	/// let mut vertical = Buffer::<u8, Rgb, _>::new(image.width(), image.height() * 2);
+	/// let mut resized  = Buffer::<u8, Rgb, _>::new(image.width() * 2, image.height() * 2);
+	///
+	/// // Nearest neighbor sampling.
+	/// image.sample_with(&mut vertical, sample::Vertically, 0.5, |x| if x.abs() <= 0.5 { 1.0 } else { 0.0 });
+	/// vertical.sample_with(&mut resized, sample::Horizontally, 0.5, |x| if x.abs() <= 0.5 { 1.0 } else { 0.0 });
+	/// ```
+	fn sample_with<'o, F, O>(self, output: O, mode: Orientation, support: f32, kernel: F)
+		where F: FnMut(f32) -> f32,
+		      O: Into<view::Write<'o, CO, PO>>;
+}
+
+impl<'i, CI, PI, CO, PO, I> Sample<CI, PI, CO, PO> for I
+	where CI: pixel::Channel,
+	      PI: pixel::Read<CI>,
+	      PI: Into<Rgba>,
+	      CO: pixel::Channel,
+	      PO: pixel::Write<CO>,
+	      PO: From<Rgba>,
+	      I:  Into<view::Read<'i, CI, PI>>
+{
+	fn sample<'o, A, O>(self, output: O, mode: Orientation)
+		where A: Sampler,
+		      O: Into<view::Write<'o, CO, PO>>
+	{
+		match mode {
+			Orientation::Vertical =>
+				vertically::<A, CO, PO, CI, PI, _, _>(self, output),
+
+			Orientation::Horizontal =>
+				horizontally::<A, CO, PO, CI, PI, _, _>(self, output)
+		}
+	}
+
+	fn sample_with<'o, F, O>(self, output: O, mode: Orientation, support: f32, kernel: F)
+		where F: FnMut(f32) -> f32,
+		      O: Into<view::Write<'o, CO, PO>>
+	{
+		match mode {
+			Orientation::Vertical =>
+				vertically_with::<CO, PO, CI, PI, _, _, _>(self, output, support, kernel),
+
+			Orientation::Horizontal =>
+				horizontally_with::<CO, PO, CI, PI, _, _, _>(self, output, support, kernel)
+		}
+	}
+}
+
+/// Sample vertically with the given `Sampler`.
 #[inline]
 pub fn vertically<'i, 'o, A, CO, PO, CI, PI, I, O>(input: I, output: O)
 	where A:  Sampler,
@@ -33,6 +122,7 @@ pub fn vertically<'i, 'o, A, CO, PO, CI, PI, I, O>(input: I, output: O)
 	vertically_with(input, output, A::support(), A::kernel)
 }
 
+/// Sample vertically with the given support and kernel function.
 pub fn vertically_with<'i, 'o, CO, PO, CI, PI, I, O, F>(input: I, output: O, support: f32, mut kernel: F)
 	where CO: pixel::Channel,
 	      PO: pixel::Write<CO>,
@@ -86,6 +176,7 @@ pub fn vertically_with<'i, 'o, CO, PO, CI, PI, I, O, F>(input: I, output: O, sup
 	}
 }
 
+/// Sample horizontally with the given `Sampler`.
 #[inline]
 pub fn horizontally<'i, 'o, A, CO, PO, CI, PI, I, O>(input: I, output: O)
 	where A:  Sampler,
@@ -101,6 +192,7 @@ pub fn horizontally<'i, 'o, A, CO, PO, CI, PI, I, O>(input: I, output: O)
 	horizontally_with(input, output, A::support(), A::kernel)
 }
 
+/// Sample horizontally with the given support and kernel function.
 pub fn horizontally_with<'i, 'o, CO, PO, CI, PI, I, O, F>(input: I, output: O, support: f32, mut kernel: F)
 	where CO: pixel::Channel,
 	      PO: pixel::Write<CO>,
