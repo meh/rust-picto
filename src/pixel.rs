@@ -19,8 +19,8 @@ use color::{Lumaa, Rgba, Hsla, Hsva, Hwba, Laba, Lcha, Xyza, Yxya};
 use color::pixel::Srgb;
 use color::RgbHue;
 
-/// Type for the `Channel` in a `Pixel`, this is typically the type for the
-/// element in a buffer as well.
+/// Trait for the `Channel` within a `Pixel`, this is typically the primitive
+/// type within a `Buffer` as well.
 pub trait Channel: Zero + Copy + 'static {
 	fn from<T: Float + 'static>(value: T) -> Self;
 }
@@ -77,7 +77,7 @@ impl_for!(3, Rgb, Srgb, Hsl, Hsv, Hwb, Lab, Lch, Xyz, Yxy);
 impl_for!(4, Rgba, Hsla, Hsva, Hwba, Laba, Lcha, Xyza, Yxya);
 
 /// A `Pixel` readable from a slice.
-pub trait Read<C: Channel> {
+pub trait Read<C: Channel>: Pixel<C> {
 	/// Read a `Pixel` from the slice.
 	fn read(data: &[C]) -> Self;
 }
@@ -261,7 +261,7 @@ impl_for!(hue(RgbHue) f64 3 -> Hsl, Hsv, Hwb);
 impl_for!(hue(RgbHue) f64 4 -> Hsla, Hsva, Hwba);
 
 /// A `Pixel` writable to a slice.
-pub trait Write<C: Channel> {
+pub trait Write<C: Channel>: Pixel<C> {
 	/// Write the `Pixel` to the slice.
 	fn write(&self, data: &mut [C]);
 }

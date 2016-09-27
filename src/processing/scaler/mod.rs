@@ -14,13 +14,13 @@
 
 use view;
 use buffer::Buffer;
-use pixel::{self, Pixel};
+use pixel;
 
 pub trait Scaler<CI, PI, CO, PO>
 	where CI: pixel::Channel,
-	      PI: Pixel<CI> + pixel::Read<CI>,
+	      PI: pixel::Read<CI>,
 	      CO: pixel::Channel,
-	      PO: Pixel<CO> + pixel::Write<CO>
+	      PO: pixel::Write<CO>
 {
 	fn scale(input: &view::Ref<CI, PI>, width: u32, height: u32) -> Buffer<CO, PO, Vec<CO>>;
 }

@@ -12,19 +12,24 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-use pixel::{self, Pixel};
+use pixel;
 use view;
 
-pub trait Clamped<C: pixel::Channel, P: Pixel<C> + pixel::Read<C> + pixel::Write<C>>:
-	Get<C, P> + Set<C, P> { }
+pub trait Clamped<C, P>: Get<C, P> + Set<C, P>
+	where C: pixel::Channel,
+	      P: pixel::Read<C> + pixel::Write<C>
+{ }
 
-pub trait Get<C: pixel::Channel, P: Pixel<C> + pixel::Read<C>> {
+pub trait Get<C, P>
+	where C: pixel::Channel,
+	      P: pixel::Read<C>
+{
 	fn get_clamped(self, x: i64, y: i64) -> P;
 }
 
 impl<'a, C, P, T> Get<C, P> for T
 	where C: pixel::Channel,
-	      P: Pixel<C> + pixel::Read<C>,
+	      P: pixel::Read<C>,
 	      T: Into<view::Ref<'a, C, P>>
 {
 	#[inline]
@@ -38,13 +43,16 @@ impl<'a, C, P, T> Get<C, P> for T
 	}
 }
 
-pub trait Set<C: pixel::Channel, P: Pixel<C> + pixel::Write<C>> {
+pub trait Set<C, P>
+	where C: pixel::Channel,
+	      P: pixel::Write<C>
+{
 	fn set_clamped(self, x: i64, y: i64, value: &P);
 }
 
 impl<'a, C, P, T> Set<C, P> for T
 	where C: pixel::Channel,
-	      P: Pixel<C> + pixel::Write<C>,
+	      P: pixel::Write<C>,
 	      T: Into<view::Mut<'a, C, P>>
 {
 	#[inline]

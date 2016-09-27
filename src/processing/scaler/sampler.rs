@@ -14,17 +14,17 @@
 
 use view;
 use buffer::Buffer;
-use pixel::{self, Pixel};
+use pixel;
 use color::Rgba;
 use processing::{sample, Sampler};
 
 impl<A, CI, PI, CO, PO> super::Scaler<CI, PI, CO, PO> for A
 	where A:  Sampler,
 	      CI: pixel::Channel,
-	      PI: Pixel<CI> + pixel::Read<CI>,
+	      PI: pixel::Read<CI>,
 	      PI: Into<Rgba>,
 	      CO: pixel::Channel,
-	      PO: Pixel<CO> + pixel::Write<CO>,
+	      PO: pixel::Write<CO>,
 	      PO: From<Rgba>
 {
 	#[inline]

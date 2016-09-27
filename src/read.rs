@@ -18,7 +18,7 @@ use std::io::{Read, Seek, Cursor, BufReader};
 
 use decoder::{self, Decoder};
 use color;
-use pixel::{self, Pixel};
+use pixel;
 use buffer::Buffer;
 use format::{self, Format};
 use error::{self, Error};
@@ -26,7 +26,7 @@ use error::{self, Error};
 /// Load an image from an input stream, guessing its format.
 pub fn from<C, P, R>(mut input: R) -> error::Result<Buffer<C, P, Vec<C>>>
 	where C: pixel::Channel,
-	      P: Pixel<C> + pixel::Write<C>,
+	      P: pixel::Write<C>,
 	      P: From<color::Rgb> + From<color::Rgba> + From<color::Luma> + From<color::Lumaa>,
 	      R: Read + Seek
 {
@@ -37,7 +37,7 @@ pub fn from<C, P, R>(mut input: R) -> error::Result<Buffer<C, P, Vec<C>>>
 /// Load an image from memory, guessing its format.
 pub fn from_memory<C, P>(slice: &[u8]) -> error::Result<Buffer<C, P, Vec<C>>>
 	where C: pixel::Channel,
-	      P: Pixel<C> + pixel::Write<C>,
+	      P: pixel::Write<C>,
 	      P: From<color::Rgb> + From<color::Rgba> + From<color::Luma> + From<color::Lumaa>
 {
 	from(Cursor::new(slice))
@@ -46,7 +46,7 @@ pub fn from_memory<C, P>(slice: &[u8]) -> error::Result<Buffer<C, P, Vec<C>>>
 /// Load an image from the given path, guessing its format.
 pub fn from_path<C, P, R>(path: R) -> error::Result<Buffer<C, P, Vec<C>>>
 	where C: pixel::Channel,
-	      P: Pixel<C> + pixel::Write<C>,
+	      P: pixel::Write<C>,
 	      P: From<color::Rgb> + From<color::Rgba> + From<color::Luma> + From<color::Lumaa>,
 	      R: AsRef<Path>
 {
@@ -56,7 +56,7 @@ pub fn from_path<C, P, R>(path: R) -> error::Result<Buffer<C, P, Vec<C>>>
 /// Load an image from an input stream with the given format.
 pub fn with_format<C, P, R>(input: R, format: Format) -> error::Result<Buffer<C, P, Vec<C>>>
 	where C: pixel::Channel,
-	      P: Pixel<C> + pixel::Write<C>,
+	      P: pixel::Write<C>,
 	      P: From<color::Rgb> + From<color::Rgba> + From<color::Luma> + From<color::Lumaa>,
 	      R: Read + Seek
 {
@@ -96,7 +96,7 @@ pub fn with_format<C, P, R>(input: R, format: Format) -> error::Result<Buffer<C,
 #[inline]
 pub fn png<C, P, F, R>(input: R, func: F) -> error::Result<Buffer<C, P, Vec<C>>>
 	where C: pixel::Channel,
-	      P: Pixel<C> + pixel::Write<C>,
+	      P: pixel::Write<C>,
 	      P: From<color::Rgb> + From<color::Rgba> + From<color::Luma> + From<color::Lumaa>,
 	      F: FnOnce(&mut decoder::png::Decoder<R>),
 	      R: Read
@@ -112,7 +112,7 @@ pub fn png<C, P, F, R>(input: R, func: F) -> error::Result<Buffer<C, P, Vec<C>>>
 #[inline]
 pub fn jpeg<C, P, F, R>(input: R, func: F) -> error::Result<Buffer<C, P, Vec<C>>>
 	where C: pixel::Channel,
-	      P: Pixel<C> + pixel::Write<C>,
+	      P: pixel::Write<C>,
 	      P: From<color::Rgb> + From<color::Luma>,
 	      F: FnOnce(&mut decoder::jpeg::Decoder<R>),
 	      R: Read
@@ -128,7 +128,7 @@ pub fn jpeg<C, P, F, R>(input: R, func: F) -> error::Result<Buffer<C, P, Vec<C>>
 #[inline]
 pub fn bmp<C, P, F, R>(input: R, func: F) -> error::Result<Buffer<C, P, Vec<C>>>
 	where C: pixel::Channel,
-	      P: Pixel<C> + pixel::Write<C>,
+	      P: pixel::Write<C>,
 	      P: From<color::Rgb> + From<color::Rgba>,
 	      F: FnOnce(&mut decoder::bmp::Decoder<R>),
 	      R: Read + Seek
@@ -144,7 +144,7 @@ pub fn bmp<C, P, F, R>(input: R, func: F) -> error::Result<Buffer<C, P, Vec<C>>>
 #[inline]
 pub fn tga<C, P, F, R>(input: R, func: F) -> error::Result<Buffer<C, P, Vec<C>>>
 	where C: pixel::Channel,
-	      P: Pixel<C> + pixel::Write<C>,
+	      P: pixel::Write<C>,
 	      P: From<color::Rgb> + From<color::Rgba> + From<color::Luma> + From<color::Lumaa>,
 	      F: FnOnce(&mut decoder::tga::Decoder<R>),
 	      R: Read + Seek
@@ -160,7 +160,7 @@ pub fn tga<C, P, F, R>(input: R, func: F) -> error::Result<Buffer<C, P, Vec<C>>>
 #[inline]
 pub fn gif<C, P, F, R>(input: R, func: F) -> error::Result<Buffer<C, P, Vec<C>>>
 	where C: pixel::Channel,
-	      P: Pixel<C> + pixel::Write<C>,
+	      P: pixel::Write<C>,
 	      P: From<color::Rgb> + From<color::Rgba> + From<color::Luma> + From<color::Lumaa>,
 	      F: FnOnce(&mut decoder::gif::Decoder<R>),
 	      R: Read
@@ -176,7 +176,7 @@ pub fn gif<C, P, F, R>(input: R, func: F) -> error::Result<Buffer<C, P, Vec<C>>>
 #[inline]
 pub fn xyz<C, P, F, R>(input: R, func: F) -> error::Result<Buffer<C, P, Vec<C>>>
 	where C: pixel::Channel,
-	      P: Pixel<C> + pixel::Write<C>,
+	      P: pixel::Write<C>,
 	      P: From<color::Rgb> + From<color::Rgba>,
 	      F: FnOnce(&mut decoder::xyz::Decoder<R>),
 	      R: Read

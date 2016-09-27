@@ -14,12 +14,12 @@
 
 use std::marker::PhantomData;
 
-use pixel::{self, Pixel};
+use pixel;
 use area::Area;
 use iter::Coordinates;
 
 /// Immutable iterator over pixels.
-pub struct Iter<'a, C: pixel::Channel, P: Pixel<C> + pixel::Read<C>> {
+pub struct Iter<'a, C: pixel::Channel, P: pixel::Read<C>> {
 	inner: Coordinates,
 	owner: Area,
 	data:  &'a [C],
@@ -30,7 +30,7 @@ pub struct Iter<'a, C: pixel::Channel, P: Pixel<C> + pixel::Read<C>> {
 
 impl<'a, C, P> Iter<'a, C, P>
 	where C: pixel::Channel,
-	      P: Pixel<C> + pixel::Read<C>
+	      P: pixel::Read<C>
 {
 	#[doc(hidden)]
 	#[inline]
@@ -48,7 +48,7 @@ impl<'a, C, P> Iter<'a, C, P>
 
 /// A readable pixel from the iterator.
 #[derive(Eq, PartialEq, Debug)]
-pub struct Item<'a, C: pixel::Channel, P: Pixel<C> + pixel::Read<C>> {
+pub struct Item<'a, C: pixel::Channel, P: pixel::Read<C>> {
 	data: &'a [C],
 
 	_channel: PhantomData<C>,
@@ -57,7 +57,7 @@ pub struct Item<'a, C: pixel::Channel, P: Pixel<C> + pixel::Read<C>> {
 
 impl<'a, C, P> Item<'a, C, P>
 	where C: pixel::Channel,
-	      P: Pixel<C> + pixel::Read<C>
+	      P: pixel::Read<C>
 {
 	#[doc(hidden)]
 	#[inline]
@@ -79,7 +79,7 @@ impl<'a, C, P> Item<'a, C, P>
 
 impl<'a, C, P> Iterator for Iter<'a, C, P>
 	where C: pixel::Channel,
-	      P: Pixel<C> + pixel::Read<C>
+	      P: pixel::Read<C>
 {
 	type Item = (u32, u32, Item<'a, C, P>);
 
@@ -110,7 +110,7 @@ impl<'a, C, P> Iterator for Iter<'a, C, P>
 
 impl<'a, C, P> ExactSizeIterator for Iter<'a, C, P>
 	where C: pixel::Channel,
-	      P: Pixel<C> + pixel::Read<C>
+	      P: pixel::Read<C>
 {
 	#[inline]
 	fn len(&self) -> usize {

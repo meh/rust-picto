@@ -17,7 +17,10 @@ use pixel::{self, Pixel};
 use error;
 
 /// An image decoder.
-pub trait Decoder<C: pixel::Channel, P: Pixel<C>> {
+pub trait Decoder<C, P>
+	where C: pixel::Channel,
+	      P: Pixel<C>
+{
 	/// Decode a frame from the stream.
 	fn frame(&mut self) -> error::Result<Buffer<C, P, Vec<C>>>;
 }
@@ -49,16 +52,16 @@ macro_rules! cast {
 		mod stable_cast {
 			use std::ops::Deref;
 
-			use pixel::{self, Pixel};
+			use pixel;
 			use buffer::Buffer;
 			use super::Cast;
 
 			impl<CI, PI, DI, CO, PO> Cast<CO, PO> for Buffer<CI, PI, DI>
 				where CI: pixel::Channel,
-				      PI: Pixel<CI> + pixel::Read<CI>,
+				      PI: pixel::Read<CI>,
 				      DI: Deref<Target = [CI]>,
 				      CO: pixel::Channel,
-				      PO: Pixel<CO> + pixel::Write<CO>,
+				      PO: pixel::Write<CO>,
 				      PO: From<PI>
 			{
 				#[inline]
@@ -79,10 +82,10 @@ macro_rules! cast {
 
 			impl<CI, PI, DI, CO, PO> Cast<CO, PO> for Buffer<CI, PI, DI>
 				where CI: pixel::Channel,
-				      PI: Pixel<CI> + pixel::Read<CI>,
+				      PI: pixel::Read<CI>,
 				      DI: Deref<Target = [CI]>,
 				      CO: pixel::Channel,
-				      PO: Pixel<CO> + pixel::Write<CO>,
+				      PO: pixel::Write<CO>,
 				      PO: From<PI>
 			{
 				#[inline]

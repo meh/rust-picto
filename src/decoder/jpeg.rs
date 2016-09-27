@@ -47,7 +47,7 @@ impl<R: Read> Decoder<R> {
 
 impl<C, P, R> super::Decoder<C, P> for Decoder<R>
 	where C: pixel::Channel,
-	      P: Pixel<C> + pixel::Write<C>,
+	      P: pixel::Write<C>,
 	      P: From<color::Rgb> + From<color::Luma>,
 	      R: Read
 {

@@ -15,12 +15,12 @@
 use std::slice;
 use std::marker::PhantomData;
 
-use pixel::{self, Pixel};
+use pixel;
 use area::Area;
 use iter::Coordinates;
 
 /// Mutable iterator over pixels.
-pub struct Iter<'a, C: pixel::Channel, P: Pixel<C> + pixel::Read<C> + pixel::Write<C>> {
+pub struct Iter<'a, C: pixel::Channel, P: pixel::Read<C> + pixel::Write<C>> {
 	inner: Coordinates,
 	owner: Area,
 	data:  &'a mut [C],
@@ -31,7 +31,7 @@ pub struct Iter<'a, C: pixel::Channel, P: Pixel<C> + pixel::Read<C> + pixel::Wri
 
 impl<'a, C, P> Iter<'a, C, P>
 	where C: pixel::Channel,
-	      P: Pixel<C> + pixel::Read<C> + pixel::Write<C>
+	      P: pixel::Read<C> + pixel::Write<C>
 {
 	#[doc(hidden)]
 	#[inline]
@@ -49,7 +49,7 @@ impl<'a, C, P> Iter<'a, C, P>
 
 /// A readable and writable pixel from the iterator.
 #[derive(Eq, PartialEq, Debug)]
-pub struct Item<'a, C: pixel::Channel, P: Pixel<C> + pixel::Read<C> + pixel::Write<C>> {
+pub struct Item<'a, C: pixel::Channel, P: pixel::Read<C> + pixel::Write<C>> {
 	data: &'a mut [C],
 
 	_channel: PhantomData<C>,
@@ -58,7 +58,7 @@ pub struct Item<'a, C: pixel::Channel, P: Pixel<C> + pixel::Read<C> + pixel::Wri
 
 impl<'a, C, P> Item<'a, C, P>
 	where C: pixel::Channel,
-	      P: Pixel<C> + pixel::Read<C> + pixel::Write<C>
+	      P: pixel::Read<C> + pixel::Write<C>
 {
 	#[doc(hidden)]
 	#[inline]
@@ -86,7 +86,7 @@ impl<'a, C, P> Item<'a, C, P>
 
 impl<'a, C, P> Iterator for Iter<'a, C, P>
 	where C: pixel::Channel,
-	      P: Pixel<C> + pixel::Read<C> + pixel::Write<C>
+	      P: pixel::Read<C> + pixel::Write<C>
 {
 	type Item = (u32, u32, Item<'a, C, P>);
 
@@ -121,7 +121,7 @@ impl<'a, C, P> Iterator for Iter<'a, C, P>
 
 impl<'a, C, P> ExactSizeIterator for Iter<'a, C, P>
 	where C: pixel::Channel,
-	      P: Pixel<C> + pixel::Read<C> + pixel::Write<C>
+	      P: pixel::Read<C> + pixel::Write<C>
 {
 	#[inline]
 	fn len(&self) -> usize {

@@ -12,7 +12,7 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-use pixel::{self, Pixel};
+use pixel;
 use view;
 use color::{Limited, Rgba};
 use super::Sampler;
@@ -22,10 +22,10 @@ use super::util::GetClamped;
 pub fn vertically<'i, 'o, A, CO, PO, CI, PI, I, O>(input: I, output: O)
 	where A:  Sampler,
 	      CO: pixel::Channel,
-	      PO: Pixel<CO> + pixel::Write<CO>,
+	      PO: pixel::Write<CO>,
 	      PO: From<Rgba>,
 	      CI: pixel::Channel,
-	      PI: Pixel<CI> + pixel::Read<CI>,
+	      PI: pixel::Read<CI>,
 	      PI: Into<Rgba>,
 	      I:  Into<view::Ref<'i, CI, PI>>,
 	      O:  Into<view::Mut<'o, CO, PO>>
@@ -35,10 +35,10 @@ pub fn vertically<'i, 'o, A, CO, PO, CI, PI, I, O>(input: I, output: O)
 
 pub fn vertically_with<'i, 'o, CO, PO, CI, PI, I, O, F>(input: I, output: O, support: f32, mut kernel: F)
 	where CO: pixel::Channel,
-	      PO: Pixel<CO> + pixel::Write<CO>,
+	      PO: pixel::Write<CO>,
 	      PO: From<Rgba>,
 	      CI: pixel::Channel,
-	      PI: Pixel<CI> + pixel::Read<CI>,
+	      PI: pixel::Read<CI>,
 	      PI: Into<Rgba>,
 	      I:  Into<view::Ref<'i, CI, PI>>,
 	      O:  Into<view::Mut<'o, CO, PO>>,
@@ -90,10 +90,10 @@ pub fn vertically_with<'i, 'o, CO, PO, CI, PI, I, O, F>(input: I, output: O, sup
 pub fn horizontally<'i, 'o, A, CO, PO, CI, PI, I, O>(input: I, output: O)
 	where A:  Sampler,
 	      CO: pixel::Channel,
-	      PO: Pixel<CO> + pixel::Write<CO>,
+	      PO: pixel::Write<CO>,
 	      PO: From<Rgba>,
 	      CI: pixel::Channel,
-	      PI: Pixel<CI> + pixel::Read<CI>,
+	      PI: pixel::Read<CI>,
 	      PI: Into<Rgba>,
 	      I:  Into<view::Ref<'i, CI, PI>>,
 	      O:  Into<view::Mut<'o, CO, PO>>
@@ -103,10 +103,10 @@ pub fn horizontally<'i, 'o, A, CO, PO, CI, PI, I, O>(input: I, output: O)
 
 pub fn horizontally_with<'i, 'o, CO, PO, CI, PI, I, O, F>(input: I, output: O, support: f32, mut kernel: F)
 	where CO: pixel::Channel,
-	      PO: Pixel<CO> + pixel::Write<CO>,
+	      PO: pixel::Write<CO>,
 	      PO: From<Rgba>,
 	      CI: pixel::Channel,
-	      PI: Pixel<CI> + pixel::Read<CI>,
+	      PI: pixel::Read<CI>,
 	      PI: Into<Rgba>,
 	      I:  Into<view::Ref<'i, CI, PI>>,
 	      O:  Into<view::Mut<'o, CO, PO>>,

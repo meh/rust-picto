@@ -23,7 +23,10 @@ use iter::pixel::{Iter as Pixels, IterMut as PixelsMut};
 
 /// Buffer for an image.
 #[derive(PartialEq, Debug)]
-pub struct Buffer<C: pixel::Channel, P: Pixel<C>, D> {
+pub struct Buffer<C, P, D>
+	where C: pixel::Channel,
+	      P: Pixel<C>
+{
 	area: Area,
 	data: D,
 
@@ -50,7 +53,7 @@ impl<C, P> Buffer<C, P, Vec<C>>
 
 impl<C, P> Buffer<C, P, Vec<C>>
 	where C: pixel::Channel,
-	      P: Pixel<C> + pixel::Write<C>,
+	      P: pixel::Write<C>,
 {
 	/// Create a new `Buffer` with the request space allocated and filled with
 	/// the given pixel.
@@ -142,7 +145,7 @@ impl<C, P, D> Buffer<C, P, D>
 
 impl<C, P, D> Buffer<C, P, D>
 	where C: pixel::Channel,
-	      P: Pixel<C> + pixel::Read<C>,
+	      P: pixel::Read<C>,
 	      D: Deref<Target = [C]>
 {
 	/// Get the `Pixel` at the given coordinates.
@@ -181,7 +184,7 @@ impl<C, P, D> Buffer<C, P, D>
 	#[inline]
 	pub fn convert<CO, PO>(&self) -> Buffer<CO, PO, Vec<CO>>
 		where CO: pixel::Channel,
-		      PO: Pixel<CO> + pixel::Write<CO>,
+		      PO: pixel::Write<CO>,
 		      P: Into<PO>
 	{
 		let mut result = Buffer::<CO, PO, Vec<_>>::new(self.area.width, self.area.height);
@@ -196,7 +199,7 @@ impl<C, P, D> Buffer<C, P, D>
 
 impl<C, P, D> Buffer<C, P, D>
 	where C: pixel::Channel,
-	      P: Pixel<C> + pixel::Write<C>,
+	      P: pixel::Write<C>,
 	      D: DerefMut<Target = [C]>
 {
 	/// Set the `Pixel` at the given coordinates.
@@ -228,7 +231,7 @@ impl<C, P, D> Buffer<C, P, D>
 
 impl<C, P, D> Buffer<C, P, D>
 	where C: pixel::Channel,
-	      P: Pixel<C> + pixel::Write<C> + pixel::Read<C>,
+	      P: pixel::Write<C> + pixel::Read<C>,
 	      D: DerefMut<Target = [C]>
 {
 	/// Get a view of the given sub-image.
@@ -255,7 +258,7 @@ impl<C, P, D> Buffer<C, P, D>
 
 impl<'a, C, P, D> From<&'a Buffer<C, P, D>> for view::Ref<'a, C, P>
 	where C: pixel::Channel,
-	      P: Pixel<C> + pixel::Read<C>,
+	      P: pixel::Read<C>,
 	      D: Deref<Target = [C]>
 {
 	#[inline]
@@ -266,7 +269,7 @@ impl<'a, C, P, D> From<&'a Buffer<C, P, D>> for view::Ref<'a, C, P>
 
 impl<'a, C, P, D> From<&'a mut Buffer<C, P, D>> for view::Mut<'a, C, P>
 	where C: pixel::Channel,
-	      P: Pixel<C> + pixel::Write<C>,
+	      P: pixel::Write<C>,
 	      D: DerefMut<Target = [C]>,
 {
 	#[inline]
@@ -277,7 +280,7 @@ impl<'a, C, P, D> From<&'a mut Buffer<C, P, D>> for view::Mut<'a, C, P>
 
 impl<'a, C, P, D> From<&'a mut Buffer<C, P, D>> for View<'a, C, P>
 	where C: pixel::Channel,
-	      P: Pixel<C> + pixel::Write<C> + pixel::Read<C>,
+	      P: pixel::Write<C> + pixel::Read<C>,
 	      D: DerefMut<Target = [C]>
 {
 	#[inline]

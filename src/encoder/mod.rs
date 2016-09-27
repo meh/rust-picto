@@ -19,7 +19,11 @@ use pixel::{self, Pixel};
 use error;
 
 /// An image encoder.
-pub trait Encoder<C: pixel::Channel, P: Pixel<C>, D: Deref<Target = [C]>> {
+pub trait Encoder<C, P, D>
+	where C: pixel::Channel,
+	      P: Pixel<C>,
+	      D: Deref<Target = [C]>
+{
 	/// A frame for the image, respecting the previously defined metadata.
 	fn frame(&mut self, buffer: &Buffer<C, P, D>) -> error::Result<()>;
 }
@@ -58,16 +62,16 @@ macro_rules! cast {
 			use std::ops::Deref;
 			use std::borrow::Cow;
 
-			use pixel::{self, Pixel};
+			use pixel;
 			use buffer::Buffer;
 			use super::Cast;
 
 			impl<CI, PI, DI, PO> Cast<PO> for Buffer<CI, PI, DI>
 				where CI: pixel::Channel,
-				      PI: Pixel<CI> + pixel::Read<CI>,
+				      PI: pixel::Read<CI>,
 				      PI: Into<PO>,
 				      DI: Deref<Target = [CI]>,
-				      PO: Pixel<u8> + pixel::Write<u8>
+				      PO: pixel::Write<u8>
 			{
 				#[inline]
 				fn cast(&self) -> Cow<[u8]> {
@@ -84,16 +88,16 @@ macro_rules! cast {
 			use std::mem;
 
 			use num::Float;
-			use pixel::{self, Pixel};
+			use pixel;
 			use buffer::Buffer;
 			use super::Cast;
 
 			impl<CI, PI, DI, PO> Cast<PO> for Buffer<CI, PI, DI>
 				where CI: pixel::Channel,
-				      PI: Pixel<CI> + pixel::Read<CI>,
+				      PI: pixel::Read<CI>,
 				      PI: Into<PO>,
 				      DI: Deref<Target = [CI]>,
-				      PO: Pixel<u8> + pixel::Write<u8>
+				      PO: pixel::Write<u8>
 			{
 				#[inline]
 				default

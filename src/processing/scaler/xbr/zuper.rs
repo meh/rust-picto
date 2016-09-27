@@ -16,7 +16,7 @@ use std::ops::Range;
 
 use view;
 use buffer::Buffer;
-use pixel::{self, Pixel};
+use pixel;
 use color::{Rgba, Limited};
 use processing::Scaler;
 use processing::util::{clamp, GetClamped};
@@ -25,10 +25,10 @@ pub struct Super;
 
 impl<CI, PI, CO, PO> Scaler<CI, PI, CO, PO> for Super
 	where CI: pixel::Channel,
-	      PI: Pixel<CI> + pixel::Read<CI>,
+	      PI: pixel::Read<CI>,
 	      PI: Into<Rgba>,
 	      CO: pixel::Channel,
-	      PO: Pixel<CO> + pixel::Write<CO> + pixel::Read<CO>,
+	      PO: pixel::Write<CO> + pixel::Read<CO>,
 	      PO: From<Rgba> + Into<Rgba> + From<PI>
 {
 	#[inline]
@@ -54,10 +54,10 @@ impl<CI, PI, CO, PO> Scaler<CI, PI, CO, PO> for Super
 #[allow(non_snake_case)]
 fn scale<CI, PI, CO, PO>(input: &view::Ref<CI, PI>) -> Buffer<CO, PO, Vec<CO>>
 	where CI: pixel::Channel,
-	      PI: Pixel<CI> + pixel::Read<CI>,
+	      PI: pixel::Read<CI>,
 	      PI: Into<Rgba> + Into<PO>,
 	      CO: pixel::Channel,
-	      PO: Pixel<CO> + pixel::Write<CO> + pixel::Read<CO>,
+	      PO: pixel::Write<CO> + pixel::Read<CO>,
 	      PO: From<Rgba> + Into<Rgba>
 {
 	const WEIGHT1: f32 = 0.129633;
@@ -184,7 +184,7 @@ type Matrix = [[f32; 4]; 4];
 #[allow(non_snake_case)]
 fn sample<CI, PI, F>(input: &view::Ref<CI, PI>, offset: i64, range: Range<i64>, func: F) -> (Matrix, Matrix, Matrix, Matrix, Matrix)
 	where CI: pixel::Channel,
-	      PI: Pixel<CI> + pixel::Read<CI>,
+	      PI: pixel::Read<CI>,
 	      PI: Into<Rgba>,
 	      F:  Fn(i64, i64) -> (i64, i64)
 {

@@ -12,7 +12,7 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-use pixel::{self, Pixel};
+use pixel;
 use view::View;
 
 #[derive(Eq, PartialEq, Copy, Clone, Debug)]
@@ -21,13 +21,13 @@ pub enum Orientation {
 	Horizontal,
 }
 
-pub trait Flip<C: pixel::Channel, P: Pixel<C> + pixel::Read<C> + pixel::Write<C>> {
+pub trait Flip<C: pixel::Channel, P: pixel::Read<C> + pixel::Write<C>> {
 	fn flip(self, mode: Orientation);
 }
 
 impl<'a, C, P, T> Flip<C, P> for T
 	where C: pixel::Channel,
-	      P: Pixel<C> + pixel::Read<C> + pixel::Write<C>,
+	      P: pixel::Read<C> + pixel::Write<C>,
 	      T: Into<View<'a, C, P>>
 {
 	fn flip(self, mode: Orientation) {
@@ -37,7 +37,7 @@ impl<'a, C, P, T> Flip<C, P> for T
 
 pub fn it<'a, C, P, T>(value: T, mode: Orientation)
 	where C: pixel::Channel,
-	      P: Pixel<C> + pixel::Write<C> + pixel::Read<C>,
+	      P: pixel::Write<C> + pixel::Read<C>,
 	      T: Into<View<'a, C, P>>
 {
 	let mut view   = value.into();

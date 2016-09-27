@@ -14,16 +14,16 @@
 
 use view;
 use buffer::Buffer;
-use pixel::{self, Pixel};
+use pixel;
 use processing::util::GetClamped;
 
 pub struct Nearest;
 
 impl<CI, PI, CO, PO> super::Scaler<CI, PI, CO, PO> for Nearest
 	where CI: pixel::Channel,
-	      PI: Pixel<CI> + pixel::Read<CI>,
+	      PI: pixel::Read<CI>,
 	      CO: pixel::Channel,
-	      PO: Pixel<CO> + pixel::Write<CO>,
+	      PO: pixel::Write<CO>,
 	      PO: From<PI>
 {
 	#[inline]
