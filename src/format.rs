@@ -15,6 +15,7 @@
 use std::io::{Read, Seek, SeekFrom};
 use byteorder::{BigEndian, ReadBytesExt};
 
+/// An image format.
 #[derive(Eq, PartialEq, Copy, Clone, Debug)]
 pub enum Format {
 	Png,
