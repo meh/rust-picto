@@ -25,6 +25,19 @@ use format::Format;
 use error::{self, Error};
 
 /// Write the buffer to the output stream in PNG format.
+///
+/// # Example
+///
+/// ```
+/// use std::fs::File;
+///
+/// use picto::write;
+/// use picto::read;
+/// use picto::color::Rgb;
+///
+/// let image = read::from_path::<u8, Rgb, _>("tests/boat.xyz").unwrap();
+/// write::to(File::create("tests/test.png").unwrap(), &image);
+/// ```
 #[inline]
 pub fn to<C, P, D, W>(output: W, buffer: &Buffer<C, P, D>) -> error::Result<()>
 	where C: pixel::Channel,
@@ -38,6 +51,17 @@ pub fn to<C, P, D, W>(output: W, buffer: &Buffer<C, P, D>) -> error::Result<()>
 
 /// Write the buffer to the given path guessing the format based on the file
 /// extension.
+///
+/// # Example
+///
+/// ```
+/// use picto::write;
+/// use picto::read;
+/// use picto::color::Rgb;
+///
+/// let image = read::from_path::<u8, Rgb, _>("tests/boat.xyz").unwrap();
+/// write::to_path("tests/test.jpeg", &image);
+/// ```
 #[inline]
 pub fn to_path<C, P, D, W>(path: W, buffer: &Buffer<C, P, D>) -> error::Result<()>
 	where C: pixel::Channel,
@@ -72,6 +96,20 @@ pub fn to_path<C, P, D, W>(path: W, buffer: &Buffer<C, P, D>) -> error::Result<(
 }
 
 /// Write the buffer to the output stream using the given format.
+///
+/// # Example
+///
+/// ```
+/// use std::fs::File;
+///
+/// use picto::write;
+/// use picto::read;
+/// use picto::Format;
+/// use picto::color::Rgb;
+///
+/// let image = read::from_path::<u8, Rgb, _>("tests/boat.xyz").unwrap();
+/// write::with_format(File::create("tests/test.png").unwrap(), Format::Bmp, &image);
+/// ```
 #[inline]
 pub fn with_format<C, P, D, W>(output: W, format: Format, buffer: &Buffer<C, P, D>) -> error::Result<()>
 	where C: pixel::Channel,
