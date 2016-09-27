@@ -34,26 +34,6 @@ impl Coordinates {
 	}
 
 	#[inline]
-	pub fn x(&self) -> u32 {
-		self.x
-	}
-
-	#[inline]
-	pub fn y(&self) -> u32 {
-		self.y
-	}
-
-	#[inline]
-	pub fn width(&self) -> u32 {
-		self.area.width
-	}
-
-	#[inline]
-	pub fn height(&self) -> u32 {
-		self.area.height
-	}
-
-	#[inline]
 	pub fn area(&self) -> Area {
 		self.area
 	}
