@@ -76,7 +76,7 @@ macro_rules! cast {
 			use std::ops::Deref;
 
 			use num::Float;
-			use pixel::{self, Pixel};
+			use pixel;
 			use buffer::Buffer;
 			use super::Cast;
 
