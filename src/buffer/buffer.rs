@@ -16,9 +16,11 @@ use std::ops::{Deref, DerefMut};
 use std::marker::PhantomData;
 
 use num;
+use orientation::Orientation;
 use pixel::{self, Pixel};
 use view::{self, View};
 use area::{self, Area};
+use color;
 use iter::pixel::{Iter as Pixels, IterMut as PixelsMut};
 
 /// Buffer for an image.
@@ -109,6 +111,47 @@ impl<C, P> Buffer<C, P, Vec<C>>
 
 		for (x, y) in buffer.area().absolute() {
 			buffer.set(x, y, &func(x, y).into());
+		}
+
+		buffer
+	}
+}
+
+impl<C, P> Buffer<C, P, Vec<C>>
+	where C: pixel::Channel,
+	      P: pixel::Write<C> + color::Mix + Clone,
+{
+	/// Create a `Buffer` from an orientation and a gradient.
+	///
+	/// # Example
+	///
+	/// ```
+	/// use picto::{Buffer, Orientation};
+	/// use picto::color::{Rgb, Gradient};
+	///
+	/// Buffer::<u8, Rgb, _>::from_gradient(1024, 1024, Orientation::Horizontal, Gradient::new(
+	///     vec![Rgb::new(0.0, 0.0, 0.0), Rgb::new(1.0, 1.0, 1.0), Rgb::new(0.0, 0.0, 0.0)]));
+	/// ```
+	#[inline]
+	pub fn from_gradient(width: u32, height: u32, mode: Orientation, gradient: color::Gradient<P>) -> Self {
+		let mut buffer = Buffer::new(width, height);
+
+		match mode {
+			Orientation::Vertical => {
+				for (y, px) in (0 .. height).zip(gradient.take(height as usize)) {
+					for x in 0 .. width {
+						buffer.set(x, y, &px);
+					}
+				}
+			}
+
+			Orientation::Horizontal => {
+				for (x, px) in (0 .. width).zip(gradient.take(width as usize)) {
+					for y in 0 .. height {
+						buffer.set(x, y, &px);
+					}
+				}
+			}
 		}
 
 		buffer

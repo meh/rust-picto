@@ -12,14 +12,22 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-pub use processing::sampler;
-pub use processing::scaler;
+#[derive(Eq, PartialEq, Copy, Clone, Debug)]
+pub enum Orientation {
+	Vertical,
+	Horizontal,
+}
 
-pub use processing::Flip;
-pub use processing::Scale;
+impl Orientation {
+	/// Reverse the orientation.
+	#[inline]
+	pub fn rev(&self) -> Self {
+		match *self {
+			Orientation::Vertical =>
+				Orientation::Horizontal,
 
-/// Flipping orientation.
-pub mod flip {
-	pub use orientation::Orientation::Vertical as Vertically;
-	pub use orientation::Orientation::Horizontal as Horizontally;
+			Orientation::Horizontal =>
+				Orientation::Vertical
+		}
+	}
 }

@@ -48,6 +48,9 @@ pub use parameter::{HasParameters, Parameter};
 mod area;
 pub use area::Area;
 
+mod orientation;
+pub use orientation::Orientation;
+
 /// Basic traits for types within a `Buffer` and views.
 pub mod pixel;
 pub use pixel::Pixel;
