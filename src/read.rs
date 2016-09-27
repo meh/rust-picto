@@ -24,6 +24,17 @@ use format::{self, Format};
 use error::{self, Error};
 
 /// Load an image from an input stream, guessing its format.
+///
+/// # Example
+///
+/// ```
+/// use std::fs::File;
+///
+/// use picto::read;
+/// use picto::color::Rgb;
+///
+/// read::from::<u8, Rgb, _>(File::open("tests/boat.xyz").unwrap()).unwrap();
+/// ```
 pub fn from<C, P, R>(mut input: R) -> error::Result<Buffer<C, P, Vec<C>>>
 	where C: pixel::Channel,
 	      P: pixel::Write<C>,
@@ -35,6 +46,22 @@ pub fn from<C, P, R>(mut input: R) -> error::Result<Buffer<C, P, Vec<C>>>
 }
 
 /// Load an image from memory, guessing its format.
+///
+/// # Example
+///
+/// ```
+/// use std::fs::File;
+/// use std::io::Read;
+///
+/// use picto::read;
+/// use picto::color::Rgb;
+///
+/// let mut buffer = Vec::new();
+/// let mut file   = File::open("tests/boat.xyz").unwrap();
+/// file.read_to_end(&mut buffer).unwrap();
+///
+/// read::from_memory::<u8, Rgb>(&buffer).unwrap();
+/// ```
 pub fn from_memory<C, P>(slice: &[u8]) -> error::Result<Buffer<C, P, Vec<C>>>
 	where C: pixel::Channel,
 	      P: pixel::Write<C>,
@@ -44,6 +71,15 @@ pub fn from_memory<C, P>(slice: &[u8]) -> error::Result<Buffer<C, P, Vec<C>>>
 }
 
 /// Load an image from the given path, guessing its format.
+///
+/// # Example
+///
+/// ```
+/// use picto::read;
+/// use picto::color::Rgb;
+///
+/// read::from_path::<u8, Rgb, _>("tests/boat.xyz").unwrap();
+/// ```
 pub fn from_path<C, P, R>(path: R) -> error::Result<Buffer<C, P, Vec<C>>>
 	where C: pixel::Channel,
 	      P: pixel::Write<C>,
@@ -54,6 +90,18 @@ pub fn from_path<C, P, R>(path: R) -> error::Result<Buffer<C, P, Vec<C>>>
 }
 
 /// Load an image from an input stream with the given format.
+///
+/// # Example
+///
+/// ```
+/// use std::fs::File;
+///
+/// use picto::read;
+/// use picto::color::Rgb;
+/// use picto::Format;
+///
+/// read::with_format::<u8, Rgb, _>(File::open("tests/boat.xyz").unwrap(), Format::Xyz).unwrap();
+/// ```
 pub fn with_format<C, P, R>(input: R, format: Format) -> error::Result<Buffer<C, P, Vec<C>>>
 	where C: pixel::Channel,
 	      P: pixel::Write<C>,
