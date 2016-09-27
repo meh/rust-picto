@@ -12,12 +12,15 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
+//! Image encoding/decoding and manipulation library.
+
 #![cfg_attr(feature = "nightly", feature(specialization))]
 #[cfg(test)] #[macro_use] extern crate approx;
 
 extern crate byteorder;
 extern crate num;
 
+#[doc(hidden)]
 pub extern crate palette;
 pub use palette as color;
 
@@ -36,28 +39,34 @@ extern crate gif;
 #[cfg(feature = "xyz")]
 extern crate xyz;
 
-pub mod error;
+mod error;
 pub use error::{Error, Result};
 
 mod parameter;
 pub use parameter::{HasParameters, Parameter};
 
-pub mod area;
+mod area;
 pub use area::Area;
 
+/// Basic traits for types within a `Buffer` and views.
 pub mod pixel;
 pub use pixel::Pixel;
 
+/// Types of view within a `Buffer`.
 pub mod view;
 pub use view::View;
 
+/// Iterator types.
 pub mod iter;
 
+/// Buffer related functionality.
 pub mod buffer;
 pub use buffer::Buffer;
 
+/// Image manipulation functions.
 pub mod processing;
 
+/// Image format related functions.
 pub mod format;
 pub use format::Format;
 
@@ -67,5 +76,8 @@ pub use decoder::Decoder;
 mod encoder;
 pub use encoder::Encoder;
 
+/// Image decoding functions.
 pub mod read;
+
+/// Image encoding functions.
 pub mod write;
