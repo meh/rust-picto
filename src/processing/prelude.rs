@@ -16,6 +16,7 @@ pub use processing::sampler;
 pub use processing::scaler;
 
 pub use processing::Flip;
+pub use processing::Rotate;
 pub use processing::Scale;
 pub use processing::Sample;
 pub use processing::Blur;

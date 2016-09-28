@@ -42,6 +42,10 @@ pub use self::scaler::Scaler;
 pub mod flip;
 pub use self::flip::Flip;
 
+/// Image rotation.
+pub mod rotate;
+pub use self::rotate::Rotate;
+
 /// Image scaling.
 pub mod scale;
 pub use self::scale::Scale;
