@@ -16,6 +16,7 @@ use buffer::Buffer;
 use pixel;
 use view;
 
+/// Trait for rotatable types.
 pub trait Rotate<CI, PI>
 	where CI: pixel::Channel,
 	      PI: pixel::Read<CI>
