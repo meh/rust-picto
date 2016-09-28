@@ -24,6 +24,7 @@ impl<C, P> Shade for Buffer<C, P, Vec<C>>
 {
 	type Scalar = P::Scalar;
 
+	#[inline]
 	fn lighten(&self, amount: Self::Scalar) -> Self {
 		let mut output = Buffer::<C, P, _>::new(self.width(), self.height());
 
@@ -42,6 +43,7 @@ impl<C, P> Mix for Buffer<C, P, Vec<C>>
 {
 	type Scalar = P::Scalar;
 
+	#[inline]
 	fn mix(&self, other: &Self, factor: Self::Scalar) -> Self {
 		let mut output = Buffer::<C, P, _>::new(self.width(), self.height());
 
@@ -58,6 +60,7 @@ impl<C, P> Limited for Buffer<C, P, Vec<C>>
 	      P: pixel::Read<C> + pixel::Write<C>,
 	      P: Limited
 {
+	#[inline]
 	fn is_valid(&self) -> bool {
 		for (_, _, px) in self.pixels() {
 			if !px.get().is_valid() {
@@ -68,6 +71,7 @@ impl<C, P> Limited for Buffer<C, P, Vec<C>>
 		true
 	}
 
+	#[inline]
 	fn clamp(&self) -> Self {
 		let mut output = Buffer::<C, P, _>::new(self.width(), self.height());
 
@@ -78,6 +82,7 @@ impl<C, P> Limited for Buffer<C, P, Vec<C>>
 		output
 	}
 
+	#[inline]
 	fn clamp_self(&mut self) {
 		for (_, _, mut px) in self.pixels_mut() {
 			let p = px.get().clamp();
@@ -93,6 +98,7 @@ impl<C, P> ComponentWise for Buffer<C, P, Vec<C>>
 {
 	type Scalar = P::Scalar;
 
+	#[inline]
 	fn component_wise<F>(&self, other: &Self, mut f: F) -> Self
 		where F: FnMut(Self::Scalar, Self::Scalar) -> Self::Scalar
 	{
@@ -105,6 +111,7 @@ impl<C, P> ComponentWise for Buffer<C, P, Vec<C>>
 		output
 	}
 
+	#[inline]
 	fn component_wise_self<F>(&self, mut f: F) -> Self
 		where F: FnMut(Self::Scalar) -> Self::Scalar
 	{
@@ -125,6 +132,7 @@ impl<C, P> Saturate for Buffer<C, P, Vec<C>>
 {
 	type Scalar = P::Scalar;
 
+	#[inline]
 	fn saturate(&self, amount: Self::Scalar) -> Self {
 		let mut output = Buffer::<C, P, _>::new(self.width(), self.height());
 
