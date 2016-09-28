@@ -57,3 +57,7 @@ pub use self::sample::Sample;
 /// Image blurring.
 pub mod blur;
 pub use self::blur::Blur;
+
+/// Image sharpening.
+pub mod sharpen;
+pub use self::sharpen::Sharpen;

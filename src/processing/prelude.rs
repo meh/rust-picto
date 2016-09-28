@@ -20,6 +20,7 @@ pub use processing::Rotate;
 pub use processing::Scale;
 pub use processing::Sample;
 pub use processing::Blur;
+pub use processing::Sharpen;
 
 /// Flipping orientation.
 pub mod flip {
