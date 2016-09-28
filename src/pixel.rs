@@ -22,34 +22,40 @@ use color::RgbHue;
 /// Trait for the `Channel` within a `Pixel`, this is typically the primitive
 /// type within a `Buffer` as well.
 pub trait Channel: Zero + Copy + 'static {
+	/// Convert the passed value to a proper `Channel`.
 	fn from<T: Float + 'static>(value: T) -> Self;
 }
 
 impl Channel for u8 {
+	#[inline]
 	fn from<T: Float + 'static>(value: T) -> Self {
 		num!(value * num!(u8::max_value()))
 	}
 }
 
 impl Channel for u16 {
+	#[inline]
 	fn from<T: Float + 'static>(value: T) -> Self {
 		num!(value * num!(u16::max_value()))
 	}
 }
 
 impl Channel for u32 {
+	#[inline]
 	fn from<T: Float + 'static>(value: T) -> Self {
 		num!(value * num!(u32::max_value()))
 	}
 }
 
 impl Channel for f32 {
+	#[inline]
 	fn from<T: Float + 'static>(value: T) -> Self {
 		num!(value)
 	}
 }
 
 impl Channel for f64 {
+	#[inline]
 	fn from<T: Float + 'static>(value: T) -> Self {
 		num!(value)
 	}
