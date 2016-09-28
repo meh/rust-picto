@@ -17,3 +17,6 @@ pub use self::buffer::Buffer;
 
 /// Cast traits for optimizations.
 pub mod cast;
+
+/// Implementations from palette.
+mod palette;
