@@ -155,4 +155,14 @@ mod nightly {
 		(u16, Luma),  (u16, Rgb),  (u16, Hsl),  (u16, Hsv),  (u16, Hwb),  (u16, Lab),  (u16, Lch),  (u16, Xyz),  (u16, Yxy),
 		(u16, Lumaa), (u16, Rgba), (u16, Hsla), (u16, Hsva), (u16, Hwba), (u16, Laba), (u16, Lcha), (u16, Xyza), (u16, Yxya),
 	}
+
+	impl_for! {
+		(f32, Luma),  (f32, Rgb),  (f32, Hsl),  (f32, Hsv),  (f32, Hwb),  (f32, Lab),  (f32, Lch),  (f32, Xyz),  (f32, Yxy),
+		(f32, Lumaa), (f32, Rgba), (f32, Hsla), (f32, Hsva), (f32, Hwba), (f32, Laba), (f32, Lcha), (f32, Xyza), (f32, Yxya),
+	}
+
+	impl_for! {
+		(f64, Luma),  (f64, Rgb),  (f64, Hsl),  (f64, Hsv),  (f64, Hwb),  (f64, Lab),  (f64, Lch),  (f64, Xyz),  (f64, Yxy),
+		(f64, Lumaa), (f64, Rgba), (f64, Hsla), (f64, Hsva), (f64, Hwba), (f64, Laba), (f64, Lcha), (f64, Xyza), (f64, Yxya),
+	}
 }
