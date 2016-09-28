@@ -25,11 +25,11 @@ pub use self::nearest::Nearest;
 mod linear;
 pub use self::linear::Linear;
 
-mod cubic;
+pub mod cubic;
 pub use self::cubic::Cubic;
 
-mod gaussian;
+pub mod gaussian;
 pub use self::gaussian::Gaussian;
 
-mod lanczos;
+pub mod lanczos;
 pub use self::lanczos::{Lanczos2, Lanczos3};

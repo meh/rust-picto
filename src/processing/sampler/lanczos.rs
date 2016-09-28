@@ -42,6 +42,7 @@ impl<T: Float + FloatConst> super::Sampler<T> for Lanczos3 {
 	}
 }
 
+/// The Lanczos function.
 #[inline]
 pub fn function<T: Float + FloatConst>(x: T, t: T) -> T {
 	if x.abs() < t {
@@ -52,6 +53,7 @@ pub fn function<T: Float + FloatConst>(x: T, t: T) -> T {
 	}
 }
 
+/// The Sinc function.
 #[inline]
 pub fn sinc<T: Float + FloatConst>(t: T) -> T {
 	let a = t * T::PI();

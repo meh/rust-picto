@@ -28,6 +28,7 @@ impl<T: Float> super::Sampler<T> for Cubic {
 	}
 }
 
+/// The Catmull-Rom cubic spline.
 pub fn spline<T: Float>(x: T, b: T, c: T) -> T {
 	let a = x.abs();
 	let k = if a < one!() {
