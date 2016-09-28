@@ -18,6 +18,7 @@ pub use processing::scaler;
 pub use processing::Flip;
 pub use processing::Scale;
 pub use processing::Sample;
+pub use processing::Blur;
 
 /// Flipping orientation.
 pub mod flip {

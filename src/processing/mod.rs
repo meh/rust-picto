@@ -49,3 +49,7 @@ pub use self::scale::Scale;
 /// Image sampling.
 pub mod sample;
 pub use self::sample::Sample;
+
+/// Image blurring.
+pub mod blur;
+pub use self::blur::Blur;
