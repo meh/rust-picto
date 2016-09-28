@@ -12,7 +12,7 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-use num::{self, Float, Zero};
+use num::{Float, Zero};
 
 use color::{Luma, Rgb, Hsl, Hsv, Hwb, Lab, Lch, Xyz, Yxy};
 use color::{Lumaa, Rgba, Hsla, Hsva, Hwba, Laba, Lcha, Xyza, Yxya};
@@ -27,25 +27,31 @@ pub trait Channel: Zero + Copy + 'static {
 
 impl Channel for u8 {
 	fn from<T: Float + 'static>(value: T) -> Self {
-		num::cast(value * num::cast(u8::max_value()).unwrap()).unwrap()
+		num!(value * num!(u8::max_value()))
 	}
 }
 
 impl Channel for u16 {
 	fn from<T: Float + 'static>(value: T) -> Self {
-		num::cast(value * num::cast(u16::max_value()).unwrap()).unwrap()
+		num!(value * num!(u16::max_value()))
+	}
+}
+
+impl Channel for u32 {
+	fn from<T: Float + 'static>(value: T) -> Self {
+		num!(value * num!(u32::max_value()))
 	}
 }
 
 impl Channel for f32 {
 	fn from<T: Float + 'static>(value: T) -> Self {
-		num::cast(value).unwrap()
+		num!(value)
 	}
 }
 
 impl Channel for f64 {
 	fn from<T: Float + 'static>(value: T) -> Self {
-		num::cast(value).unwrap()
+		num!(value)
 	}
 }
 
@@ -83,127 +89,98 @@ pub trait Read<C: Channel>: Pixel<C> {
 }
 
 macro_rules! impl_for {
-	(u8 1 -> $ty:ident) => (
-		impl<T: Float + 'static> Read<u8> for $ty<T> {
+	(integer $ch:ident 1 -> $ty:ident) => (
+		impl<T: Float + 'static> Read<$ch> for $ty<T> {
 			#[inline]
-			fn read(data: &[u8]) -> Self {
-				$ty::new_u8(data[0])
-			}
-		}
-	);
-
-	(u8 2 -> $ty:ident) => (
-		impl<T: Float + 'static> Read<u8> for $ty<T> {
-			#[inline]
-			fn read(data: &[u8]) -> Self {
-				$ty::new_u8(data[0], data[1])
-			}
-		}
-	);
-
-	(u8 3 -> $ty:ident) => (
-		impl<T: Float + 'static> Read<u8> for $ty<T> {
-			#[inline]
-			fn read(data: &[u8]) -> Self {
-				$ty::new_u8(data[0], data[1], data[2])
-			}
-		}
-	);
-
-	(u8 4 -> $ty:ident) => (
-		impl<T: Float + 'static> Read<u8> for $ty<T> {
-			#[inline]
-			fn read(data: &[u8]) -> Self {
-				$ty::new_u8(data[0], data[1], data[2], data[3])
-			}
-		}
-	);
-
-	(u16 1 -> $ty:ident) => (
-		impl<T: Float + 'static> Read<u16> for $ty<T> {
-			#[inline]
-			fn read(data: &[u16]) -> Self {
+			fn read(data: &[$ch]) -> Self {
 				$ty::new(
-					T::from(data[0]).unwrap() / T::from(u16::max_value()).unwrap()
+					num!(data[0] => T) / num!($ch::max_value())
 				)
 			}
 		}
 	);
 
-	(u16 2 -> $ty:ident) => (
-		impl<T: Float + 'static> Read<u16> for $ty<T> {
+	(integer $ch:ident 2 -> $ty:ident) => (
+		impl<T: Float + 'static> Read<$ch> for $ty<T> {
 			#[inline]
-			fn read(data: &[u16]) -> Self {
+			fn read(data: &[$ch]) -> Self {
 				$ty::new(
-					T::from(data[0]).unwrap() / T::from(u16::max_value()).unwrap(),
-					T::from(data[1]).unwrap() / T::from(u16::max_value()).unwrap()
+					num!(data[0] => T) / num!($ch::max_value()),
+					num!(data[1] => T) / num!($ch::max_value())
 				)
 			}
 		}
 	);
 
-	(u16 3 -> $ty:ident) => (
-		impl<T: Float + 'static> Read<u16> for $ty<T> {
+	(integer $ch:ident 3 -> $ty:ident) => (
+		impl<T: Float + 'static> Read<$ch> for $ty<T> {
 			#[inline]
-			fn read(data: &[u16]) -> Self {
+			fn read(data: &[$ch]) -> Self {
 				$ty::new(
-					T::from(data[0]).unwrap() / T::from(u16::max_value()).unwrap(),
-					T::from(data[1]).unwrap() / T::from(u16::max_value()).unwrap(),
-					T::from(data[2]).unwrap() / T::from(u16::max_value()).unwrap(),
+					num!(data[0] => T) / num!($ch::max_value()),
+					num!(data[1] => T) / num!($ch::max_value()),
+					num!(data[2] => T) / num!($ch::max_value()),
 				)
 			}
 		}
 	);
 
-	(u16 4 -> $ty:ident) => (
-		impl<T: Float + 'static> Read<u16> for $ty<T> {
+	(integer $ch:ident 4 -> $ty:ident) => (
+		impl<T: Float + 'static> Read<$ch> for $ty<T> {
 			#[inline]
-			fn read(data: &[u16]) -> Self {
+			fn read(data: &[$ch]) -> Self {
 				$ty::new(
-					T::from(data[0]).unwrap() / T::from(u16::max_value()).unwrap(),
-					T::from(data[1]).unwrap() / T::from(u16::max_value()).unwrap(),
-					T::from(data[2]).unwrap() / T::from(u16::max_value()).unwrap(),
-					T::from(data[3]).unwrap() / T::from(u16::max_value()).unwrap(),
+					num!(data[0] => T) / num!($ch::max_value()),
+					num!(data[1] => T) / num!($ch::max_value()),
+					num!(data[2] => T) / num!($ch::max_value()),
+					num!(data[3] => T) / num!($ch::max_value()),
 				)
 			}
 		}
 	);
 
-	($ch:ident 1 -> $ty:ident) => (
-		impl Read<$ch> for $ty<$ch> {
+	(float $ch:ident 1 -> $ty:ident) => (
+		impl<T: Float + 'static> Read<$ch> for $ty<T> {
 			#[inline]
 			fn read(data: &[$ch]) -> Self {
-				$ty::new(data[0])
+				$ty::new(num!(data[0]))
 			}
 		}
 	);
 
-	($ch:ident 2 -> $ty:ident) => (
-		impl Read<$ch> for $ty<$ch> {
+	(float $ch:ident 2 -> $ty:ident) => (
+		impl<T: Float + 'static> Read<$ch> for $ty<T> {
 			#[inline]
 			fn read(data: &[$ch]) -> Self {
-				$ty::new(data[0], data[1])
+				$ty::new(num!(data[0]), num!(data[1]))
 			}
 		}
 	);
 
-	($ch:ident 3 -> $ty:ident) => (
-		impl Read<$ch> for $ty<$ch> {
+	(float $ch:ident 3 -> $ty:ident) => (
+		impl<T: Float + 'static> Read<$ch> for $ty<T> {
 			#[inline]
 			fn read(data: &[$ch]) -> Self {
-				$ty::new(data[0], data[1], data[2])
+				$ty::new(num!(data[0]), num!(data[1]), num!(data[2]))
 			}
 		}
 	);
 
-	($ch:ident 4 -> $ty:ident) => (
-		impl Read<$ch> for $ty<$ch> {
+	(float $ch:ident 4 -> $ty:ident) => (
+		impl<T: Float + 'static> Read<$ch> for $ty<T> {
 			#[inline]
 			fn read(data: &[$ch]) -> Self {
-				$ty::new(data[0], data[1], data[2], data[3])
+				$ty::new(num!(data[0]), num!(data[1]), num!(data[2]), num!(data[3]))
 			}
 		}
 	);
+
+	(u8  $n:tt -> $ty:ident) => (impl_for!(integer u8  $n -> $ty););
+	(u16 $n:tt -> $ty:ident) => (impl_for!(integer u16 $n -> $ty););
+	(u32 $n:tt -> $ty:ident) => (impl_for!(integer u32 $n -> $ty););
+
+	(f32 $n:tt -> $ty:ident) => (impl_for!(float f32 $n -> $ty););
+	(f64 $n:tt -> $ty:ident) => (impl_for!(float f64 $n -> $ty););
 
 	($ch:ident $n:tt -> $ty:ident, $($rest:ident),*) => (
 		impl_for!($ch $n -> $ty);
@@ -211,19 +188,19 @@ macro_rules! impl_for {
 	);
 
 	(hue($hue:ident) $ch:ident 3 -> $ty:ident) => (
-		impl Read<$ch> for $ty<$ch> {
+		impl<T: Float + 'static> Read<$ch> for $ty<T> {
 			#[inline]
 			fn read(data: &[$ch]) -> Self {
-				$ty::new($hue::from_radians(data[0]), data[1], data[2])
+				$ty::new($hue::from_radians(num!(data[0])), num!(data[1]), num!(data[2]))
 			}
 		}
 	);
 
 	(hue($hue:ident) $ch:ident 4 -> $ty:ident) => (
-		impl Read<$ch> for $ty<$ch> {
+		impl<T: Float + 'static> Read<$ch> for $ty<T> {
 			#[inline]
 			fn read(data: &[$ch]) -> Self {
-				$ty::new($hue::from_radians(data[0]), data[1], data[2], data[3])
+				$ty::new($hue::from_radians(num!(data[0])), num!(data[1]), num!(data[2]), num!(data[3]))
 			}
 		}
 	);
@@ -236,13 +213,18 @@ macro_rules! impl_for {
 
 impl_for!(u8 1 -> Luma);
 impl_for!(u8 2 -> Lumaa);
-impl_for!(u8 3 -> Rgb, Srgb);
-impl_for!(u8 4 -> Rgba);
+impl_for!(u8 3 -> Rgb, Srgb, Lab, Xyz, Yxy);
+impl_for!(u8 4 -> Rgba, Laba, Xyza, Yxya);
 
 impl_for!(u16 1 -> Luma);
 impl_for!(u16 2 -> Lumaa);
-impl_for!(u16 3 -> Rgb, Srgb);
-impl_for!(u16 4 -> Rgba);
+impl_for!(u16 3 -> Rgb, Srgb, Lab, Xyz, Yxy);
+impl_for!(u16 4 -> Rgba, Laba, Xyza, Yxya);
+
+impl_for!(u32 1 -> Luma);
+impl_for!(u32 2 -> Lumaa);
+impl_for!(u32 3 -> Rgb, Srgb, Lab, Xyz, Yxy);
+impl_for!(u32 4 -> Rgba, Laba, Xyza, Yxya);
 
 impl_for!(f32 1 -> Luma);
 impl_for!(f32 2 -> Lumaa);

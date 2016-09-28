@@ -39,6 +39,9 @@ extern crate gif;
 #[cfg(feature = "xyz")]
 extern crate xyz;
 
+#[macro_use]
+mod util;
+
 mod error;
 pub use error::{Error, Result};
 
