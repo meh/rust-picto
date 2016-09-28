@@ -24,6 +24,10 @@ Supported Formats
 | TGA    | ✔        | ✔        |
 | XYZ    | ✔        | ✘        |
 
+Documentation
+-------------
+Documentation is available [here](https://docs.rs/picto).
+
 Example
 -------
 The following example turns an image to gray scale (maintaining the alpha),
