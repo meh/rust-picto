@@ -12,6 +12,7 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
+/// An orientation, for flipping, sampling, etc.
 #[derive(Eq, PartialEq, Copy, Clone, Debug)]
 pub enum Orientation {
 	Vertical,
