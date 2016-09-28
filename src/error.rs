@@ -29,7 +29,7 @@ pub enum Error {
 	Unsupported(String),
 }
 
-/// `Result`s from the library.
+/// Results from the library.
 pub type Result<T> = ::std::result::Result<T, Error>;
 
 impl From<io::Error> for Error {
