@@ -15,7 +15,6 @@
 use std::ops::{Deref, DerefMut};
 use std::marker::PhantomData;
 
-use num;
 use orientation::Orientation;
 use pixel::{self, Pixel};
 use view::{self, View};
@@ -55,7 +54,7 @@ impl<C, P> Buffer<C, P, Vec<C>>
 	pub fn new(width: u32, height: u32) -> Self {
 		Buffer {
 			area: Area::from(0, 0, width, height),
-			data: vec![num::zero(); width as usize * height as usize * P::channels()],
+			data: vec![zero!(); width as usize * height as usize * P::channels()],
 
 			_channel: PhantomData,
 			_pixel:   PhantomData,
