@@ -62,7 +62,7 @@ impl Channel for f64 {
 }
 
 /// The type for a `Pixel`.
-pub trait Pixel<C: Channel>: Copy + 'static {
+pub trait Pixel<C: Channel = u8>: Copy + 'static {
 	/// The number of channels in the `Pixel`.
 	fn channels() -> usize;
 }
@@ -89,7 +89,7 @@ impl_for!(3, Rgb, Srgb, Hsl, Hsv, Hwb, Lab, Lch, Xyz, Yxy);
 impl_for!(4, Rgba, Hsla, Hsva, Hwba, Laba, Lcha, Xyza, Yxya);
 
 /// A `Pixel` readable from a slice.
-pub trait Read<C: Channel>: Pixel<C> {
+pub trait Read<C: Channel = u8>: Pixel<C> {
 	/// Read a `Pixel` from the slice.
 	fn read(data: &[C]) -> Self;
 }
@@ -249,7 +249,7 @@ impl_for!(hue(RgbHue) f64 3 -> Hsl, Hsv, Hwb);
 impl_for!(hue(RgbHue) f64 4 -> Hsla, Hsva, Hwba);
 
 /// A `Pixel` writable to a slice.
-pub trait Write<C: Channel>: Pixel<C> {
+pub trait Write<C: Channel = u8>: Pixel<C> {
 	/// Write the `Pixel` to the slice.
 	fn write(&self, data: &mut [C]);
 }
