@@ -16,7 +16,7 @@ picto = "0.2"
 Supported Formats
 -----------------
 | Format | Decoding | Encoding |
-|---     |---       | ---      |
+|--------|----------|----------|
 | PNG    | ✔        | ✔        |
 | JPEG   | ✔        | ✘        |
 | GIF    | ✔        | ✔        |
