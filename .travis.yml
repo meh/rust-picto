@@ -5,6 +5,9 @@ matrix:
   fast_finish: true
 
   allow_failures:
+    - env: [BENCH=read]
+    - env: [BENCH=create]
+    - env: [BENCH=iter]
     - env: [BENCH=resize]
 
   include:
@@ -18,9 +21,9 @@ matrix:
     - rust: nightly
       env:  [BENCH=create]
     - rust: nightly
-      env:  [BENCH=resize]
-    - rust: nightly
       env:  [BENCH=iter]
+    - rust: nightly
+      env:  [BENCH=resize]
 
 script:
   - if [[ ! -z "$BENCH" ]]; then
