@@ -10,8 +10,13 @@ repository  = "https://github.com/meh/rust-picto"
 keywords    = ["image", "color"]
 
 [dev-dependencies]
+# Benchmarks and tests.
 approx = "0.1"
 image  = "0.10"
+
+# Examples.
+clap      = "2"
+term_size = "0."
 
 [dependencies]
 byteorder = "0.5"
