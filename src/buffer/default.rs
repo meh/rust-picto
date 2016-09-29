@@ -12,14 +12,10 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-mod buffer;
-pub use self::buffer::Buffer;
+use color;
 
-mod default;
-pub use self::default::{Rgb};
+pub type Luma<T = f32> = super::Buffer<color::Luma<T>, u8, Vec<u8>>;
+pub type Lumaa<T = f32> = super::Buffer<color::Lumaa<T>, u8, Vec<u8>>;
 
-/// Cast traits for optimizations.
-pub mod cast;
-
-/// Implementations from palette.
-mod palette;
+pub type Rgb<T = f32> = super::Buffer<color::Rgb<T>, u8, Vec<u8>>;
+pub type Rgba<T = f32> = super::Buffer<color::Rgba<T>, u8, Vec<u8>>;
