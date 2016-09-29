@@ -275,6 +275,9 @@ impl<P, C, D> Buffer<P, C, D>
 
 	/// Get a read-only of the given area.
 	///
+	/// Passing `Default::default()` as `area` will create a view on the whole
+	/// `Buffer`.
+	///
 	/// # Panics
 	///
 	/// Requires that `x + width <= self.width()` and `y + height <= self.height()`, otherwise it will panic.
@@ -342,6 +345,9 @@ impl<P, C, D> Buffer<P, C, D>
 
 	/// Get a write-only view of the given area.
 	///
+	/// Passing `Default::default()` as `area` will create a view on the whole
+	/// `Buffer`.
+	///
 	/// # Panics
 	///
 	/// Requires that `x + width <= self.width()` and `y + height <= self.height()`, otherwise it will panic.
@@ -381,6 +387,9 @@ impl<P, C, D> Buffer<P, C, D>
 	      D: DerefMut<Target = [C]>,
 {
 	/// Get a view of the given area.
+	///
+	/// Passing `Default::default()` as `area` will create a view on the whole
+	/// `Buffer`.
 	///
 	/// # Panics
 	///
