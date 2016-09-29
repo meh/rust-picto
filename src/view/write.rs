@@ -18,6 +18,12 @@ use pixel;
 use area::{self, Area};
 
 /// A write-only view into a `Buffer`.
+///
+/// The `view::Write` is a writable borrowed area within a `Buffer` and it's
+/// parametrized over two types, the `Pixel` and `Channel`.
+///
+/// The same details on those types from `Buffer` hold true for `View`, except
+/// it doesn't own any `Data`.
 #[derive(PartialEq, Debug)]
 pub struct Write<'a, P, C>
 	where P: pixel::Write<C>,

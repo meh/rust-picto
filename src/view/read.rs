@@ -20,6 +20,15 @@ use area::{self, Area};
 use iter::pixel::Iter as Pixels;
 
 /// A read-only view into a `Buffer`.
+///
+/// The `view::Read` is a readable borrowed area within a `Buffer` and it's
+/// parametrized over two types, the `Pixel` and `Channel`.
+///
+/// The same details on those types from `Buffer` hold true for `View`, except
+/// it doesn't own any `Data`.
+///
+/// There is no functional difference between an immutable `Buffer` and a
+/// `view::Read` that encompasses the whole `Buffer` area.
 #[derive(PartialEq, Debug)]
 pub struct Read<'a, P, C>
 	where P: pixel::Read<C>,

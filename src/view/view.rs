@@ -21,6 +21,15 @@ use iter::pixel::{Iter as Pixels, IterMut as PixelsMut};
 use super::{Read, Write};
 
 /// A view into a `Buffer`.
+///
+/// The `View` is a readable and writable borrowed area within a `Buffer` and
+/// it's parametrized over two types, the `Pixel` and `Channel`.
+///
+/// The same details on those types from `Buffer` hold true for `View`, except
+/// it doesn't own any `Data`.
+///
+/// There is no functional difference between a `Buffer` and a `View` that
+/// encompasses the whole `Buffer` area.
 #[derive(PartialEq, Debug)]
 pub struct View<'a, P, C>
 	where P: pixel::Read<C> + pixel::Write<C>,
