@@ -23,7 +23,7 @@ use color;
 use iter::pixel::{Iter as Pixels, IterMut as PixelsMut};
 
 /// Buffer for an image.
-#[derive(PartialEq, Debug)]
+#[derive(Clone, PartialEq, Debug)]
 pub struct Buffer<P, C, D>
 	where P: Pixel<C>,
 	      C: pixel::Channel,
@@ -470,23 +470,6 @@ impl<P, C, D> DerefMut for Buffer<P, C, D>
 	#[inline]
 	fn deref_mut(&mut self) -> &mut Self::Target {
 		&mut self.data
-	}
-}
-
-impl<P, C, D> Clone for Buffer<P, C, D>
-	where P: Pixel<C>,
-	      C: pixel::Channel,
-	      D: Clone,
-{
-	#[inline]
-	fn clone(&self) -> Self {
-		Buffer {
-			area: self.area,
-
-			channel: PhantomData,
-			pixel:   PhantomData,
-			data:    self.data.clone(),
-		}
 	}
 }
 
