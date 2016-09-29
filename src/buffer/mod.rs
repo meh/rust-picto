@@ -16,7 +16,7 @@ mod buffer;
 pub use self::buffer::Buffer;
 
 mod default;
-pub use self::default::{Rgb};
+pub use self::default::{Luma, Lumaa, Rgb, Rgba};
 
 /// Cast traits for optimizations.
 pub mod cast;
