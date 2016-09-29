@@ -54,9 +54,13 @@ pub use area::Area;
 mod orientation;
 pub use orientation::Orientation;
 
-/// Basic traits for types within a `Buffer` and views.
+/// Basic traits for types within buffers and views.
 pub mod pixel;
 pub use pixel::Pixel;
+
+/// Buffer related functionality.
+pub mod buffer;
+pub use buffer::Buffer;
 
 /// Types of view within a `Buffer`.
 pub mod view;
@@ -64,10 +68,6 @@ pub use view::View;
 
 /// Iterator types.
 pub mod iter;
-
-/// Buffer related functionality.
-pub mod buffer;
-pub use buffer::Buffer;
 
 /// Image manipulation functions.
 pub mod processing;
