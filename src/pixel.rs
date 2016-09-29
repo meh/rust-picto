@@ -62,7 +62,7 @@ impl Channel for f64 {
 }
 
 /// A `Pixel` represents a color containing a certain amount of channels
-/// composed by the `Channel` type.
+/// convertible from the `Channel` type.
 pub trait Pixel<C: Channel = u8>: Copy + 'static {
 	/// The number of channels in the `Pixel`.
 	fn channels() -> usize;
