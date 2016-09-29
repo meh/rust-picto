@@ -17,9 +17,9 @@ use pixel;
 use view;
 
 /// Trait for rotatable types.
-pub trait Rotate<CI, PI>
-	where CI: pixel::Channel,
-	      PI: pixel::Read<CI>
+pub trait Rotate<PI, CI>
+	where PI: pixel::Read<CI>,
+	      CI: pixel::Channel,
 {
 	/// Rotate by the given degree, negative degrees will turn counter-clockwise.
 	///
@@ -30,41 +30,41 @@ pub trait Rotate<CI, PI>
 	/// use picto::color::Rgb;
 	/// use picto::processing::prelude::*;
 	///
-	/// let image   = read::from_path::<u8, Rgb, _>("tests/boat.xyz").unwrap();
-	/// let rotated = image.rotate::<u8, Rgb>(90.0);
+	/// let image   = read::from_path::<Rgb, u8, _>("tests/boat.xyz").unwrap();
+	/// let rotated = image.rotate::<Rgb, u8>(90.0);
 	///
 	/// assert_eq!(rotated.width(), 240);
 	/// assert_eq!(rotated.height(), 320);
 	/// ```
-	fn rotate<CO, PO>(self, by: f32) -> Buffer<CO, PO, Vec<CO>>
-		where CO: pixel::Channel,
+	fn rotate<PO, CO>(self, by: f32) -> Buffer<PO, CO, Vec<CO>>
+		where PO: From<PI>,
 		      PO: pixel::Write<CO>,
-		      PO: From<PI>;
+		      CO: pixel::Channel;
 }
 
-impl<'i, CI, PI, I> Rotate<CI, PI> for I
-	where CI: pixel::Channel,
-	      PI: pixel::Read<CI>,
-	      I:  Into<view::Read<'i, CI, PI>>
+impl<'i, PI, CI, I> Rotate<PI, CI> for I
+	where PI: pixel::Read<CI>,
+	      CI: pixel::Channel,
+	      I:  Into<view::Read<'i, PI, CI>>
 {
 	#[inline]
-	fn rotate<CO, PO>(self, by: f32) -> Buffer<CO, PO, Vec<CO>>
-		where CO: pixel::Channel,
+	fn rotate<PO, CO>(self, by: f32) -> Buffer<PO, CO, Vec<CO>>
+		where PO: From<PI>,
 		      PO: pixel::Write<CO>,
-		      PO: From<PI>
+		      CO: pixel::Channel,
 	{
 		it(self, by)
 	}
 }
 
 /// Rotate by the given degree, negative degrees will turn counter-clockwise.
-pub fn it<'i, CO, PO, CI, PI, I>(input: I, by: f32) -> Buffer<CO, PO, Vec<CO>>
-	where CO: pixel::Channel,
+pub fn it<'i, PO, CO, PI, CI, I>(input: I, by: f32) -> Buffer<PO, CO, Vec<CO>>
+	where PO: From<PI>,
 	      PO: pixel::Write<CO>,
-	      PO: From<PI>,
-	      CI: pixel::Channel,
+	      CO: pixel::Channel,
 	      PI: pixel::Read<CI>,
-	      I:  Into<view::Read<'i, CI, PI>>
+	      CI: pixel::Channel,
+	      I:  Into<view::Read<'i, PI, CI>>
 {
 	let input = input.into();
 	let by    = if by.is_sign_positive() {
@@ -77,10 +77,10 @@ pub fn it<'i, CO, PO, CI, PI, I>(input: I, by: f32) -> Buffer<CO, PO, Vec<CO>>
 	debug_assert!(by % 90 == 0);
 
 	if by == 0 {
-		return input.convert::<CO, PO>();
+		return input.convert::<PO, CO>();
 	}
 
-	let mut output: Buffer<CO, PO, _>;
+	let mut output: Buffer<PO, CO, _>;
 
 	match by {
 		90 => {

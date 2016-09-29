@@ -23,16 +23,16 @@ use processing::util::{clamp, GetClamped};
 
 pub struct Super;
 
-impl<CI, PI, CO, PO> Scaler<CI, PI, CO, PO> for Super
-	where CI: pixel::Channel,
+impl<PI, CI, PO, CO> Scaler<PI, CI, PO, CO> for Super
+	where PI: Into<Rgba>,
 	      PI: pixel::Read<CI>,
-	      PI: Into<Rgba>,
-	      CO: pixel::Channel,
+	      CI: pixel::Channel,
+	      PO: From<Rgba> + Into<Rgba> + From<PI>,
 	      PO: pixel::Write<CO> + pixel::Read<CO>,
-	      PO: From<Rgba> + Into<Rgba> + From<PI>
+	      CO: pixel::Channel,
 {
 	#[inline]
-	fn scale(input: &view::Read<CI, PI>, width: u32, height: u32) -> Buffer<CO, PO, Vec<CO>> {
+	fn scale(input: &view::Read<PI, CI>, width: u32, height: u32) -> Buffer<PO, CO, Vec<CO>> {
 		let x_factor = width as f32 / input.width() as f32;
 		let y_factor = height as f32 / input.height() as f32;
 		let factor   = x_factor as u32;
@@ -40,10 +40,10 @@ impl<CI, PI, CO, PO> Scaler<CI, PI, CO, PO> for Super
 		debug_assert!(x_factor != y_factor || x_factor.fract() != 0.0 || (factor & (factor - 1)) != 0);
 
 		let mut factor = factor / 2;
-		let mut output = scale::<CI, PI, CO, PO>(input);
+		let mut output = scale::<PI, CI, PO, CO>(input);
 
 		while factor >= 2 {
-			output  = scale::<CO, PO, CO, PO>(&output.readable(Default::default()));
+			output  = scale::<PO, CO, PO, CO>(&output.readable(Default::default()));
 			factor /= 2;
 		}
 
@@ -52,13 +52,13 @@ impl<CI, PI, CO, PO> Scaler<CI, PI, CO, PO> for Super
 }
 
 #[allow(non_snake_case)]
-fn scale<CI, PI, CO, PO>(input: &view::Read<CI, PI>) -> Buffer<CO, PO, Vec<CO>>
-	where CI: pixel::Channel,
+fn scale<PI, CI, PO, CO>(input: &view::Read<PI, CI>) -> Buffer<PO, CO, Vec<CO>>
+	where PI: Into<Rgba> + Into<PO>,
 	      PI: pixel::Read<CI>,
-	      PI: Into<Rgba> + Into<PO>,
-	      CO: pixel::Channel,
+	      CI: pixel::Channel,
+	      PO: From<Rgba> + Into<Rgba>,
 	      PO: pixel::Write<CO> + pixel::Read<CO>,
-	      PO: From<Rgba> + Into<Rgba>
+	      CO: pixel::Channel,
 {
 	const WEIGHT1: f32 = 0.129633;
 	const WEIGHT2: f32 = 0.175068;
@@ -67,7 +67,7 @@ fn scale<CI, PI, CO, PO>(input: &view::Read<CI, PI>) -> Buffer<CO, PO, Vec<CO>>
 	const W3:      f32 = -WEIGHT2;
 	const W4:      f32 = WEIGHT2 + 0.5;
 
-	let mut output = Buffer::<CO, PO, _>::new(input.width() * 2, input.height() * 2);
+	let mut output = Buffer::<PO, CO, _>::new(input.width() * 2, input.height() * 2);
 
 	// First pass.
 	for y in 0 .. input.height() {
@@ -182,10 +182,10 @@ type Matrix = [[f32; 4]; 4];
 
 #[inline]
 #[allow(non_snake_case)]
-fn sample<CI, PI, F>(input: &view::Read<CI, PI>, offset: i64, range: Range<i64>, func: F) -> (Matrix, Matrix, Matrix, Matrix, Matrix)
-	where CI: pixel::Channel,
+fn sample<PI, CI, F>(input: &view::Read<PI, CI>, offset: i64, range: Range<i64>, func: F) -> (Matrix, Matrix, Matrix, Matrix, Matrix)
+	where PI: Into<Rgba>,
 	      PI: pixel::Read<CI>,
-	      PI: Into<Rgba>,
+	      CI: pixel::Channel,
 	      F:  Fn(i64, i64) -> (i64, i64)
 {
 	let mut r = [[0.0f32; 4]; 4];

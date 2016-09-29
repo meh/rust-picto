@@ -33,17 +33,17 @@ impl<R: Read> Decoder<R> {
 	}
 }
 
-impl<C, P, R> super::Decoder<C, P> for Decoder<R>
-	where C: pixel::Channel,
-	      P: pixel::Write<C>,
+impl<P, C, R> super::Decoder<P, C> for Decoder<R>
+	where P: pixel::Write<C>,
 	      P: From<color::Rgb> + From<color::Rgba>,
+	      C: pixel::Channel,
 	      R: Read
 {
 	#[inline]
-	fn frame(&mut self) -> error::Result<Buffer<C, P, Vec<C>>> {
+	fn frame(&mut self) -> error::Result<Buffer<P, C, Vec<C>>> {
 		let image = try!(xyz::read(self.inner.by_ref()));
 
-		Ok(cast::Into::<C, P>::into(try!(Buffer::<u8, color::Rgb, _>::from_raw(
+		Ok(cast::Into::<P, C>::into(try!(Buffer::<color::Rgb, u8, _>::from_raw(
 			image.width as u32, image.height as u32,
 			image.to_rgb_buffer())
 				.map_err(|_| Error::Format("wrong dimensions".into())))))

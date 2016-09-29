@@ -8,7 +8,7 @@ mod png {
 
 	#[test]
 	fn read_as_is() {
-		let image = picto::read::from_path::<u8, Rgb, _>("tests/rainbow.png").unwrap();
+		let image = picto::read::from_path::<Rgb, u8, _>("tests/rainbow.png").unwrap();
 
 		assert_eq!(400, image.width());
 		assert_eq!(326, image.height());
@@ -22,7 +22,7 @@ mod png {
 
 	#[test]
 	fn read_with_convert() {
-		let image = picto::read::from_path::<u8, Rgba, _>("tests/rainbow.png").unwrap();
+		let image = picto::read::from_path::<Rgba, u8, _>("tests/rainbow.png").unwrap();
 
 		assert_eq!(400, image.width());
 		assert_eq!(326, image.height());
@@ -37,7 +37,7 @@ mod png {
 	#[test]
 	fn write() {
 		{
-			let mut image = picto::Buffer::<u8, Rgb, _>::new(2, 2);
+			let mut image = picto::Buffer::<Rgb, u8, _>::new(2, 2);
 
 			image.set(0, 0, &Rgb::new(1.0, 0.0, 0.0));
 			image.set(0, 1, &Rgb::new(0.0, 1.0, 0.0));
@@ -48,7 +48,7 @@ mod png {
 		}
 
 		{
-			let image = picto::read::from_path::<u8, Rgb, _>("tests/test.png").unwrap();
+			let image = picto::read::from_path::<Rgb, u8, _>("tests/test.png").unwrap();
 
 			assert_eq!(2, image.width());
 			assert_eq!(2, image.height());
@@ -74,7 +74,7 @@ mod jpeg {
 
 	#[test]
 	fn read_as_is() {
-		let image = picto::read::from_path::<u8, Rgb, _>("tests/rainbow.jpeg").unwrap();
+		let image = picto::read::from_path::<Rgb, u8, _>("tests/rainbow.jpeg").unwrap();
 
 		assert_eq!(400, image.width());
 		assert_eq!(326, image.height());
@@ -88,7 +88,7 @@ mod jpeg {
 
 	#[test]
 	fn read_with_convert() {
-		let image = picto::read::from_path::<u8, Rgba, _>("tests/rainbow.jpeg").unwrap();
+		let image = picto::read::from_path::<Rgba, u8, _>("tests/rainbow.jpeg").unwrap();
 
 		assert_eq!(400, image.width());
 		assert_eq!(326, image.height());
@@ -107,7 +107,7 @@ mod bmp {
 
 	#[test]
 	fn read_as_is() {
-		let image = picto::read::from_path::<u8, Rgb, _>("tests/rainbow.bmp").unwrap();
+		let image = picto::read::from_path::<Rgb, u8, _>("tests/rainbow.bmp").unwrap();
 
 		assert_eq!(400, image.width());
 		assert_eq!(326, image.height());
@@ -121,7 +121,7 @@ mod bmp {
 
 	#[test]
 	fn read_with_convert() {
-		let image = picto::read::from_path::<u8, Rgba, _>("tests/rainbow.bmp").unwrap();
+		let image = picto::read::from_path::<Rgba, u8, _>("tests/rainbow.bmp").unwrap();
 
 		assert_eq!(400, image.width());
 		assert_eq!(326, image.height());
@@ -136,7 +136,7 @@ mod bmp {
 	#[test]
 	fn write() {
 		{
-			let mut image = picto::Buffer::<u8, Rgb, _>::new(2, 2);
+			let mut image = picto::Buffer::<Rgb, u8, _>::new(2, 2);
 
 			image.set(0, 0, &Rgb::new(1.0, 0.0, 0.0));
 			image.set(0, 1, &Rgb::new(0.0, 1.0, 0.0));
@@ -147,7 +147,7 @@ mod bmp {
 		}
 
 		{
-			let image = picto::read::from_path::<u8, Rgb, _>("tests/test.bmp").unwrap();
+			let image = picto::read::from_path::<Rgb, u8, _>("tests/test.bmp").unwrap();
 
 			assert_eq!(2, image.width());
 			assert_eq!(2, image.height());
@@ -173,7 +173,7 @@ mod tga {
 
 	#[test]
 	fn read_as_is() {
-		let image = picto::read::from_path::<u8, Rgb, _>("tests/rainbow.tga").unwrap();
+		let image = picto::read::from_path::<Rgb, u8, _>("tests/rainbow.tga").unwrap();
 
 		assert_eq!(400, image.width());
 		assert_eq!(326, image.height());
@@ -187,7 +187,7 @@ mod tga {
 
 	#[test]
 	fn read_with_convert() {
-		let image = picto::read::from_path::<u8, Rgba, _>("tests/rainbow.tga").unwrap();
+		let image = picto::read::from_path::<Rgba, u8, _>("tests/rainbow.tga").unwrap();
 
 		assert_eq!(400, image.width());
 		assert_eq!(326, image.height());
@@ -202,7 +202,7 @@ mod tga {
 	#[test]
 	fn write() {
 		{
-			let mut image = picto::Buffer::<u8, Rgb, _>::new(2, 2);
+			let mut image = picto::Buffer::<Rgb, u8, _>::new(2, 2);
 
 			image.set(0, 0, &Rgb::new(1.0, 0.0, 0.0));
 			image.set(0, 1, &Rgb::new(0.0, 1.0, 0.0));
@@ -213,7 +213,7 @@ mod tga {
 		}
 
 		{
-			let image = picto::read::from_path::<u8, Rgb, _>("tests/test.tga").unwrap();
+			let image = picto::read::from_path::<Rgb, u8, _>("tests/test.tga").unwrap();
 
 			assert_eq!(2, image.width());
 			assert_eq!(2, image.height());
@@ -241,7 +241,7 @@ mod gif {
 
 	#[test]
 	fn read_as_is() {
-		let image = picto::read::from_path::<u8, Rgb, _>("tests/rainbow.gif").unwrap();
+		let image = picto::read::from_path::<Rgb, u8, _>("tests/rainbow.gif").unwrap();
 
 		assert_eq!(400, image.width());
 		assert_eq!(326, image.height());
@@ -255,7 +255,7 @@ mod gif {
 
 	#[test]
 	fn read_with_convert() {
-		let image = picto::read::from_path::<u8, Rgba, _>("tests/rainbow.gif").unwrap();
+		let image = picto::read::from_path::<Rgba, u8, _>("tests/rainbow.gif").unwrap();
 
 		assert_eq!(400, image.width());
 		assert_eq!(326, image.height());
@@ -270,7 +270,7 @@ mod gif {
 	#[test]
 	fn write() {
 		{
-			let mut image = picto::Buffer::<u8, Rgb, _>::new(2, 2);
+			let mut image = picto::Buffer::<Rgb, u8, _>::new(2, 2);
 
 			image.set(0, 0, &Rgb::new(0.0, 0.0, 0.0));
 			image.set(0, 1, &Rgb::new(0.0, 1.0, 0.0));
@@ -283,7 +283,7 @@ mod gif {
 		}
 
 		{
-			let image = picto::read::from_path::<u8, Rgb, _>("tests/test.gif").unwrap();
+			let image = picto::read::from_path::<Rgb, u8, _>("tests/test.gif").unwrap();
 
 			assert_eq!(2, image.width());
 			assert_eq!(2, image.height());
@@ -309,7 +309,7 @@ mod xyz {
 
 	#[test]
 	fn read_as_is() {
-		let image = picto::read::from_path::<u8, Rgb, _>("tests/boat.xyz").unwrap();
+		let image = picto::read::from_path::<Rgb, u8, _>("tests/boat.xyz").unwrap();
 
 		assert_eq!(320, image.width());
 		assert_eq!(240, image.height());
@@ -323,7 +323,7 @@ mod xyz {
 
 	#[test]
 	fn read_with_convert() {
-		let image = picto::read::from_path::<u8, Rgba, _>("tests/boat.xyz").unwrap();
+		let image = picto::read::from_path::<Rgba, u8, _>("tests/boat.xyz").unwrap();
 
 		assert_eq!(320, image.width());
 		assert_eq!(240, image.height());

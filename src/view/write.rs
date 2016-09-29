@@ -19,32 +19,32 @@ use area::{self, Area};
 
 /// A write-only view into a `Buffer`.
 #[derive(PartialEq, Debug)]
-pub struct Write<'a, C, P>
-	where C: pixel::Channel,
-	      P: pixel::Write<C>
+pub struct Write<'a, P, C>
+	where P: pixel::Write<C>,
+	      C: pixel::Channel,
 {
 	owner: Area,
 	area:  Area,
-	data:  &'a mut [C],
 
-	_channel: PhantomData<C>,
-	_pixel:   PhantomData<P>,
+	pixel:   PhantomData<P>,
+	channel: PhantomData<C>,
+	data:    &'a mut [C],
 }
 
-impl<'a, C, P> Write<'a, C, P>
-	where C: pixel::Channel,
-	      P: pixel::Write<C>
+impl<'a, P, C> Write<'a, P, C>
+	where P: pixel::Write<C>,
+	      C: pixel::Channel,
 {
 	#[doc(hidden)]
 	#[inline]
-	pub fn new(data: &mut [C], owner: Area, area: Area) -> Write<C, P> {
+	pub fn new(data: &mut [C], owner: Area, area: Area) -> Write<P, C> {
 		Write {
 			owner: owner,
 			area:  area,
-			data:  data,
 
-			_channel: PhantomData,
-			_pixel:   PhantomData,
+			pixel:   PhantomData,
+			channel: PhantomData,
+			data:    data,
 		}
 	}
 
@@ -92,7 +92,7 @@ impl<'a, C, P> Write<'a, C, P>
 	/// Requires that `x + width <= self.width()` and `y + height <=
 	/// self.height()`, otherwise it will panic.
 	#[inline]
-	pub fn writable(&mut self, area: area::Builder) -> Write<C, P> {
+	pub fn writable(&mut self, area: area::Builder) -> Write<P, C> {
 		let area = area.complete(Area::from(0, 0, self.area.width, self.area.height));
 
 		if area.x + area.width > self.area.width || area.y + area.height > self.area.height {
@@ -111,7 +111,7 @@ impl<'a, C, P> Write<'a, C, P>
 	/// use picto::Area;
 	/// use picto::color::Rgb;
 	///
-	/// let mut image = read::from_path::<u8, Rgb, _>("tests/boat.xyz").unwrap();
+	/// let mut image = read::from_path::<Rgb, u8, _>("tests/boat.xyz").unwrap();
 	/// let mut view  = image.writable(Area::new().x(10).y(10).width(20).height(30));
 	///
 	/// // Make a 20x20 pixel area black at offset 10,10.
@@ -125,25 +125,25 @@ impl<'a, C, P> Write<'a, C, P>
 	}
 }
 
-impl<'a, C, P> From<&'a mut Write<'a, C, P>> for Write<'a, C, P>
-	where C: pixel::Channel,
-	      P: pixel::Write<C>
+impl<'a, P, C> From<&'a mut Write<'a, P, C>> for Write<'a, P, C>
+	where P: pixel::Write<C>,
+	      C: pixel::Channel,
 {
 	#[inline]
-	fn from(value: &'a mut Write<'a, C, P>) -> Write<'a, C, P> {
+	fn from(value: &'a mut Write<'a, P, C>) -> Write<'a, P, C> {
 		Write::new(value.data, value.owner, value.area)
 	}
 }
 
 #[cfg(test)]
 mod test {
-	use buffer::*;
+	use buffer::Buffer;
 	use color::*;
 	use area::Area;
 
 	#[test]
 	fn set() {
-		let mut image = Buffer::<u8, Rgb, Vec<_>>::new(2, 2);
+		let mut image = Buffer::<Rgb, u8, Vec<_>>::new(2, 2);
 		image.set(0, 0, &Rgb::new(1.0, 0.0, 1.0));
 
 		assert_eq!(Rgb::new(1.0, 0.0, 1.0),
@@ -152,7 +152,7 @@ mod test {
 
 	#[test]
 	fn writable() {
-		let mut image = Buffer::<u8, Rgb, Vec<_>>::new(50, 50);
+		let mut image = Buffer::<Rgb, u8, Vec<_>>::new(50, 50);
 		let mut image = image.writable(Area::new().x(10).y(10).width(4).height(4));
 
 		assert_eq!(vec![
@@ -178,7 +178,7 @@ mod test {
 
 	#[test]
 	fn fill() {
-		let mut image = Buffer::<u8, Rgb, Vec<_>>::new(50, 50);
+		let mut image = Buffer::<Rgb, u8, Vec<_>>::new(50, 50);
 		{
 			let mut view = image.writable(Area::new().x(10).y(10).width(4).height(4));
 			view.fill(&Rgb::new(1.0, 1.0, 1.0));

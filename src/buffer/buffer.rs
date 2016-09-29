@@ -24,20 +24,20 @@ use iter::pixel::{Iter as Pixels, IterMut as PixelsMut};
 
 /// Buffer for an image.
 #[derive(PartialEq, Debug)]
-pub struct Buffer<C, P, D>
-	where C: pixel::Channel,
-	      P: Pixel<C>
+pub struct Buffer<P, C, D>
+	where P: Pixel<C>,
+	      C: pixel::Channel,
 {
 	area: Area,
-	data: D,
 
-	_channel: PhantomData<C>,
-	_pixel:   PhantomData<P>,
+	pixel:   PhantomData<P>,
+	channel: PhantomData<C>,
+	data:    D,
 }
 
-impl<C, P> Buffer<C, P, Vec<C>>
-	where C: pixel::Channel,
-	      P: Pixel<C>,
+impl<P, C> Buffer<P, C, Vec<C>>
+	where P: Pixel<C>,
+	      C: pixel::Channel,
 {
 	/// Create a new `Buffer` with the requested space allocated and all channels
 	/// set to `0`.
@@ -48,23 +48,23 @@ impl<C, P> Buffer<C, P, Vec<C>>
 	/// use picto::Buffer;
 	/// use picto::color::Rgb;
 	///
-	/// Buffer::<u8, Rgb, _>::new(1024, 1024);
+	/// Buffer::<Rgb, u8, _>::new(1024, 1024);
 	/// ```
 	#[inline]
 	pub fn new(width: u32, height: u32) -> Self {
 		Buffer {
 			area: Area::from(0, 0, width, height),
-			data: vec![zero!(); width as usize * height as usize * P::channels()],
 
-			_channel: PhantomData,
-			_pixel:   PhantomData,
+			channel: PhantomData,
+			pixel:   PhantomData,
+			data:    vec![zero!(); width as usize * height as usize * P::channels()],
 		}
 	}
 }
 
-impl<C, P> Buffer<C, P, Vec<C>>
-	where C: pixel::Channel,
-	      P: pixel::Write<C>,
+impl<P, C> Buffer<P, C, Vec<C>>
+	where P: pixel::Write<C>,
+	      C: pixel::Channel,
 {
 	/// Create a new `Buffer` with the request space allocated and filled with
 	/// the given pixel.
@@ -75,7 +75,7 @@ impl<C, P> Buffer<C, P, Vec<C>>
 	/// use picto::Buffer;
 	/// use picto::color::Rgb;
 	///
-	/// Buffer::<u8, Rgb, _>::from_pixel(1024, 1024, &Rgb::new(1.0, 0.0, 0.0));
+	/// Buffer::<Rgb, u8, _>::from_pixel(1024, 1024, &Rgb::new(1.0, 0.0, 0.0));
 	/// ```
 	#[inline]
 	pub fn from_pixel(width: u32, height: u32, pixel: &P) -> Self {
@@ -96,7 +96,7 @@ impl<C, P> Buffer<C, P, Vec<C>>
 	/// use picto::Buffer;
 	/// use picto::color::Rgb;
 	///
-	/// Buffer::<u8, Rgb, _>::from_fn(1024, 1024, |x, y| {
+	/// Buffer::<Rgb, u8, _>::from_fn(1024, 1024, |x, y| {
 	///     let w = (x as f32 + y as f32) / 2048.0;
 	///     Rgb::new(w, w, w)
 	/// });
@@ -116,9 +116,9 @@ impl<C, P> Buffer<C, P, Vec<C>>
 	}
 }
 
-impl<C, P> Buffer<C, P, Vec<C>>
-	where C: pixel::Channel,
-	      P: pixel::Write<C> + color::Mix + Clone,
+impl<P, C> Buffer<P, C, Vec<C>>
+	where P: pixel::Write<C> + color::Mix + Clone,
+	      C: pixel::Channel,
 {
 	/// Create a `Buffer` from an orientation and a gradient.
 	///
@@ -128,7 +128,7 @@ impl<C, P> Buffer<C, P, Vec<C>>
 	/// use picto::{Buffer, Orientation};
 	/// use picto::color::{Rgb, Gradient};
 	///
-	/// Buffer::<u8, Rgb, _>::from_gradient(1024, 1024, Orientation::Horizontal, Gradient::new(
+	/// Buffer::<Rgb, u8, _>::from_gradient(1024, 1024, Orientation::Horizontal, Gradient::new(
 	///     vec![Rgb::new(0.0, 0.0, 0.0), Rgb::new(1.0, 1.0, 1.0), Rgb::new(0.0, 0.0, 0.0)]));
 	/// ```
 	#[inline]
@@ -157,10 +157,10 @@ impl<C, P> Buffer<C, P, Vec<C>>
 	}
 }
 
-impl<C, P, D> Buffer<C, P, D>
-	where C: pixel::Channel,
-	      P: Pixel<C>,
-	      D: Deref<Target = [C]>
+impl<P, C, D> Buffer<P, C, D>
+	where P: Pixel<C>,
+	      C: pixel::Channel,
+	      D: Deref<Target = [C]>,
 {
 	/// Use an existing container as backing storage for an image `Buffer`.
 	///
@@ -173,7 +173,7 @@ impl<C, P, D> Buffer<C, P, D>
 	/// use picto::Buffer;
 	/// use picto::color::Rgb;
 	///
-	/// Buffer::<u8, Rgb, _>::from_raw(2, 2, vec![
+	/// Buffer::<Rgb, u8, _>::from_raw(2, 2, vec![
 	///     255,   0,   0,
 	///       0, 255,   0,
 	///       0,   0, 255,
@@ -188,17 +188,17 @@ impl<C, P, D> Buffer<C, P, D>
 
 		Ok(Buffer {
 			area: Area::from(0, 0, width, height),
-			data: data,
 
-			_channel: PhantomData,
-			_pixel:   PhantomData,
+			pixel:   PhantomData,
+			channel: PhantomData,
+			data:    data,
 		})
 	}
 }
 
-impl<C, P, D> Buffer<C, P, D>
-	where C: pixel::Channel,
-	      P: Pixel<C>
+impl<P, C, D> Buffer<P, C, D>
+	where P: Pixel<C>,
+	      C: pixel::Channel,
 {
 	/// Get the backing storage of the `Buffer`.
 	#[inline]
@@ -231,9 +231,9 @@ impl<C, P, D> Buffer<C, P, D>
 	}
 }
 
-impl<C, P, D> Buffer<C, P, D>
-	where C: pixel::Channel,
-	      P: pixel::Read<C>,
+impl<P, C, D> Buffer<P, C, D>
+	where P: pixel::Read<C>,
+	      C: pixel::Channel,
 	      D: Deref<Target = [C]>
 {
 	/// Get the `Pixel` at the given coordinates.
@@ -252,7 +252,7 @@ impl<C, P, D> Buffer<C, P, D>
 	///
 	/// Requires that `x + width <= self.width()` and `y + height <= self.height()`, otherwise it will panic.
 	#[inline]
-	pub fn readable(&self, area: area::Builder) -> view::Read<C, P> {
+	pub fn readable(&self, area: area::Builder) -> view::Read<P, C> {
 		let area = area.complete(self.area);
 
 		if area.x + area.width > self.area.width || area.y + area.height > self.area.height {
@@ -264,7 +264,7 @@ impl<C, P, D> Buffer<C, P, D>
 
 	/// Get an immutable `Iterator` over the pixels.
 	#[inline]
-	pub fn pixels(&self) -> Pixels<C, P> {
+	pub fn pixels(&self) -> Pixels<P, C> {
 		Pixels::new(&self.data, self.area, self.area)
 	}
 
@@ -277,18 +277,18 @@ impl<C, P, D> Buffer<C, P, D>
 	/// use picto::Area;
 	/// use picto::color::{Rgb, Lumaa};
 	///
-	/// let image = read::from_path::<u8, Rgb, _>("tests/boat.xyz").unwrap();
+	/// let image = read::from_path::<Rgb, u8, _>("tests/boat.xyz").unwrap();
 	///
 	/// // Convert the `Buffer` from Rgb to grayscale with alpha.
-	/// image.convert::<u8, Lumaa>();
+	/// image.convert::<Lumaa, u8>();
 	/// ```
 	#[inline]
-	pub fn convert<CO, PO>(&self) -> Buffer<CO, PO, Vec<CO>>
-		where CO: pixel::Channel,
+	pub fn convert<PO, CO>(&self) -> Buffer<PO, CO, Vec<CO>>
+		where P:  Into<PO>,
 		      PO: pixel::Write<CO>,
-		      P: Into<PO>
+		      CO: pixel::Channel,
 	{
-		let mut result = Buffer::<CO, PO, Vec<_>>::new(self.area.width, self.area.height);
+		let mut result = Buffer::<PO, CO, Vec<CO>>::new(self.area.width, self.area.height);
 
 		for (input, output) in self.chunks(P::channels()).zip(result.chunks_mut(PO::channels())) {
 			P::read(input).into().write(output)
@@ -298,10 +298,10 @@ impl<C, P, D> Buffer<C, P, D>
 	}
 }
 
-impl<C, P, D> Buffer<C, P, D>
-	where C: pixel::Channel,
-	      P: pixel::Write<C>,
-	      D: DerefMut<Target = [C]>
+impl<P, C, D> Buffer<P, C, D>
+	where P: pixel::Write<C>,
+	      C: pixel::Channel,
+	      D: DerefMut<Target = [C]>,
 {
 	/// Set the `Pixel` at the given coordinates.
 	///
@@ -319,7 +319,7 @@ impl<C, P, D> Buffer<C, P, D>
 	///
 	/// Requires that `x + width <= self.width()` and `y + height <= self.height()`, otherwise it will panic.
 	#[inline]
-	pub fn writable(&mut self, area: area::Builder) -> view::Write<C, P> {
+	pub fn writable(&mut self, area: area::Builder) -> view::Write<P, C> {
 		let area = area.complete(self.area);
 
 		if area.x + area.width > self.area.width || area.y + area.height > self.area.height {
@@ -337,7 +337,7 @@ impl<C, P, D> Buffer<C, P, D>
 	/// use picto::read;
 	/// use picto::color::Rgb;
 	///
-	/// let mut image = read::from_path::<u8, Rgb, _>("tests/boat.xyz").unwrap();
+	/// let mut image = read::from_path::<Rgb, u8, _>("tests/boat.xyz").unwrap();
 	/// image.fill(&Rgb::new(1.0, 1.0, 1.0));
 	/// ```
 	#[inline]
@@ -348,10 +348,10 @@ impl<C, P, D> Buffer<C, P, D>
 	}
 }
 
-impl<C, P, D> Buffer<C, P, D>
-	where C: pixel::Channel,
-	      P: pixel::Write<C> + pixel::Read<C>,
-	      D: DerefMut<Target = [C]>
+impl<P, C, D> Buffer<P, C, D>
+	where P: pixel::Write<C> + pixel::Read<C>,
+	      C: pixel::Channel,
+	      D: DerefMut<Target = [C]>,
 {
 	/// Get a view of the given area.
 	///
@@ -367,7 +367,7 @@ impl<C, P, D> Buffer<C, P, D>
 	/// use picto::Area;
 	/// use picto::color::Rgba;
 	///
-	/// let mut image = read::from_path::<u8, Rgba, _>("tests/boat.xyz").unwrap();
+	/// let mut image = read::from_path::<Rgba, u8, _>("tests/boat.xyz").unwrap();
 	/// let mut view  = image.view(Area::new().x(10).y(10).width(20).height(30));
 	///
 	/// for (_, _, mut px) in view.pixels_mut() {
@@ -379,7 +379,7 @@ impl<C, P, D> Buffer<C, P, D>
 	/// }
 	/// ```
 	#[inline]
-	pub fn view(&mut self, area: area::Builder) -> View<C, P> {
+	pub fn view(&mut self, area: area::Builder) -> View<P, C> {
 		let area = area.complete(self.area);
 
 		if area.x + area.width > self.area.width || area.y + area.height > self.area.height {
@@ -397,7 +397,7 @@ impl<C, P, D> Buffer<C, P, D>
 	/// use picto::read;
 	/// use picto::color::{IntoColor, Hue, RgbHue, Rgb};
 	///
-	/// let mut image = read::from_path::<u8, Rgb, _>("tests/boat.xyz").unwrap();
+	/// let mut image = read::from_path::<Rgb, u8, _>("tests/boat.xyz").unwrap();
 	///
 	/// for (x, y, mut px) in image.pixels_mut() {
 	///     // Get the pixel value.
@@ -411,48 +411,48 @@ impl<C, P, D> Buffer<C, P, D>
 	/// }
 	/// ```
 	#[inline]
-	pub fn pixels_mut(&mut self) -> PixelsMut<C, P> {
+	pub fn pixels_mut(&mut self) -> PixelsMut<P, C> {
 		PixelsMut::new(&mut self.data, self.area, self.area)
 	}
 }
 
-impl<'a, C, P, D> From<&'a Buffer<C, P, D>> for view::Read<'a, C, P>
-	where C: pixel::Channel,
-	      P: pixel::Read<C>,
-	      D: Deref<Target = [C]>
+impl<'a, P, C, D> From<&'a Buffer<P, C, D>> for view::Read<'a, P, C>
+	where P: pixel::Read<C>,
+	      C: pixel::Channel,
+	      D: Deref<Target = [C]>,
 {
 	#[inline]
-	fn from(value: &'a Buffer<C, P, D>) -> view::Read<'a, C, P> {
+	fn from(value: &'a Buffer<P, C, D>) -> view::Read<'a, P, C> {
 		value.readable(Default::default())
 	}
 }
 
-impl<'a, C, P, D> From<&'a mut Buffer<C, P, D>> for view::Write<'a, C, P>
-	where C: pixel::Channel,
-	      P: pixel::Write<C>,
+impl<'a, P, C, D> From<&'a mut Buffer<P, C, D>> for view::Write<'a, P, C>
+	where P: pixel::Write<C>,
+	      C: pixel::Channel,
 	      D: DerefMut<Target = [C]>,
 {
 	#[inline]
-	fn from(mut value: &'a mut Buffer<C, P, D>) -> view::Write<'a, C, P> {
+	fn from(mut value: &'a mut Buffer<P, C, D>) -> view::Write<'a, P, C> {
 		value.writable(Default::default())
 	}
 }
 
-impl<'a, C, P, D> From<&'a mut Buffer<C, P, D>> for View<'a, C, P>
-	where C: pixel::Channel,
-	      P: pixel::Write<C> + pixel::Read<C>,
-	      D: DerefMut<Target = [C]>
+impl<'a, P, C, D> From<&'a mut Buffer<P, C, D>> for View<'a, P, C>
+	where P: pixel::Write<C> + pixel::Read<C>,
+	      C: pixel::Channel,
+	      D: DerefMut<Target = [C]>,
 {
 	#[inline]
-	fn from(mut value: &'a mut Buffer<C, P, D>) -> View<'a, C, P> {
+	fn from(mut value: &'a mut Buffer<P, C, D>) -> View<'a, P, C> {
 		value.view(Default::default())
 	}
 }
 
-impl<C, P, D> Deref for Buffer<C, P, D>
-	where C: pixel::Channel,
-	      P: Pixel<C>,
-	      D: Deref<Target = [C]>
+impl<P, C, D> Deref for Buffer<P, C, D>
+	where P: Pixel<C>,
+	      C: pixel::Channel,
+	      D: Deref<Target = [C]>,
 {
 	type Target = D::Target;
 
@@ -462,10 +462,10 @@ impl<C, P, D> Deref for Buffer<C, P, D>
 	}
 }
 
-impl<C, P, D> DerefMut for Buffer<C, P, D>
-	where C: pixel::Channel,
-	      P: Pixel<C>,
-	      D: DerefMut<Target = [C]>
+impl<P, C, D> DerefMut for Buffer<P, C, D>
+	where P: Pixel<C>,
+	      C: pixel::Channel,
+	      D: DerefMut<Target = [C]>,
 {
 	#[inline]
 	fn deref_mut(&mut self) -> &mut Self::Target {
@@ -473,19 +473,19 @@ impl<C, P, D> DerefMut for Buffer<C, P, D>
 	}
 }
 
-impl<C, P, D> Clone for Buffer<C, P, D>
-	where C: pixel::Channel,
-	      P: Pixel<C>,
-	      D: Clone
+impl<P, C, D> Clone for Buffer<P, C, D>
+	where P: Pixel<C>,
+	      C: pixel::Channel,
+	      D: Clone,
 {
 	#[inline]
 	fn clone(&self) -> Self {
 		Buffer {
 			area: self.area,
-			data: self.data.clone(),
 
-			_channel: PhantomData,
-			_pixel:   PhantomData,
+			channel: PhantomData,
+			pixel:   PhantomData,
+			data:    self.data.clone(),
 		}
 	}
 }
@@ -497,40 +497,40 @@ mod test {
 
 	#[test]
 	fn new() {
-		assert_eq!(3, Buffer::<u8, Rgb, Vec<_>>::new(1, 1).into_raw().len());
-		assert_eq!(6, Buffer::<u8, Rgb, Vec<_>>::new(1, 2).into_raw().len());
-		assert_eq!(6, Buffer::<u8, Rgb, Vec<_>>::new(2, 1).into_raw().len());
-		assert_eq!(12, Buffer::<u8, Rgb, Vec<_>>::new(2, 2).into_raw().len());
+		assert_eq!(3, Buffer::<Rgb, u8, Vec<_>>::new(1, 1).into_raw().len());
+		assert_eq!(6, Buffer::<Rgb, u8, Vec<_>>::new(1, 2).into_raw().len());
+		assert_eq!(6, Buffer::<Rgb, u8, Vec<_>>::new(2, 1).into_raw().len());
+		assert_eq!(12, Buffer::<Rgb, u8, Vec<_>>::new(2, 2).into_raw().len());
 	}
 
 	#[test]
 	fn from_raw() {
-		assert!(Buffer::<u8, Rgb, _>::from_raw(1, 1, vec![0, 0, 0]).is_ok());
-		assert!(Buffer::<u8, Rgb, _>::from_raw(1, 2, vec![0, 0, 0, 0, 0, 0]).is_ok());
-		assert!(Buffer::<u8, Rgb, _>::from_raw(2, 1, vec![0, 0, 0, 0, 0, 0]).is_ok());
-		assert!(Buffer::<u8, Rgb, _>::from_raw(2, 2, vec![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]).is_ok());
+		assert!(Buffer::<Rgb, u8, _>::from_raw(1, 1, vec![0, 0, 0]).is_ok());
+		assert!(Buffer::<Rgb, u8, _>::from_raw(1, 2, vec![0, 0, 0, 0, 0, 0]).is_ok());
+		assert!(Buffer::<Rgb, u8, _>::from_raw(2, 1, vec![0, 0, 0, 0, 0, 0]).is_ok());
+		assert!(Buffer::<Rgb, u8, _>::from_raw(2, 2, vec![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]).is_ok());
 
-		assert!(Buffer::<u8, Rgb, _>::from_raw(1, 1, vec![0, 0, 0, 0]).is_err());
-		assert!(Buffer::<u8, Rgb, _>::from_raw(1, 1, vec![0, 0, 0, 0]).is_err());
+		assert!(Buffer::<Rgb, u8, _>::from_raw(1, 1, vec![0, 0, 0, 0]).is_err());
+		assert!(Buffer::<Rgb, u8, _>::from_raw(1, 1, vec![0, 0, 0, 0]).is_err());
 	}
 
 	#[test]
 	fn into_raw() {
 		assert_eq!(vec![1, 2, 3],
-			Buffer::<u8, Rgb, _>::from_raw(1, 1, vec![1, 2, 3]).unwrap().into_raw());
+			Buffer::<Rgb, u8, _>::from_raw(1, 1, vec![1, 2, 3]).unwrap().into_raw());
 
 		assert_eq!(vec![0, 0, 0],
-			Buffer::<u8, Rgb, Vec<_>>::new(1, 1).into_raw());
+			Buffer::<Rgb, u8, Vec<_>>::new(1, 1).into_raw());
 	}
 
 	#[test]
 	fn deref() {
-		assert!(Buffer::<u8, Rgb, _>::from_raw(1, 1, vec![0, 0, 0]).unwrap().len() == 3);
+		assert!(Buffer::<Rgb, u8, _>::from_raw(1, 1, vec![0, 0, 0]).unwrap().len() == 3);
 	}
 
 	#[test]
 	fn clone() {
-		let a = Buffer::<u8, Rgb, _>::from_raw(1, 1, vec![0, 0, 0]).unwrap();
+		let a = Buffer::<Rgb, u8, _>::from_raw(1, 1, vec![0, 0, 0]).unwrap();
 		let b = a.clone();
 
 		assert_eq!(a.get(0, 0), b.get(0, 0));
@@ -538,7 +538,7 @@ mod test {
 
 	#[test]
 	fn eq() {
-		let a = Buffer::<u8, Rgb, _>::from_raw(1, 1, vec![0, 0, 0]).unwrap();
+		let a = Buffer::<Rgb, u8, _>::from_raw(1, 1, vec![0, 0, 0]).unwrap();
 		let b = a.clone();
 
 		assert_eq!(a, b);
@@ -546,8 +546,8 @@ mod test {
 
 	#[test]
 	fn convert() {
-		let a = Buffer::<u8, Rgb, _>::from_raw(1, 1, vec![255, 0, 255]).unwrap();
-		let b = a.convert::<u8, Rgba>();
+		let a = Buffer::<Rgb, u8, _>::from_raw(1, 1, vec![255, 0, 255]).unwrap();
+		let b = a.convert::<Rgba, u8>();
 
 		assert_eq!(Rgba::new(1.0, 0.0, 1.0, 1.0),
 			b.get(0, 0));

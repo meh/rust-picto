@@ -45,30 +45,30 @@ fn main() {
 			.help("The scaling algorithm to use (nearest, linear, cubic, gaussian, lanczos2, lanczos3, super-xbr). (default is `nearest`)"))
 		.get_matches();
 
-	let image = picto::read::from_path::<u8, Rgba, _>(matches.value_of("INPUT").unwrap()).unwrap();
+	let image = picto::read::from_path::<Rgba, u8, _>(matches.value_of("INPUT").unwrap()).unwrap();
 	let by    = matches.value_of("by").unwrap().parse::<f32>().unwrap();
 
 	picto::write::to_path(matches.value_of("OUTPUT").unwrap(), &match &*matches.value_of("scaler").unwrap_or("nearest").to_lowercase() {
 		"nearest" =>
-			image.scale_by::<scaler::Nearest, u8, Rgba>(by),
+			image.scale_by::<scaler::Nearest, Rgba, u8>(by),
 
 		"linear" =>
-			image.scale_by::<scaler::Linear, u8, Rgba>(by),
+			image.scale_by::<scaler::Linear, Rgba, u8>(by),
 
 		"cubic" =>
-			image.scale_by::<scaler::Cubic, u8, Rgba>(by),
+			image.scale_by::<scaler::Cubic, Rgba, u8>(by),
 
 		"gaussian" =>
-			image.scale_by::<scaler::Gaussian, u8, Rgba>(by),
+			image.scale_by::<scaler::Gaussian, Rgba, u8>(by),
 
 		"lanczos2" =>
-			image.scale_by::<scaler::Lanczos2, u8, Rgba>(by),
+			image.scale_by::<scaler::Lanczos2, Rgba, u8>(by),
 
 		"lanczos3" =>
-			image.scale_by::<scaler::Lanczos3, u8, Rgba>(by),
+			image.scale_by::<scaler::Lanczos3, Rgba, u8>(by),
 
 		"super-xbr" =>
-			image.scale_by::<scaler::xbr::Super, u8, Rgba>(by),
+			image.scale_by::<scaler::xbr::Super, Rgba, u8>(by),
 
 		_ =>
 			unreachable!()

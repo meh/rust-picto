@@ -17,9 +17,9 @@ use view::View;
 use orientation::Orientation;
 
 /// Trait for flippable types.
-pub trait Flip<C, P>
-	where C: pixel::Channel,
-	      P: pixel::Read<C> + pixel::Write<C>
+pub trait Flip<P, C>
+	where P: pixel::Read<C> + pixel::Write<C>,
+	      C: pixel::Channel,
 {
 	/// Flip on the given orientation.
 	///
@@ -30,16 +30,16 @@ pub trait Flip<C, P>
 	/// use picto::color::Rgb;
 	/// use picto::processing::prelude::*;
 	///
-	/// let mut image = read::from_path::<u8, Rgb, _>("tests/boat.xyz").unwrap();
+	/// let mut image = read::from_path::<Rgb, u8, _>("tests/boat.xyz").unwrap();
 	/// image.flip(flip::Vertically);
 	/// ```
 	fn flip(self, mode: Orientation);
 }
 
-impl<'a, C, P, T> Flip<C, P> for T
-	where C: pixel::Channel,
-	      P: pixel::Read<C> + pixel::Write<C>,
-	      T: Into<View<'a, C, P>>
+impl<'a, P, C, T> Flip<P, C> for T
+	where P: pixel::Read<C> + pixel::Write<C>,
+	      C: pixel::Channel,
+	      T: Into<View<'a, P, C>>
 {
 	fn flip(self, mode: Orientation) {
 		it(self, mode)
@@ -47,10 +47,10 @@ impl<'a, C, P, T> Flip<C, P> for T
 }
 
 /// Flip the given value on the given orientation.
-pub fn it<'a, C, P, T>(value: T, mode: Orientation)
-	where C: pixel::Channel,
-	      P: pixel::Write<C> + pixel::Read<C>,
-	      T: Into<View<'a, C, P>>
+pub fn it<'a, P, C, T>(value: T, mode: Orientation)
+	where P: pixel::Write<C> + pixel::Read<C>,
+	      C: pixel::Channel,
+	      T: Into<View<'a, P, C>>
 {
 	let mut view   = value.into();
 	let     width  = view.width();
@@ -112,7 +112,7 @@ mod test {
 
 	#[test]
 	fn vertical_none() {
-		let mut image = Buffer::<u8, Rgb, _>::new(2, 1);
+		let mut image = Buffer::<Rgb, u8, _>::new(2, 1);
 		image.set(0, 0, &Rgb::new(1.0, 1.0, 1.0));
 		image.set(1, 0, &Rgb::new(1.0, 1.0, 1.0));
 
@@ -124,7 +124,7 @@ mod test {
 
 	#[test]
 	fn vertical_even() {
-		let mut image = Buffer::<u8, Rgb, _>::new(2, 2);
+		let mut image = Buffer::<Rgb, u8, _>::new(2, 2);
 		image.set(0, 0, &Rgb::new(1.0, 1.0, 1.0));
 		image.set(1, 0, &Rgb::new(1.0, 1.0, 1.0));
 		image.set(0, 1, &Rgb::new(0.0, 0.0, 0.0));
@@ -140,7 +140,7 @@ mod test {
 
 	#[test]
 	fn vertical_odd() {
-		let mut image = Buffer::<u8, Rgb, _>::new(2, 3);
+		let mut image = Buffer::<Rgb, u8, _>::new(2, 3);
 		image.set(0, 0, &Rgb::new(1.0, 1.0, 1.0));
 		image.set(1, 0, &Rgb::new(1.0, 1.0, 1.0));
 		image.set(0, 1, &Rgb::new(0.0, 0.0, 0.0));
@@ -160,7 +160,7 @@ mod test {
 
 	#[test]
 	fn horizontal_none() {
-		let mut image = Buffer::<u8, Rgb, _>::new(1, 2);
+		let mut image = Buffer::<Rgb, u8, _>::new(1, 2);
 		image.set(0, 0, &Rgb::new(1.0, 1.0, 1.0));
 		image.set(0, 1, &Rgb::new(1.0, 1.0, 1.0));
 
@@ -172,7 +172,7 @@ mod test {
 
 	#[test]
 	fn horizontal_even() {
-		let mut image = Buffer::<u8, Rgb, _>::new(2, 2);
+		let mut image = Buffer::<Rgb, u8, _>::new(2, 2);
 		image.set(0, 0, &Rgb::new(1.0, 1.0, 1.0));
 		image.set(1, 0, &Rgb::new(0.0, 0.0, 0.0));
 		image.set(0, 1, &Rgb::new(1.0, 1.0, 1.0));
@@ -188,7 +188,7 @@ mod test {
 
 	#[test]
 	fn horizontal_odd() {
-		let mut image = Buffer::<u8, Rgb, _>::new(3, 2);
+		let mut image = Buffer::<Rgb, u8, _>::new(3, 2);
 		image.set(0, 0, &Rgb::new(1.0, 1.0, 1.0));
 		image.set(1, 0, &Rgb::new(0.0, 0.0, 0.0));
 		image.set(2, 0, &Rgb::new(0.0, 1.0, 0.0));

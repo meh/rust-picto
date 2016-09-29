@@ -50,16 +50,16 @@ impl<W: Write> HasParameters for Encoder<W>
 {
 }
 
-impl<C, P, D, W> super::Encoder<C, P, D> for Encoder<W>
-	where C: pixel::Channel,
-	      P: pixel::Read<C>,
+impl<P, C, D, W> super::Encoder<P, C, D> for Encoder<W>
+	where P: pixel::Read<C>,
 	      P: Into<color::Luma> + Into<color::Lumaa> + Into<color::Rgb> + Into<color::Rgba>,
+	      C: pixel::Channel,
 	      D: Deref<Target = [C]>,
 	      W: Write
 {
 	#[inline]
-	fn frame(&mut self, buffer: &Buffer<C, P, D>) -> error::Result<()> {
-		let mut buffer  = buffer.convert::<u8, color::Rgba>();
+	fn frame(&mut self, buffer: &Buffer<P, C, D>) -> error::Result<()> {
+		let mut buffer  = buffer.convert::<color::Rgba, u8>();
 		let mut encoder = try!(gif::Encoder::new(self.inner.by_ref(),
 			buffer.width() as u16, buffer.height() as u16, &self.palette));
 

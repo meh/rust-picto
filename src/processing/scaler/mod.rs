@@ -16,13 +16,13 @@ use view;
 use buffer::Buffer;
 use pixel;
 
-pub trait Scaler<CI, PI, CO, PO>
-	where CI: pixel::Channel,
-	      PI: pixel::Read<CI>,
+pub trait Scaler<PI, CI, PO, CO>
+	where PI: pixel::Read<CI>,
+	      CI: pixel::Channel,
+	      PO: pixel::Write<CO>,
 	      CO: pixel::Channel,
-	      PO: pixel::Write<CO>
 {
-	fn scale(input: &view::Read<CI, PI>, width: u32, height: u32) -> Buffer<CO, PO, Vec<CO>>;
+	fn scale(input: &view::Read<PI, CI>, width: u32, height: u32) -> Buffer<PO, CO, Vec<CO>>;
 }
 
 mod sampler;

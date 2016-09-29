@@ -20,10 +20,10 @@ use processing::sampler::gaussian;
 use processing::sample;
 
 /// Trait for blurrable types.
-pub trait Blur<CI, PI>
-	where CI: pixel::Channel,
+pub trait Blur<PI, CI>
+	where PI: Into<Rgba>,
 	      PI: pixel::Read<CI>,
-	      PI: Into<Rgba>
+	      CI: pixel::Channel,
 {
 	/// Blur by the given radius.
 	///
@@ -34,42 +34,42 @@ pub trait Blur<CI, PI>
 	/// use picto::color::Rgb;
 	/// use picto::processing::prelude::*;
 	///
-	/// let image = read::from_path::<u8, Rgb, _>("tests/boat.xyz").unwrap();
+	/// let image = read::from_path::<Rgb, u8, _>("tests/boat.xyz").unwrap();
 	///
-	/// image.blur::<u8, Rgb>(1.0);
+	/// image.blur::<Rgb, u8>(1.0);
 	/// ```
-	fn blur<CO, PO>(self, sigma: f32) -> Buffer<CO, PO, Vec<CO>>
-		where CO: pixel::Channel,
+	fn blur<PO, CO>(self, sigma: f32) -> Buffer<PO, CO, Vec<CO>>
+		where PO: From<Rgba> + Into<Rgba>,
 		      PO: pixel::Read<CO> + pixel::Write<CO>,
-		      PO: From<Rgba> + Into<Rgba>;
+		      CO: pixel::Channel;
 }
 
-impl<'i, CI, PI, I> Blur<CI, PI> for I
-	where CI: pixel::Channel,
+impl<'i, PI, CI, I> Blur<PI, CI> for I
+	where PI: Into<Rgba>,
 	      PI: pixel::Read<CI>,
-	      PI: Into<Rgba>,
-	      I:  Into<view::Read<'i, CI, PI>>
+	      CI: pixel::Channel,
+	      I:  Into<view::Read<'i, PI, CI>>
 {
 	#[inline]
-	fn blur<CO, PO>(self, sigma: f32) -> Buffer<CO, PO, Vec<CO>>
-		where CO: pixel::Channel,
+	fn blur<PO, CO>(self, sigma: f32) -> Buffer<PO, CO, Vec<CO>>
+		where PO: From<Rgba> + Into<Rgba>,
 		      PO: pixel::Read<CO> + pixel::Write<CO>,
-		      PO: From<Rgba> + Into<Rgba>
+		      CO: pixel::Channel,
 	{
-		by::<CO, PO, CI, PI, _>(self, sigma)
+		by::<PO, CO, PI, CI, _>(self, sigma)
 	}
 }
 
 /// Blur by the given radius.
 #[inline]
-pub fn by<'i, CO, PO, CI, PI, I>(input: I, mut sigma: f32) -> Buffer<CO, PO, Vec<CO>>
-	where CO: pixel::Channel,
+pub fn by<'i, PO, CO, PI, CI, I>(input: I, mut sigma: f32) -> Buffer<PO, CO, Vec<CO>>
+	where PO: From<Rgba> + Into<Rgba>,
 	      PO: pixel::Read<CO> + pixel::Write<CO>,
-	      PO: From<Rgba> + Into<Rgba>,
-	      CI: pixel::Channel,
-	      PI: pixel::Read<CI>,
+	      CO: pixel::Channel,
 	      PI: Into<Rgba>,
-	      I:  Into<view::Read<'i, CI, PI>>
+	      PI: pixel::Read<CI>,
+	      CI: pixel::Channel,
+	      I:  Into<view::Read<'i, PI, CI>>
 {
 	let input = input.into();
 
@@ -77,10 +77,10 @@ pub fn by<'i, CO, PO, CI, PI, I>(input: I, mut sigma: f32) -> Buffer<CO, PO, Vec
 		sigma = 1.0;
 	}
 
-	let mut tmp = Buffer::<CO, PO, _>::new(input.width(), input.height());
+	let mut tmp = Buffer::<PO, CO, _>::new(input.width(), input.height());
 	sample::vertically_with(&input, &mut tmp, sigma * 2.0, |x| gaussian::function(x, sigma));
 
-	let mut out = Buffer::<CO, PO, _>::new(input.width(), input.height());
+	let mut out = Buffer::<PO, CO, _>::new(input.width(), input.height());
 	sample::horizontally_with(&tmp, &mut out, sigma * 2.0, |x| gaussian::function(x, sigma));
 
 	out

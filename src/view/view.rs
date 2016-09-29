@@ -22,32 +22,32 @@ use super::{Read, Write};
 
 /// A view into a `Buffer`.
 #[derive(PartialEq, Debug)]
-pub struct View<'a, C, P>
-	where C: pixel::Channel,
-	      P: pixel::Read<C> + pixel::Write<C>
+pub struct View<'a, P, C>
+	where P: pixel::Read<C> + pixel::Write<C>,
+	      C: pixel::Channel,
 {
 	owner: Area,
 	area:  Area,
-	data:  &'a mut [C],
 
-	_channel: PhantomData<C>,
-	_pixel:   PhantomData<P>,
+	pixel:   PhantomData<P>,
+	channel: PhantomData<C>,
+	data:    &'a mut [C],
 }
 
-impl<'a, C, P> View<'a, C, P>
-	where C: pixel::Channel,
-	      P: pixel::Read<C> + pixel::Write<C>
+impl<'a, P, C> View<'a, P, C>
+	where P: pixel::Read<C> + pixel::Write<C>,
+	      C: pixel::Channel,
 {
 	#[doc(hidden)]
 	#[inline]
-	pub fn new(data: &mut [C], owner: Area, area: Area) -> View<C, P> {
+	pub fn new(data: &mut [C], owner: Area, area: Area) -> View<P, C> {
 		View {
 			owner: owner,
 			area:  area,
-			data:  data,
 
-			_channel: PhantomData,
-			_pixel:   PhantomData,
+			pixel:   PhantomData,
+			channel: PhantomData,
+			data:    data,
 		}
 	}
 
@@ -95,7 +95,7 @@ impl<'a, C, P> View<'a, C, P>
 	///
 	/// Requires that `x + width <= self.width()` and `y + height <= self.height()`, otherwise it will panic.
 	#[inline]
-	pub fn readable(&self, area: area::Builder) -> Read<C, P> {
+	pub fn readable(&self, area: area::Builder) -> Read<P, C> {
 		let area = area.complete(Area::from(0, 0, self.area.width, self.area.height));
 
 		if area.x + area.width > self.area.width || area.y + area.height > self.area.height {
@@ -111,7 +111,7 @@ impl<'a, C, P> View<'a, C, P>
 	///
 	/// Requires that `x + width <= self.width()` and `y + height <= self.height()`, otherwise it will panic.
 	#[inline]
-	pub fn writable(&mut self, area: area::Builder) -> Write<C, P> {
+	pub fn writable(&mut self, area: area::Builder) -> Write<P, C> {
 		let area = area.complete(Area::from(0, 0, self.area.width, self.area.height));
 
 		if area.x + area.width > self.area.width || area.y + area.height > self.area.height {
@@ -127,7 +127,7 @@ impl<'a, C, P> View<'a, C, P>
 	///
 	/// Requires that `x + width <= self.width()` and `y + height <= self.height()`, otherwise it will panic.
 	#[inline]
-	pub fn view(&mut self, area: area::Builder) -> View<C, P> {
+	pub fn view(&mut self, area: area::Builder) -> View<P, C> {
 		let area = area.complete(Area::from(0, 0, self.area.width, self.area.height));
 
 		if area.x + area.width > self.area.width || area.y + area.height > self.area.height {
@@ -146,7 +146,7 @@ impl<'a, C, P> View<'a, C, P>
 	/// use picto::Area;
 	/// use picto::color::Rgb;
 	///
-	/// let mut image = read::from_path::<u8, Rgb, _>("tests/boat.xyz").unwrap();
+	/// let mut image = read::from_path::<Rgb, u8, _>("tests/boat.xyz").unwrap();
 	/// let mut view  = image.view(Area::new().x(10).y(10).width(20).height(30));
 	///
 	/// // Make a 20x20 pixel area black at offset 10,10.
@@ -158,7 +158,7 @@ impl<'a, C, P> View<'a, C, P>
 	}
 
 	/// Get a mutable `Iterator` over the pixels.
-	pub fn pixels(&self) -> Pixels<C, P> {
+	pub fn pixels(&self) -> Pixels<P, C> {
 		Pixels::new(self.data, self.owner, self.area)
 	}
 
@@ -171,7 +171,7 @@ impl<'a, C, P> View<'a, C, P>
 	/// use picto::Area;
 	/// use picto::color::{Mix, Rgb};
 	///
-	/// let mut image = read::from_path::<u8, Rgb, _>("tests/boat.xyz").unwrap();
+	/// let mut image = read::from_path::<Rgb, u8, _>("tests/boat.xyz").unwrap();
 	/// let mut view  = image.view(Area::new().x(50).y(20));
 	///
 	/// for (_, _, mut px) in view.pixels_mut() {
@@ -185,12 +185,12 @@ impl<'a, C, P> View<'a, C, P>
 	///     px.set(&p);
 	/// }
 	/// ```
-	pub fn pixels_mut(&mut self) -> PixelsMut<C, P> {
+	pub fn pixels_mut(&mut self) -> PixelsMut<P, C> {
 		PixelsMut::new(self.data, self.owner, self.area)
 	}
 
 	/// Create a `Buffer` from the `View`.
-	pub fn into_owned(&self) -> Buffer<C, P, Vec<C>> {
+	pub fn into_owned(&self) -> Buffer<P, C, Vec<C>> {
 		let mut buffer = Buffer::new(self.area.width, self.area.height);
 
 		for (x, y, px) in self.pixels() {
@@ -209,81 +209,81 @@ impl<'a, C, P> View<'a, C, P>
 	/// use picto::Area;
 	/// use picto::color::{Rgb, Rgba};
 	///
-	/// let mut image = read::from_path::<u8, Rgba, _>("tests/rainbow.png").unwrap();
+	/// let mut image = read::from_path::<Rgba, u8, _>("tests/rainbow.png").unwrap();
 	/// let     view  = image.view(Area::new().x(10).y(10).width(20).height(20));
 	///
 	/// // Convert the 20x20 area from Rgba to Rgb.
-	/// view.convert::<u8, Rgb>();
+	/// view.convert::<Rgb, u8>();
 	/// ```
 	#[inline]
-	pub fn convert<CO, PO>(&self) -> Buffer<CO, PO, Vec<CO>>
-		where CO: pixel::Channel,
+	pub fn convert<PO, CO>(&self) -> Buffer<PO, CO, Vec<CO>>
+		where P: Into<PO>,
 		      PO: pixel::Write<CO>,
-		      P: Into<PO>
+		      CO: pixel::Channel,
 	{
-		Read::<C, P>::new(self.data, self.owner, self.area).convert()
+		Read::<P, C>::new(self.data, self.owner, self.area).convert()
 	}
 }
 
-impl<'a, C, P> From<&'a mut View<'a, C, P>> for View<'a, C, P>
-	where C: pixel::Channel,
-	      P: pixel::Read<C> + pixel::Write<C>
+impl<'a, P, C> From<&'a mut View<'a, P, C>> for View<'a, P, C>
+	where P: pixel::Read<C> + pixel::Write<C>,
+	      C: pixel::Channel,
 {
 	#[inline]
-	fn from(value: &'a mut View<'a, C, P>) -> View<'a, C, P> {
+	fn from(value: &'a mut View<'a, P, C>) -> View<'a, P, C> {
 		View::new(value.data, value.owner, value.area)
 	}
 }
 
-impl<'a, C, P> From<View<'a, C, P>> for Read<'a, C, P>
-	where C: pixel::Channel,
-	      P: pixel::Read<C> + pixel::Write<C>
+impl<'a, P, C> From<View<'a, P, C>> for Read<'a, P, C>
+	where P: pixel::Read<C> + pixel::Write<C>,
+	      C: pixel::Channel,
 {
 	#[inline]
-	fn from(value: View<'a, C, P>) -> Read<'a, C, P> {
+	fn from(value: View<'a, P, C>) -> Read<'a, P, C> {
 		Read::new(value.data, value.owner, value.area)
 	}
 }
 
-impl<'a, C, P> From<&'a View<'a, C, P>> for Read<'a, C, P>
-	where C: pixel::Channel,
-	      P: pixel::Read<C> + pixel::Write<C>
+impl<'a, P, C> From<&'a View<'a, P, C>> for Read<'a, P, C>
+	where P: pixel::Read<C> + pixel::Write<C>,
+	      C: pixel::Channel,
 {
 	#[inline]
-	fn from(value: &'a View<'a, C, P>) -> Read<'a, C, P> {
+	fn from(value: &'a View<'a, P, C>) -> Read<'a, P, C> {
 		Read::new(value.data, value.owner, value.area)
 	}
 }
 
-impl<'a, C, P> From<View<'a, C, P>> for Write<'a, C, P>
-	where C: pixel::Channel,
-	      P: pixel::Read<C> + pixel::Write<C>
+impl<'a, P, C> From<View<'a, P, C>> for Write<'a, P, C>
+	where P: pixel::Read<C> + pixel::Write<C>,
+	      C: pixel::Channel,
 {
 	#[inline]
-	fn from(value: View<'a, C, P>) -> Write<'a, C, P> {
+	fn from(value: View<'a, P, C>) -> Write<'a, P, C> {
 		Write::new(value.data, value.owner, value.area)
 	}
 }
 
-impl<'a, C, P> From<&'a mut View<'a, C, P>> for Write<'a, C, P>
-	where C: pixel::Channel,
-	      P: pixel::Read<C> + pixel::Write<C>
+impl<'a, P, C> From<&'a mut View<'a, P, C>> for Write<'a, P, C>
+	where P: pixel::Read<C> + pixel::Write<C>,
+	      C: pixel::Channel,
 {
 	#[inline]
-	fn from(value: &'a mut View<'a, C, P>) -> Write<'a, C, P> {
+	fn from(value: &'a mut View<'a, P, C>) -> Write<'a, P, C> {
 		Write::new(value.data, value.owner, value.area)
 	}
 }
 
 #[cfg(test)]
 mod test {
-	use buffer::*;
+	use buffer::Buffer;
 	use color::*;
 	use area::Area;
 
 	#[test]
 	fn pixels_mut() {
-		let mut buffer = Buffer::<u8, Rgb, _>::from_raw(2, 2, vec![0, 255, 0, 255, 0, 255, 255, 255, 255, 0, 0, 0]).unwrap();
+		let mut buffer = Buffer::<Rgb, u8, _>::from_raw(2, 2, vec![0, 255, 0, 255, 0, 255, 255, 255, 255, 0, 0, 0]).unwrap();
 		let mut view = buffer.view(Default::default());
 
 		for (x, y, mut px) in view.pixels_mut() {
@@ -301,7 +301,7 @@ mod test {
 
 	#[test]
 	fn readable() {
-		let mut image = Buffer::<u8, Rgb, Vec<_>>::new(50, 50);
+		let mut image = Buffer::<Rgb, u8, Vec<_>>::new(50, 50);
 		let     image = image.view(Area::new().x(10).y(10).width(4).height(4));
 
 		assert_eq!(vec![
@@ -327,7 +327,7 @@ mod test {
 
 	#[test]
 	fn writable() {
-		let mut image = Buffer::<u8, Rgb, Vec<_>>::new(50, 50);
+		let mut image = Buffer::<Rgb, u8, Vec<_>>::new(50, 50);
 		let mut image = image.view(Area::new().x(10).y(10).width(4).height(4));
 
 		assert_eq!(vec![
@@ -353,7 +353,7 @@ mod test {
 
 	#[test]
 	fn view() {
-		let mut image = Buffer::<u8, Rgb, Vec<_>>::new(50, 50);
+		let mut image = Buffer::<Rgb, u8, Vec<_>>::new(50, 50);
 		let mut image = image.view(Area::new().x(10).y(10).width(4).height(4));
 
 		assert_eq!(vec![

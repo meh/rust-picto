@@ -17,16 +17,16 @@ use color::{Shade, Mix, Limited, ComponentWise, Saturate};
 use processing::util::GetClamped;
 use super::Buffer;
 
-impl<C, P> Shade for Buffer<C, P, Vec<C>>
-	where C: pixel::Channel,
+impl<P, C> Shade for Buffer<P, C, Vec<C>>
+	where P: Shade,
 	      P: pixel::Read<C> + pixel::Write<C>,
-	      P: Shade
+	      C: pixel::Channel,
 {
 	type Scalar = P::Scalar;
 
 	#[inline]
 	fn lighten(&self, amount: Self::Scalar) -> Self {
-		let mut output = Buffer::<C, P, _>::new(self.width(), self.height());
+		let mut output = Buffer::<P, C, _>::new(self.width(), self.height());
 
 		for ((_, _, i), (_, _, mut o)) in self.pixels().zip(output.pixels_mut()) {
 			o.set(&i.get().lighten(amount));
@@ -36,16 +36,16 @@ impl<C, P> Shade for Buffer<C, P, Vec<C>>
 	}
 }
 
-impl<C, P> Mix for Buffer<C, P, Vec<C>>
-	where C: pixel::Channel,
+impl<P, C> Mix for Buffer<P, C, Vec<C>>
+	where P: Mix,
 	      P: pixel::Read<C> + pixel::Write<C>,
-	      P: Mix
+	      C: pixel::Channel,
 {
 	type Scalar = P::Scalar;
 
 	#[inline]
 	fn mix(&self, other: &Self, factor: Self::Scalar) -> Self {
-		let mut output = Buffer::<C, P, _>::new(self.width(), self.height());
+		let mut output = Buffer::<P, C, _>::new(self.width(), self.height());
 
 		for ((x, y, i), (_, _, mut o)) in self.pixels().zip(output.pixels_mut()) {
 			o.set(&i.get().mix(&other.get_clamped(x as i64, y as i64), factor));
@@ -55,10 +55,10 @@ impl<C, P> Mix for Buffer<C, P, Vec<C>>
 	}
 }
 
-impl<C, P> Limited for Buffer<C, P, Vec<C>>
-	where C: pixel::Channel,
+impl<P, C> Limited for Buffer<P, C, Vec<C>>
+	where P: Limited,
 	      P: pixel::Read<C> + pixel::Write<C>,
-	      P: Limited
+	      C: pixel::Channel,
 {
 	#[inline]
 	fn is_valid(&self) -> bool {
@@ -73,7 +73,7 @@ impl<C, P> Limited for Buffer<C, P, Vec<C>>
 
 	#[inline]
 	fn clamp(&self) -> Self {
-		let mut output = Buffer::<C, P, _>::new(self.width(), self.height());
+		let mut output = Buffer::<P, C, _>::new(self.width(), self.height());
 
 		for ((_, _, i), (_, _, mut o)) in self.pixels().zip(output.pixels_mut()) {
 			o.set(&i.get().clamp());
@@ -91,10 +91,10 @@ impl<C, P> Limited for Buffer<C, P, Vec<C>>
 	}
 }
 
-impl<C, P> ComponentWise for Buffer<C, P, Vec<C>>
-	where C: pixel::Channel,
+impl<P, C> ComponentWise for Buffer<P, C, Vec<C>>
+	where P: ComponentWise,
 	      P: pixel::Read<C> + pixel::Write<C>,
-	      P: ComponentWise
+	      C: pixel::Channel,
 {
 	type Scalar = P::Scalar;
 
@@ -102,7 +102,7 @@ impl<C, P> ComponentWise for Buffer<C, P, Vec<C>>
 	fn component_wise<F>(&self, other: &Self, mut f: F) -> Self
 		where F: FnMut(Self::Scalar, Self::Scalar) -> Self::Scalar
 	{
-		let mut output = Buffer::<C, P, _>::new(self.width(), self.height());
+		let mut output = Buffer::<P, C, _>::new(self.width(), self.height());
 
 		for ((x, y, i), (_, _, mut o)) in self.pixels().zip(output.pixels_mut()) {
 			o.set(&i.get().component_wise(&other.get_clamped(x as i64, y as i64), |a, b| f(a, b)));
@@ -115,7 +115,7 @@ impl<C, P> ComponentWise for Buffer<C, P, Vec<C>>
 	fn component_wise_self<F>(&self, mut f: F) -> Self
 		where F: FnMut(Self::Scalar) -> Self::Scalar
 	{
-		let mut output = Buffer::<C, P, _>::new(self.width(), self.height());
+		let mut output = Buffer::<P, C, _>::new(self.width(), self.height());
 
 		for ((_, _, i), (_, _, mut o)) in self.pixels().zip(output.pixels_mut()) {
 			o.set(&i.get().component_wise_self(|x| f(x)));
@@ -125,16 +125,16 @@ impl<C, P> ComponentWise for Buffer<C, P, Vec<C>>
 	}
 }
 
-impl<C, P> Saturate for Buffer<C, P, Vec<C>>
-	where C: pixel::Channel,
+impl<P, C> Saturate for Buffer<P, C, Vec<C>>
+	where P: Saturate,
 	      P: pixel::Read<C> + pixel::Write<C>,
-	      P: Saturate
+	      C: pixel::Channel,
 {
 	type Scalar = P::Scalar;
 
 	#[inline]
 	fn saturate(&self, amount: Self::Scalar) -> Self {
-		let mut output = Buffer::<C, P, _>::new(self.width(), self.height());
+		let mut output = Buffer::<P, C, _>::new(self.width(), self.height());
 
 		for ((_, _, i), (_, _, mut o)) in self.pixels().zip(output.pixels_mut()) {
 			o.set(&i.get().saturate(amount));

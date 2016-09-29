@@ -35,14 +35,14 @@ use error::{self, Error};
 /// use picto::read;
 /// use picto::color::Rgb;
 ///
-/// let image = read::from_path::<u8, Rgb, _>("tests/boat.xyz").unwrap();
+/// let image = read::from_path::<Rgb, u8, _>("tests/boat.xyz").unwrap();
 /// write::to(File::create("tests/test.png").unwrap(), &image);
 /// ```
 #[inline]
-pub fn to<C, P, D, W>(output: W, buffer: &Buffer<C, P, D>) -> error::Result<()>
-	where C: pixel::Channel,
+pub fn to<P, C, D, W>(output: W, buffer: &Buffer<P, C, D>) -> error::Result<()>
+	where P: Into<color::Rgb> + Into<color::Rgba> + Into<color::Luma> + Into<color::Lumaa>,
 	      P: pixel::Read<C>,
-	      P: Into<color::Rgb> + Into<color::Rgba> + Into<color::Luma> + Into<color::Lumaa>,
+	      C: pixel::Channel,
 	      D: Deref<Target = [C]>,
 	      W: Write
 {
@@ -59,14 +59,14 @@ pub fn to<C, P, D, W>(output: W, buffer: &Buffer<C, P, D>) -> error::Result<()>
 /// use picto::read;
 /// use picto::color::Rgb;
 ///
-/// let image = read::from_path::<u8, Rgb, _>("tests/boat.xyz").unwrap();
+/// let image = read::from_path::<Rgb, u8, _>("tests/boat.xyz").unwrap();
 /// write::to_path("tests/test.jpeg", &image);
 /// ```
 #[inline]
-pub fn to_path<C, P, D, W>(path: W, buffer: &Buffer<C, P, D>) -> error::Result<()>
-	where C: pixel::Channel,
+pub fn to_path<P, C, D, W>(path: W, buffer: &Buffer<P, C, D>) -> error::Result<()>
+	where P: Into<color::Rgb> + Into<color::Rgba> + Into<color::Luma> + Into<color::Lumaa>,
 	      P: pixel::Read<C>,
-	      P: Into<color::Rgb> + Into<color::Rgba> + Into<color::Luma> + Into<color::Lumaa>,
+	      C: pixel::Channel,
 	      D: Deref<Target = [C]>,
 	      W: AsRef<Path>
 {
@@ -107,14 +107,14 @@ pub fn to_path<C, P, D, W>(path: W, buffer: &Buffer<C, P, D>) -> error::Result<(
 /// use picto::Format;
 /// use picto::color::Rgb;
 ///
-/// let image = read::from_path::<u8, Rgb, _>("tests/boat.xyz").unwrap();
+/// let image = read::from_path::<Rgb, u8, _>("tests/boat.xyz").unwrap();
 /// write::with_format(File::create("tests/test.png").unwrap(), Format::Bmp, &image);
 /// ```
 #[inline]
-pub fn with_format<C, P, D, W>(output: W, format: Format, buffer: &Buffer<C, P, D>) -> error::Result<()>
-	where C: pixel::Channel,
+pub fn with_format<P, C, D, W>(output: W, format: Format, buffer: &Buffer<P, C, D>) -> error::Result<()>
+	where P: Into<color::Rgb> + Into<color::Rgba> + Into<color::Luma> + Into<color::Lumaa>,
 	      P: pixel::Read<C>,
-	      P: Into<color::Rgb> + Into<color::Rgba> + Into<color::Luma> + Into<color::Lumaa>,
+	      C: pixel::Channel,
 	      D: Deref<Target = [C]>,
 	      W: Write
 {
@@ -144,10 +144,10 @@ pub fn with_format<C, P, D, W>(output: W, format: Format, buffer: &Buffer<C, P, 
 /// parameters on the encoder.
 #[cfg(feature = "png")]
 #[inline]
-pub fn png<C, P, D, F, W>(output: W, buffer: &Buffer<C, P, D>, func: F) -> error::Result<()>
-	where C: pixel::Channel,
+pub fn png<P, C, D, F, W>(output: W, buffer: &Buffer<P, C, D>, func: F) -> error::Result<()>
+	where P: Into<color::Rgb> + Into<color::Rgba> + Into<color::Luma> + Into<color::Lumaa>,
 	      P: pixel::Read<C>,
-	      P: Into<color::Rgb> + Into<color::Rgba> + Into<color::Luma> + Into<color::Lumaa>,
+	      C: pixel::Channel,
 	      D: Deref<Target = [C]>,
 	      F: FnOnce(&mut encoder::png::Encoder<W>),
 	      W: Write
@@ -161,10 +161,10 @@ pub fn png<C, P, D, F, W>(output: W, buffer: &Buffer<C, P, D>, func: F) -> error
 /// parameters on the encoder.
 #[cfg(feature = "bmp")]
 #[inline]
-pub fn bmp<C, P, D, F, W>(output: W, buffer: &Buffer<C, P, D>, func: F) -> error::Result<()>
-	where C: pixel::Channel,
+pub fn bmp<P, C, D, F, W>(output: W, buffer: &Buffer<P, C, D>, func: F) -> error::Result<()>
+	where P: Into<color::Rgb> + Into<color::Rgba>,
 	      P: pixel::Read<C>,
-	      P: Into<color::Rgb> + Into<color::Rgba>,
+	      C: pixel::Channel,
 	      D: Deref<Target = [C]>,
 	      F: FnOnce(&mut encoder::bmp::Encoder<W>),
 	      W: Write
@@ -178,10 +178,10 @@ pub fn bmp<C, P, D, F, W>(output: W, buffer: &Buffer<C, P, D>, func: F) -> error
 /// parameters on the encoder.
 #[cfg(feature = "tga")]
 #[inline]
-pub fn tga<C, P, D, F, W>(output: W, buffer: &Buffer<C, P, D>, func: F) -> error::Result<()>
-	where C: pixel::Channel,
+pub fn tga<P, C, D, F, W>(output: W, buffer: &Buffer<P, C, D>, func: F) -> error::Result<()>
+	where P: Into<color::Rgb> + Into<color::Rgba> + Into<color::Luma> + Into<color::Lumaa>,
 	      P: pixel::Read<C>,
-	      P: Into<color::Rgb> + Into<color::Rgba> + Into<color::Luma> + Into<color::Lumaa>,
+	      C: pixel::Channel,
 	      D: Deref<Target = [C]>,
 	      F: FnOnce(&mut encoder::tga::Encoder<W>),
 	      W: Write
@@ -195,10 +195,10 @@ pub fn tga<C, P, D, F, W>(output: W, buffer: &Buffer<C, P, D>, func: F) -> error
 /// parameters on the encoder.
 #[cfg(feature = "gif")]
 #[inline]
-pub fn gif<C, P, D, F, W>(output: W, buffer: &Buffer<C, P, D>, func: F) -> error::Result<()>
-	where C: pixel::Channel,
+pub fn gif<P, C, D, F, W>(output: W, buffer: &Buffer<P, C, D>, func: F) -> error::Result<()>
+	where P: Into<color::Rgb> + Into<color::Rgba> + Into<color::Luma> + Into<color::Lumaa>,
 	      P: pixel::Read<C>,
-	      P: Into<color::Rgb> + Into<color::Rgba> + Into<color::Luma> + Into<color::Lumaa>,
+	      C: pixel::Channel,
 	      D: Deref<Target = [C]>,
 	      F: FnOnce(&mut encoder::gif::Encoder<W>),
 	      W: Write

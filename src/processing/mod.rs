@@ -21,12 +21,12 @@ pub mod util;
 /// # Example
 ///
 /// ```
-/// use picto::Buffer;
+/// use picto::buffer;
 /// use picto::color::Rgb;
 /// use picto::processing::prelude::*;
 ///
-/// Buffer::<u8, Rgb, _>::from_pixel(1, 1, &Rgb::new(1.0, 0.0, 0.0))
-/// 	.scale_by::<scaler::Nearest, u8, Rgb>(20.0);
+/// buffer::Rgb::from_pixel(1, 1, &Rgb::new(1.0, 0.0, 0.0))
+/// 	.scale_by::<scaler::Nearest, Rgb, u8>(20.0);
 /// ```
 pub mod prelude;
 

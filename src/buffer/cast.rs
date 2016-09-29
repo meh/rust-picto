@@ -18,18 +18,19 @@ use buffer::Buffer;
 
 /// This trait is used for optimizations where turning a `Buffer` into another
 /// can just reuse the inner data as is.
-pub trait Into<C, P>
-	where C: pixel::Channel,
-	      P: Pixel<C>
+pub trait Into<P, C>
+	where P: Pixel<C>,
+	      C: pixel::Channel,
 {
 	/// Convert `Self` into a `Buffer`.
-	fn into(self) -> Buffer<C, P, Vec<C>>;
+	fn into(self) -> Buffer<P, C, Vec<C>>;
 }
 
 /// This trait is used for optimizations where the type can be converted to an
 /// `&[u8]` as is without going through any conversions.
-pub trait Bytes<P>
-	where P: Pixel<u8>
+pub trait Bytes<P, C>
+	where P: Pixel<C>,
+	      C: pixel::Channel,
 {
 	/// Convert `Self` to a byte slice.
 	fn bytes(&self) -> Cow<[u8]>;
@@ -42,30 +43,31 @@ mod stable {
 	use pixel;
 	use buffer::Buffer;
 
-	impl<CI, PI, DI, CO, PO> super::Into<CO, PO> for Buffer<CI, PI, DI>
-		where CI: pixel::Channel,
-		      PI: pixel::Read<CI>,
+	impl<PI, CI, DI, PO, CO> super::Into<PO, CO> for Buffer<PI, CI, DI>
+		where PI: pixel::Read<CI>,
+		      CI: pixel::Channel,
 		      DI: Deref<Target = [CI]>,
-		      CO: pixel::Channel,
 		      PO: pixel::Write<CO>,
-		      PO: From<PI>
+		      PO: From<PI>,
+		      CO: pixel::Channel,
 	{
 		#[inline]
-		fn into(self) -> Buffer<CO, PO, Vec<CO>> {
-			self.convert::<CO, PO>()
+		fn into(self) -> Buffer<PO, CO, Vec<CO>> {
+			self.convert::<PO, CO>()
 		}
 	}
 
-	impl<CI, PI, DI, PO> super::Bytes<PO> for Buffer<CI, PI, DI>
-		where CI: pixel::Channel,
-		      PI: pixel::Read<CI>,
+	impl<PI, CI, DI, PO, CO> super::Bytes<PO, CO> for Buffer<PI, CI, DI>
+		where PI: pixel::Read<CI>,
 		      PI: Into<PO>,
+		      CI: pixel::Channel,
 		      DI: Deref<Target = [CI]>,
-		      PO: pixel::Write<u8>
+		      PO: pixel::Write<CO> + pixel::Write<u8>,
+		      CO: pixel::Channel,
 	{
 		#[inline]
 		fn bytes(&self) -> Cow<[u8]> {
-			Cow::Owned(self.convert::<u8, PO>().into_raw())
+			Cow::Owned(self.convert::<PO, u8>().into_raw())
 		}
 	}
 }
@@ -83,32 +85,33 @@ mod nightly {
 	use color::{Luma, Rgb, Hsl, Hsv, Hwb, Lab, Lch, Xyz, Yxy};
 	use color::{Lumaa, Rgba, Hsla, Hsva, Hwba, Laba, Lcha, Xyza, Yxya};
 
-	impl<CI, PI, DI, CO, PO> super::Into<CO, PO> for Buffer<CI, PI, DI>
-		where CI: pixel::Channel,
-		      PI: pixel::Read<CI>,
+	impl<PI, CI, DI, CO, PO> super::Into<PO, CO> for Buffer<PI, CI, DI>
+		where PI: pixel::Read<CI>,
+		      CI: pixel::Channel,
 		      DI: Deref<Target = [CI]>,
-		      CO: pixel::Channel,
 		      PO: pixel::Write<CO>,
-		      PO: From<PI>
+		      PO: From<PI>,
+		      CO: pixel::Channel,
 	{
 		#[inline]
 		default
-		fn into(self) -> Buffer<CO, PO, Vec<CO>> {
-			self.convert::<CO, PO>()
+		fn into(self) -> Buffer<PO, CO, Vec<CO>> {
+			self.convert::<PO, CO>()
 		}
 	}
 
-	impl<CI, PI, DI, PO> super::Bytes<PO> for Buffer<CI, PI, DI>
-		where CI: pixel::Channel,
-		      PI: pixel::Read<CI>,
+	impl<PI, CI, DI, PO, CO> super::Bytes<PO, CO> for Buffer<PI, CI, DI>
+		where PI: pixel::Read<CI>,
 		      PI: Into<PO>,
+		      CI: pixel::Channel,
 		      DI: Deref<Target = [CI]>,
-		      PO: pixel::Write<u8>
+		      PO: pixel::Write<CO> + pixel::Write<u8>,
+		      CO: pixel::Channel,
 	{
 		#[inline]
 		default
 		fn bytes(&self) -> Cow<[u8]> {
-			Cow::Owned(self.convert::<u8, PO>().into_raw())
+			Cow::Owned(self.convert::<PO, u8>().into_raw())
 		}
 	}
 
@@ -117,14 +120,14 @@ mod nightly {
 		(impl) => ();
 
 		(impl ($ch:ident, $px:ident)) => (
-			impl<T: Float + Copy + 'static> super::Into<$ch, $px<T>> for Buffer<$ch, $px<T>, Vec<$ch>> {
+			impl<T: Float + Copy + 'static> super::Into<$px<T>, $ch> for Buffer<$px<T>, $ch, Vec<$ch>> {
 				#[inline]
-				fn into(self) -> Buffer<$ch, $px<T>, Vec<$ch>> {
+				fn into(self) -> Self {
 					self
 				}
 			}
 
-			impl<T: Float + Copy + 'static> super::Bytes<$px<T>> for Buffer<$ch, $px<T>, Vec<$ch>> {
+			impl<T: Float + Copy + 'static> super::Bytes<$px<T>, $ch> for Buffer<$px<T>, $ch, Vec<$ch>> {
 				#[inline]
 				fn bytes(&self) -> Cow<[u8]> {
 					let slice: &[$ch] = &*self;

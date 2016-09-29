@@ -19,8 +19,8 @@ use color::{Lumaa, Rgba, Hsla, Hsva, Hwba, Laba, Lcha, Xyza, Yxya};
 use color::pixel::Srgb;
 use color::RgbHue;
 
-/// Trait for the `Channel` within a `Pixel`, this is typically the primitive
-/// type within a `Buffer` as well.
+/// A `Channel` abstracts away the underlying type the `Pixel` components are
+/// stored as.
 pub trait Channel: Zero + Copy + 'static {
 	/// Convert the passed value to a proper `Channel`.
 	fn from<T: Float + 'static>(value: T) -> Self;
@@ -61,7 +61,8 @@ impl Channel for f64 {
 	}
 }
 
-/// The type for a `Pixel`.
+/// A `Pixel` represents a color containing a certain amount of channels
+/// composed by the `Channel` type.
 pub trait Pixel<C: Channel = u8>: Copy + 'static {
 	/// The number of channels in the `Pixel`.
 	fn channels() -> usize;

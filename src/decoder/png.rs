@@ -64,19 +64,19 @@ impl<R: Read> Decoder<R> {
 	}
 }
 
-impl<C, P, R> super::Decoder<C, P> for Decoder<R>
-	where C: pixel::Channel,
-	      P: pixel::Write<C>,
+impl<P, C, R> super::Decoder<P, C> for Decoder<R>
+	where P: pixel::Write<C>,
 	      P: From<color::Rgb> + From<color::Rgba> + From<color::Luma> + From<color::Lumaa>,
+	      C: pixel::Channel,
 	      R: Read
 {
-	fn frame(&mut self) -> error::Result<Buffer<C, P, Vec<C>>> {
+	fn frame(&mut self) -> error::Result<Buffer<P, C, Vec<C>>> {
 		let mut buffer = vec![0; try!(self.reader()).output_buffer_size()];
 		try!(try!(self.reader()).next_frame(&mut buffer));
 
 		macro_rules! buffer {
 			($ch:ty, $ty:path) => ({
-				Ok(cast::Into::<C, P>::into(try!(Buffer::<_, $ty, _>::from_raw(
+				Ok(cast::Into::<P, C>::into(try!(Buffer::<$ty, _, _>::from_raw(
 					try!(self.reader()).info().size().0,
 					try!(self.reader()).info().size().1,
 					buffer).map_err(|_| Error::Format("wrong dimensions".into())))))

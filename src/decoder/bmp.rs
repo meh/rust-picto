@@ -33,18 +33,18 @@ impl<R: Read + Seek> Decoder<R> {
 	}
 }
 
-impl<C, P, R> super::Decoder<C, P> for Decoder<R>
-	where C: pixel::Channel,
-	      P: pixel::Write<C>,
+impl<P, C, R> super::Decoder<P, C> for Decoder<R>
+	where P: pixel::Write<C>,
 	      P: From<color::Rgb> + From<color::Rgba>,
+	      C: pixel::Channel,
 	      R: Read + Seek
 {
-	fn frame(&mut self) -> error::Result<Buffer<C, P, Vec<C>>> {
+	fn frame(&mut self) -> error::Result<Buffer<P, C, Vec<C>>> {
 		let image = try!(bmp::read(self.inner.by_ref(), ColFmt::Auto));
 
 		macro_rules! buffer {
 			($ch:ty, $ty:path) => ({
-				Ok(cast::Into::<C, P>::into(try!(Buffer::<$ch, $ty, _>::from_raw(
+				Ok(cast::Into::<P, C>::into(try!(Buffer::<$ty, $ch, _>::from_raw(
 					image.w as u32,
 					image.h as u32,
 					image.buf).map_err(|_| Error::Format("wrong dimensions".into())))))

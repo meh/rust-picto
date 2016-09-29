@@ -15,25 +15,19 @@
 use pixel;
 use view;
 
-/// Clamped getter and setter.
-pub trait Clamped<C, P>: Get<C, P> + Set<C, P>
-	where C: pixel::Channel,
-	      P: pixel::Read<C> + pixel::Write<C>
-{ }
-
 /// Clamped getter.
-pub trait Get<C, P>
-	where C: pixel::Channel,
-	      P: pixel::Read<C>
+pub trait Get<P, C>
+	where P: pixel::Read<C>,
+	      C: pixel::Channel,
 {
 	/// Get the pixel at the coordinates clamped to the width and height.
 	fn get_clamped(self, x: i64, y: i64) -> P;
 }
 
-impl<'a, C, P, T> Get<C, P> for T
-	where C: pixel::Channel,
-	      P: pixel::Read<C>,
-	      T: Into<view::Read<'a, C, P>>
+impl<'a, P, C, T> Get<P, C> for T
+	where P: pixel::Read<C>,
+	      C: pixel::Channel,
+	      T: Into<view::Read<'a, P, C>>,
 {
 	#[inline]
 	fn get_clamped(self, x: i64, y: i64) -> P {
@@ -47,18 +41,18 @@ impl<'a, C, P, T> Get<C, P> for T
 }
 
 /// Clamped setter.
-pub trait Set<C, P>
-	where C: pixel::Channel,
-	      P: pixel::Write<C>
+pub trait Set<P, C>
+	where P: pixel::Write<C>,
+	      C: pixel::Channel,
 {
 	/// Set the pixel at the coordinates clamped to the width and height.
 	fn set_clamped(self, x: i64, y: i64, value: &P);
 }
 
-impl<'a, C, P, T> Set<C, P> for T
-	where C: pixel::Channel,
-	      P: pixel::Write<C>,
-	      T: Into<view::Write<'a, C, P>>
+impl<'a, P, C, T> Set<P, C> for T
+	where P: pixel::Write<C>,
+	      C: pixel::Channel,
+	      T: Into<view::Write<'a, P, C>>,
 {
 	#[inline]
 	fn set_clamped(self, x: i64, y: i64, value: &P) {

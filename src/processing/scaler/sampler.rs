@@ -18,21 +18,21 @@ use pixel;
 use color::Rgba;
 use processing::{sample, Sampler};
 
-impl<A, CI, PI, CO, PO> super::Scaler<CI, PI, CO, PO> for A
+impl<A, PI, CI, PO, CO> super::Scaler<PI, CI, PO, CO> for A
 	where A:  Sampler,
-	      CI: pixel::Channel,
-	      PI: pixel::Read<CI>,
 	      PI: Into<Rgba>,
-	      CO: pixel::Channel,
+	      PI: pixel::Read<CI>,
+	      CI: pixel::Channel,
+	      PO: From<Rgba>,
 	      PO: pixel::Write<CO>,
-	      PO: From<Rgba>
+	      CO: pixel::Channel,
 {
 	#[inline]
-	fn scale(input: &view::Read<CI, PI>, width: u32, height: u32) -> Buffer<CO, PO, Vec<CO>> {
-		let mut tmp = Buffer::<u8, Rgba, _>::new(input.width(), height);
+	fn scale(input: &view::Read<PI, CI>, width: u32, height: u32) -> Buffer<PO, CO, Vec<CO>> {
+		let mut tmp = Buffer::<Rgba, u8, _>::new(input.width(), height);
 		sample::vertically::<A, _, _, _, _, _, _>(input, &mut tmp);
 
-		let mut out = Buffer::<CO, PO, _>::new(width, height);
+		let mut out = Buffer::<PO, CO, _>::new(width, height);
 		sample::horizontally::<A, _, _, _, _, _, _>(&tmp, &mut out);
 
 		out

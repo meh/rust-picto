@@ -45,10 +45,10 @@ fn main() {
 			.help("The threshold."))
 		.get_matches();
 
-	let image     = picto::read::from_path::<u8, Rgba, _>(matches.value_of("INPUT").unwrap()).unwrap();
+	let image     = picto::read::from_path::<Rgba, u8, _>(matches.value_of("INPUT").unwrap()).unwrap();
 	let by        = matches.value_of("by").unwrap().parse::<f32>().unwrap();
 	let threshold = matches.value_of("threshold").unwrap().parse::<f32>().unwrap();
 
 
-	picto::write::to_path(matches.value_of("OUTPUT").unwrap(), &image.sharpen::<u8, Rgba>(by, threshold)).unwrap();
+	picto::write::to_path(matches.value_of("OUTPUT").unwrap(), &image.sharpen::<Rgba, u8>(by, threshold)).unwrap();
 }

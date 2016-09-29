@@ -12,5 +12,5 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-mod clamping;
-pub use self::clamping::{clamp, Clamped, Get as GetClamped, Set as SetClamped};
+pub mod clamped;
+pub use self::clamped::{clamp, Get as GetClamped, Set as SetClamped};

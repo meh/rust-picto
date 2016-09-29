@@ -19,16 +19,16 @@ use processing::util::GetClamped;
 
 pub struct Nearest;
 
-impl<CI, PI, CO, PO> super::Scaler<CI, PI, CO, PO> for Nearest
-	where CI: pixel::Channel,
-	      PI: pixel::Read<CI>,
-	      CO: pixel::Channel,
+impl<PI, CI, PO, CO> super::Scaler<PI, CI, PO, CO> for Nearest
+	where PI: pixel::Read<CI>,
+	      CI: pixel::Channel,
+	      PO: From<PI>,
 	      PO: pixel::Write<CO>,
-	      PO: From<PI>
+	      CO: pixel::Channel,
 {
 	#[inline]
-	fn scale(input: &view::Read<CI, PI>, width: u32, height: u32) -> Buffer<CO, PO, Vec<CO>> {
-		let mut output = Buffer::<CO, PO, _>::new(width, height);
+	fn scale(input: &view::Read<PI, CI>, width: u32, height: u32) -> Buffer<PO, CO, Vec<CO>> {
+		let mut output = Buffer::<PO, CO, _>::new(width, height);
 
 		for (x, y) in output.area().absolute() {
 			let v = y as f32 / (height - 1) as f32;

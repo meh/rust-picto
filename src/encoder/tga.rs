@@ -34,20 +34,20 @@ impl<W: Write> Encoder<W> {
 	}
 }
 
-impl<C, P, D, W> super::Encoder<C, P, D> for Encoder<W>
-	where C: pixel::Channel,
-	      P: pixel::Read<C>,
+impl<P, C, D, W> super::Encoder<P, C, D> for Encoder<W>
+	where P: pixel::Read<C>,
 	      P: Into<color::Luma> + Into<color::Lumaa> + Into<color::Rgb> + Into<color::Rgba>,
+	      C: pixel::Channel,
 	      D: Deref<Target = [C]>,
 	      W: Write
 {
-	fn frame(&mut self, buffer: &Buffer<C, P, D>) -> error::Result<()> {
+	fn frame(&mut self, buffer: &Buffer<P, C, D>) -> error::Result<()> {
 		let format = buffer.color().unwrap_or(ColFmt::RGB);
 
 		macro_rules! write {
 			($ch:ty, $ty:path) => (
 				try!(tga::write(self.inner.by_ref(), buffer.width() as usize, buffer.height() as usize,
-					format, cast::Bytes::<$ty>::bytes(buffer).as_ref(), ColType::Auto, None))
+					format, cast::Bytes::<$ty, $ch>::bytes(buffer).as_ref(), ColType::Auto, None))
 			);
 		}
 
@@ -82,9 +82,9 @@ mod stable {
 	use pixel::{self, Pixel};
 	use super::Color;
 
-	impl<C, P, D> Color for Buffer<C, P, D>
-		where C: pixel::Channel,
-	        P: Pixel<C>
+	impl<P, C, D> Color for Buffer<P, C, D>
+		where P: Pixel<C>,
+		      C: pixel::Channel,
 	{
 		#[inline]
 		fn color(&self) -> Option<ColFmt> {
@@ -102,9 +102,9 @@ mod nightly {
 	use color::{Luma, Lumaa, Rgb, Rgba};
 	use super::Color;
 
-	impl<C, P, D> Color for Buffer<C, P, D>
-		where C: pixel::Channel,
-	        P: Pixel<C>
+	impl<P, C, D> Color for Buffer<P, C, D>
+		where P: Pixel<C>,
+		      C: pixel::Channel,
 	{
 		#[inline]
 		default
@@ -115,7 +115,7 @@ mod nightly {
 
 	macro_rules! impl_for {
 		($ch:ident, $px:ident => $fmt:path) => (
-			impl<D, T: Float + 'static> Color for Buffer<$ch, $px<T>, D> {
+			impl<D, T: Float + 'static> Color for Buffer<$px<T>, $ch, D> {
 				#[inline]
 				fn color(&self) -> Option<ColFmt> {
 					Some($fmt)

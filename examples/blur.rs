@@ -39,8 +39,8 @@ fn main() {
 			.help("The amount to blur by."))
 		.get_matches();
 
-	let image = picto::read::from_path::<u8, Rgba, _>(matches.value_of("INPUT").unwrap()).unwrap();
+	let image = picto::read::from_path::<Rgba, u8, _>(matches.value_of("INPUT").unwrap()).unwrap();
 	let by    = matches.value_of("by").unwrap().parse::<f32>().unwrap();
 
-	picto::write::to_path(matches.value_of("OUTPUT").unwrap(), &image.blur::<u8, Rgba>(by)).unwrap();
+	picto::write::to_path(matches.value_of("OUTPUT").unwrap(), &image.blur::<Rgba, u8>(by)).unwrap();
 }

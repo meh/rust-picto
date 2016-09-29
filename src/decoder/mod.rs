@@ -17,12 +17,12 @@ use pixel::{self, Pixel};
 use error;
 
 /// An image decoder.
-pub trait Decoder<C, P>
-	where C: pixel::Channel,
-	      P: Pixel<C>
+pub trait Decoder<P, C>
+	where P: Pixel<C>,
+	      C: pixel::Channel,
 {
 	/// Decode a frame from the stream.
-	fn frame(&mut self) -> error::Result<Buffer<C, P, Vec<C>>>;
+	fn frame(&mut self) -> error::Result<Buffer<P, C, Vec<C>>>;
 }
 
 #[cfg(feature = "png")]

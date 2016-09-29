@@ -19,54 +19,58 @@ use area::Area;
 use iter::Coordinates;
 
 /// Immutable iterator over pixels.
-pub struct Iter<'a, C: pixel::Channel, P: pixel::Read<C>> {
+pub struct Iter<'a, P, C>
+	where P: pixel::Read<C>,
+	      C: pixel::Channel,
+{
 	inner: Coordinates,
 	owner: Area,
-	data:  &'a [C],
 
-	_channel: PhantomData<C>,
-	_pixel:   PhantomData<P>,
+	pixel:   PhantomData<P>,
+	channel: PhantomData<C>,
+	data:    &'a [C],
 }
 
-impl<'a, C, P> Iter<'a, C, P>
-	where C: pixel::Channel,
-	      P: pixel::Read<C>
+impl<'a, P, C> Iter<'a, P, C>
+	where P: pixel::Read<C>,
+	      C: pixel::Channel,
 {
 	#[doc(hidden)]
 	#[inline]
-	pub fn new(data: &[C], owner: Area, area: Area) -> Iter<C, P> {
+	pub fn new(data: &[C], owner: Area, area: Area) -> Iter<P, C> {
 		Iter {
 			inner: Coordinates::new(area),
 			owner: owner,
-			data:  data,
 
-			_channel: PhantomData,
-			_pixel:   PhantomData,
+			pixel:   PhantomData,
+			channel: PhantomData,
+			data:    data,
 		}
 	}
 }
 
 /// A readable pixel from the iterator.
 #[derive(Eq, PartialEq, Debug)]
-pub struct Item<'a, C: pixel::Channel, P: pixel::Read<C>> {
-	data: &'a [C],
-
-	_channel: PhantomData<C>,
-	_pixel:   PhantomData<P>,
+pub struct Item<'a, P, C>
+	where P: pixel::Read<C>,
+	      C: pixel::Channel,
+{
+	pixel:   PhantomData<P>,
+	channel: PhantomData<C>,
+	data:    &'a [C],
 }
 
-impl<'a, C, P> Item<'a, C, P>
-	where C: pixel::Channel,
-	      P: pixel::Read<C>
+impl<'a, P, C> Item<'a, P, C>
+	where P: pixel::Read<C>,
+	      C: pixel::Channel,
 {
 	#[doc(hidden)]
 	#[inline]
-	pub fn new(data: &[C]) -> Item<C, P> {
+	pub fn new(data: &[C]) -> Item<P, C> {
 		Item {
-			data: data,
-
-			_channel: PhantomData,
-			_pixel:   PhantomData,
+			pixel:   PhantomData,
+			channel: PhantomData,
+			data:    data,
 		}
 	}
 
@@ -77,11 +81,11 @@ impl<'a, C, P> Item<'a, C, P>
 	}
 }
 
-impl<'a, C, P> Iterator for Iter<'a, C, P>
-	where C: pixel::Channel,
-	      P: pixel::Read<C>
+impl<'a, P, C> Iterator for Iter<'a, P, C>
+	where P: pixel::Read<C>,
+	      C: pixel::Channel,
 {
-	type Item = (u32, u32, Item<'a, C, P>);
+	type Item = (u32, u32, Item<'a, P, C>);
 
 	fn next(&mut self) -> Option<Self::Item> {
 		let (x, y) = if let Some((x, y)) = self.inner.next() {
@@ -108,9 +112,9 @@ impl<'a, C, P> Iterator for Iter<'a, C, P>
 	}
 }
 
-impl<'a, C, P> ExactSizeIterator for Iter<'a, C, P>
-	where C: pixel::Channel,
-	      P: pixel::Read<C>
+impl<'a, P, C> ExactSizeIterator for Iter<'a, P, C>
+	where P: pixel::Read<C>,
+	      C: pixel::Channel,
 {
 	#[inline]
 	fn len(&self) -> usize {

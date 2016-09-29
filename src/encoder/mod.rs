@@ -19,13 +19,13 @@ use pixel::{self, Pixel};
 use error;
 
 /// An image encoder.
-pub trait Encoder<C, P, D>
-	where C: pixel::Channel,
-	      P: Pixel<C>,
-	      D: Deref<Target = [C]>
+pub trait Encoder<P, C, D>
+	where P: Pixel<C>,
+	      C: pixel::Channel,
+	      D: Deref<Target = [C]>,
 {
 	/// A frame for the image, respecting the previously defined metadata.
-	fn frame(&mut self, buffer: &Buffer<C, P, D>) -> error::Result<()>;
+	fn frame(&mut self, buffer: &Buffer<P, C, D>) -> error::Result<()>;
 }
 
 #[cfg(feature = "png")]
