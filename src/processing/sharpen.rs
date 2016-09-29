@@ -16,13 +16,13 @@ use buffer::Buffer;
 use pixel;
 use view;
 use color::{Rgba, ComponentWise, Limited};
-use processing::Blur;
+use processing::blur;
 
 /// Trait for blurrable types.
-pub trait Sharpen<PI, CI>
-	where PI: Into<Rgba>,
-	      PI: pixel::Read<CI>,
-	      CI: pixel::Channel,
+pub trait Sharpen<P, C>
+	where P: From<Rgba> + Into<Rgba>,
+	      P: pixel::Read<C> + pixel::Write<C>,
+	      C: pixel::Channel,
 {
 	/// Sharpen by the given radius and threshold.
 	///
@@ -35,43 +35,36 @@ pub trait Sharpen<PI, CI>
 	///
 	/// let image = read::from_path::<Rgb, u8, _>("tests/boat.xyz").unwrap();
 	///
-	/// image.sharpen::<Rgb, u8>(4.0, 0.02);
+	/// image.sharpen(4.0, 0.02);
 	/// ```
-	fn sharpen<PO, CO>(self, sigma: f32, threshold: f32) -> Buffer<PO, CO, Vec<CO>>
-		where PO: From<Rgba> + Into<Rgba>,
-		      PO: pixel::Read<CO> + pixel::Write<CO>,
-		      CO: pixel::Channel;
+	fn sharpen(self, sigma: f32, threshold: f32) -> Buffer<P, C, Vec<C>>;
 }
 
-impl<'i, PI, CI, I> Sharpen<PI, CI> for I
-	where PI: Into<Rgba>,
-	      PI: pixel::Read<CI>,
-	      CI: pixel::Channel,
-	      I:  Into<view::Read<'i, PI, CI>>
+impl<'i, P, C, I> Sharpen<P, C> for I
+	where P: From<Rgba> + Into<Rgba>,
+	      P: pixel::Read<C> + pixel::Write<C>,
+	      C: pixel::Channel,
+	      I: Into<view::Read<'i, P, C>>
 {
 	#[inline]
-	fn sharpen<PO, CO>(self, sigma: f32, threshold: f32) -> Buffer<PO, CO, Vec<CO>>
-		where PO: From<Rgba> + Into<Rgba>,
-		      PO: pixel::Read<CO> + pixel::Write<CO>,
-		      CO: pixel::Channel,
-	{
-		by::<PO, CO, PI, CI, _>(self, sigma, threshold)
+	fn sharpen(self, sigma: f32, threshold: f32) -> Buffer<P, C, Vec<C>> {
+		by::<_, P, C, P, C>(self, sigma, threshold)
 	}
 }
 
 /// Sharpen by the given radius and threshold.
 #[inline]
-pub fn by<'i, PO, CO, PI, CI, I>(input: I, sigma: f32, threshold: f32) -> Buffer<PO, CO, Vec<CO>>
-	where PO: From<Rgba> + Into<Rgba>,
+pub fn by<'i, I, PI, CI, PO, CO>(input: I, sigma: f32, threshold: f32) -> Buffer<PO, CO, Vec<CO>>
+	where I:  Into<view::Read<'i, PI, CI>>,
+	      PO: From<Rgba> + Into<Rgba>,
 	      PO: pixel::Read<CO> + pixel::Write<CO>,
 	      CO: pixel::Channel,
 	      PI: Into<Rgba>,
 	      PI: pixel::Read<CI>,
 	      CI: pixel::Channel,
-	      I:  Into<view::Read<'i, PI, CI>>
 {
 	let     input  = input.into();
-	let mut output = (&input).blur::<PO, CO>(sigma);
+	let mut output = blur::by::<_, PI, CI, PO, CO>(&input, sigma);
 
 	for ((_, _, i), (_, _, mut o)) in input.pixels().zip(output.pixels_mut()) {
 		let a = i.get().into();

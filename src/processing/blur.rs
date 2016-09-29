@@ -20,10 +20,10 @@ use processing::sampler::gaussian;
 use processing::sample;
 
 /// Trait for blurrable types.
-pub trait Blur<PI, CI>
-	where PI: Into<Rgba>,
-	      PI: pixel::Read<CI>,
-	      CI: pixel::Channel,
+pub trait Blur<P, C>
+	where P: From<Rgba> + Into<Rgba>,
+	      P: pixel::Read<C> + pixel::Write<C>,
+	      C: pixel::Channel,
 {
 	/// Blur by the given radius.
 	///
@@ -36,33 +36,26 @@ pub trait Blur<PI, CI>
 	///
 	/// let image = read::from_path::<Rgb, u8, _>("tests/boat.xyz").unwrap();
 	///
-	/// image.blur::<Rgb, u8>(1.0);
+	/// image.blur(1.0);
 	/// ```
-	fn blur<PO, CO>(self, sigma: f32) -> Buffer<PO, CO, Vec<CO>>
-		where PO: From<Rgba> + Into<Rgba>,
-		      PO: pixel::Read<CO> + pixel::Write<CO>,
-		      CO: pixel::Channel;
+	fn blur(self, sigma: f32) -> Buffer<P, C, Vec<C>>;
 }
 
-impl<'i, PI, CI, I> Blur<PI, CI> for I
-	where PI: Into<Rgba>,
-	      PI: pixel::Read<CI>,
-	      CI: pixel::Channel,
-	      I:  Into<view::Read<'i, PI, CI>>
+impl<'i, P, C, I> Blur<P, C> for I
+	where P: From<Rgba> + Into<Rgba>,
+	      P: pixel::Read<C> + pixel::Write<C>,
+	      C: pixel::Channel,
+	      I: Into<view::Read<'i, P, C>>
 {
 	#[inline]
-	fn blur<PO, CO>(self, sigma: f32) -> Buffer<PO, CO, Vec<CO>>
-		where PO: From<Rgba> + Into<Rgba>,
-		      PO: pixel::Read<CO> + pixel::Write<CO>,
-		      CO: pixel::Channel,
-	{
-		by::<PO, CO, PI, CI, _>(self, sigma)
+	fn blur(self, sigma: f32) -> Buffer<P, C, Vec<C>> {
+		by::<_, P, C, P, C>(self, sigma)
 	}
 }
 
 /// Blur by the given radius.
 #[inline]
-pub fn by<'i, PO, CO, PI, CI, I>(input: I, mut sigma: f32) -> Buffer<PO, CO, Vec<CO>>
+pub fn by<'i, I, PI, CI, PO, CO>(input: I, mut sigma: f32) -> Buffer<PO, CO, Vec<CO>>
 	where PO: From<Rgba> + Into<Rgba>,
 	      PO: pixel::Read<CO> + pixel::Write<CO>,
 	      CO: pixel::Channel,

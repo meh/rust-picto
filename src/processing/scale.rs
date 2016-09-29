@@ -18,9 +18,9 @@ use view;
 use super::Scaler;
 
 /// Trait for scalable types.
-pub trait Scale<PI, CI>
-	where PI: pixel::Read<CI>,
-	      CI: pixel::Channel,
+pub trait Scale<P, C>
+	where P: pixel::Read<C> + pixel::Write<C>,
+	      C: pixel::Channel,
 {
 	/// Resize to the given width and height.
 	///
@@ -32,16 +32,13 @@ pub trait Scale<PI, CI>
 	/// use picto::processing::prelude::*;
 	///
 	/// let image   = read::from_path::<Rgb, u8, _>("tests/boat.xyz").unwrap();
-	/// let resized = image.resize::<scaler::Lanczos3, Rgb, u8>(100, 100);
+	/// let resized = image.resize::<scaler::Lanczos3>(100, 100);
 	///
 	/// assert_eq!(resized.width(), 100);
 	/// assert_eq!(resized.height(), 100);
 	/// ```
-	fn resize<A, PO, CO>(self, width: u32, height: u32) -> Buffer<PO, CO, Vec<CO>>
-		where A:  Scaler<PI, CI, PO, CO>,
-		      PO: From<PI>,
-		      PO: pixel::Write<CO>,
-		      CO: pixel::Channel;
+	fn resize<A>(self, width: u32, height: u32) -> Buffer<P, C, Vec<C>>
+		where A: Scaler<P, C, P, C>;
 
 	/// Scale by the given factor.
 	///
@@ -53,16 +50,13 @@ pub trait Scale<PI, CI>
 	/// use picto::processing::prelude::*;
 	///
 	/// let image   = read::from_path::<Rgb, u8, _>("tests/boat.xyz").unwrap();
-	/// let resized = image.scale_by::<scaler::Lanczos3, Rgb, u8>(0.5);
+	/// let resized = image.scale_by::<scaler::Lanczos3>(0.5);
 	///
 	/// assert_eq!(resized.width(), 160);
 	/// assert_eq!(resized.height(), 120);
 	/// ```
-	fn scale_by<A, PO, CO>(self, factor: f32) -> Buffer<PO, CO, Vec<CO>>
-		where A:  Scaler<PI, CI, PO, CO>,
-		      PO: pixel::Write<CO>,
-		      PO: From<PI>,
-		      CO: pixel::Channel;
+	fn scale_by<A>(self, factor: f32) -> Buffer<P, C, Vec<C>>
+		where A: Scaler<P, C, P, C>;
 
 	/// Scale to the given width and height, maintaining the aspect ratio.
 	///
@@ -74,57 +68,45 @@ pub trait Scale<PI, CI>
 	/// use picto::processing::prelude::*;
 	///
 	/// let image   = read::from_path::<Rgb, u8, _>("tests/boat.xyz").unwrap();
-	/// let resized = image.scale_to::<scaler::Lanczos3, Rgb, u8>(160, 160);
+	/// let resized = image.scale_to::<scaler::Lanczos3>(160, 160);
 	///
 	/// assert_eq!(resized.width(), 160);
 	/// assert_eq!(resized.height(), 120);
 	/// ```
-	fn scale_to<A, PO, CO>(self, width: u32, height: u32) -> Buffer<PO, CO, Vec<CO>>
-		where A:  Scaler<PI, CI, PO, CO>,
-		      PO: pixel::Write<CO>,
-		      PO: From<PI>,
-		      CO: pixel::Channel;
+	fn scale_to<A>(self, width: u32, height: u32) -> Buffer<P, C, Vec<C>>
+		where A: Scaler<P, C, P, C>;
 }
 
-impl<'i, PI, CI, I> Scale<PI, CI> for I
-	where PI: pixel::Read<CI>,
-	      CI: pixel::Channel,
-	      I:  Into<view::Read<'i, PI, CI>>
+impl<'i, P, C, I> Scale<P, C> for I
+	where P: pixel::Read<C> + pixel::Write<C>,
+	      C: pixel::Channel,
+	      I: Into<view::Read<'i, P, C>>
 {
 	#[inline]
-	fn resize<A, PO, CO>(self, width: u32, height: u32) -> Buffer<PO, CO, Vec<CO>>
-		where A:  Scaler<PI, CI, PO, CO>,
-		      PO: pixel::Write<CO>,
-		      PO: From<PI>,
-		      CO: pixel::Channel,
+	fn resize<A>(self, width: u32, height: u32) -> Buffer<P, C, Vec<C>>
+		where A: Scaler<P, C, P, C>,
 	{
-		resize::<A, PO, CO, PI, CI, I>(self, width, height)
+		resize::<A, _, P, C, P, C>(self, width, height)
 	}
 
 	#[inline]
-	fn scale_by<A, PO, CO>(self, factor: f32) -> Buffer<PO, CO, Vec<CO>>
-		where A:  Scaler<PI, CI, PO, CO>,
-		      PO: pixel::Write<CO>,
-		      PO: From<PI>,
-		      CO: pixel::Channel,
+	fn scale_by<A>(self, factor: f32) -> Buffer<P, C, Vec<C>>
+		where A: Scaler<P, C, P, C>
 	{
-		by::<A, PO, CO, PI, CI, I>(self, factor)
+		by::<A, _, P, C, P, C>(self, factor)
 	}
 
 	#[inline]
-	fn scale_to<A, PO, CO>(self, width: u32, height: u32) -> Buffer<PO, CO, Vec<CO>>
-		where A:  Scaler<PI, CI, PO, CO>,
-		      PO: pixel::Write<CO>,
-		      PO: From<PI>,
-		      CO: pixel::Channel,
+	fn scale_to<A>(self, width: u32, height: u32) -> Buffer<P, C, Vec<C>>
+		where A: Scaler<P, C, P, C>,
 	{
-		to::<A, PO, CO, PI, CI, I>(self, width, height)
+		to::<A, _, P, C, P, C>(self, width, height)
 	}
 }
 
 /// Resize to the given width and height.
 #[inline]
-pub fn resize<'i, A, PO, CO, PI, CI, I>(input: I, width: u32, height: u32) -> Buffer<PO, CO, Vec<CO>>
+pub fn resize<'i, A, I, PI, CI, PO, CO>(input: I, width: u32, height: u32) -> Buffer<PO, CO, Vec<CO>>
 	where A:  Scaler<PI, CI, PO, CO>,
 	      PO: From<PI>,
 	      PO: pixel::Write<CO>,
@@ -144,7 +126,7 @@ pub fn resize<'i, A, PO, CO, PI, CI, I>(input: I, width: u32, height: u32) -> Bu
 
 /// Scale by the given factor.
 #[inline]
-pub fn by<'i, A, PO, CO, PI, CI, I>(input: I, factor: f32) -> Buffer<PO, CO, Vec<CO>>
+pub fn by<'i, A, I, PI, CI, PO, CO>(input: I, factor: f32) -> Buffer<PO, CO, Vec<CO>>
 	where A:  Scaler<PI, CI, PO, CO>,
 	      PO: From<PI>,
 	      PO: pixel::Write<CO>,
@@ -157,12 +139,12 @@ pub fn by<'i, A, PO, CO, PI, CI, I>(input: I, factor: f32) -> Buffer<PO, CO, Vec
 	let width  = input.width() as f32 * factor;
 	let height = input.height() as f32 * factor;
 
-	resize::<A, PO, CO, PI, CI, _>(input, width as u32, height as u32)
+	resize::<A, _, PI, CI, PO, CO>(input, width as u32, height as u32)
 }
 
 /// Scale to the given width and height, maintaining the aspect ratio.
 #[inline]
-pub fn to<'i, A, PO, CO, PI, CI, I>(input: I, width: u32, height: u32) -> Buffer<PO, CO, Vec<CO>>
+pub fn to<'i, A, I, PI, CI, PO, CO>(input: I, width: u32, height: u32) -> Buffer<PO, CO, Vec<CO>>
 	where A:  Scaler<PI, CI, PO, CO>,
 	      PO: From<PI>,
 	      PO: pixel::Write<CO>,
@@ -185,26 +167,26 @@ pub fn to<'i, A, PO, CO, PI, CI, I>(input: I, width: u32, height: u32) -> Buffer
 	let width  = input.width() as f32 * scale;
 	let height = input.height() as f32 * scale;
 
-	resize::<A, PO, CO, PI, CI, _>(input, width as u32, height as u32)
+	resize::<A, _, PI, CI, PO, CO>(input, width as u32, height as u32)
 }
 
 #[cfg(test)]
 mod test {
 	use super::*;
 	use processing::scaler::Nearest;
-	use buffer::Buffer;
+	use buffer;
 	use color::Rgb;
 
 	#[test]
 	fn nearest() {
-		let mut buffer = Buffer::<Rgb, u8, _>::new(2, 2);
+		let mut buffer = buffer::Rgb::new(2, 2);
 
 		buffer.set(0, 0, &Rgb::new(1.0, 0.0, 0.0));
 		buffer.set(1, 0, &Rgb::new(0.0, 1.0, 0.0));
 		buffer.set(0, 1, &Rgb::new(0.0, 0.0, 1.0));
 		buffer.set(1, 1, &Rgb::new(1.0, 0.0, 1.0));
 
-		let result = buffer.resize::<Nearest, Rgb, u8>(4, 4);
+		let result = buffer.resize::<Nearest>(4, 4);
 
 		assert_eq!(Rgb::new(1.0, 0.0, 0.0), result.get(0, 0));
 		assert_eq!(Rgb::new(1.0, 0.0, 0.0), result.get(1, 0));

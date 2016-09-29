@@ -12,6 +12,7 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
+use buffer::Buffer;
 use pixel;
 use view::View;
 use orientation::Orientation;
@@ -21,7 +22,7 @@ pub trait Flip<P, C>
 	where P: pixel::Read<C> + pixel::Write<C>,
 	      C: pixel::Channel,
 {
-	/// Flip on the given orientation.
+	/// Flip on the given orientation in-place.
 	///
 	/// # Example
 	///
@@ -34,6 +35,20 @@ pub trait Flip<P, C>
 	/// image.flip(flip::Vertically);
 	/// ```
 	fn flip(self, mode: Orientation);
+
+	/// Flip on the given orientation.
+	///
+	/// # Example
+	///
+	/// ```
+	/// use picto::read;
+	/// use picto::color::Rgb;
+	/// use picto::processing::prelude::*;
+	///
+	/// let mut image = read::from_path::<Rgb, u8, _>("tests/boat.xyz").unwrap();
+	/// image.flipped(flip::Vertically);
+	/// ```
+	fn flipped(self, mode: Orientation) -> Buffer<P, C, Vec<C>>;
 }
 
 impl<'a, P, C, T> Flip<P, C> for T
@@ -43,6 +58,13 @@ impl<'a, P, C, T> Flip<P, C> for T
 {
 	fn flip(self, mode: Orientation) {
 		it(self, mode)
+	}
+
+	fn flipped(self, mode: Orientation) -> Buffer<P, C, Vec<C>> {
+		let mut output = self.into().into_owned();
+		it(&mut output, mode);
+
+		output
 	}
 }
 

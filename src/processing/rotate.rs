@@ -17,9 +17,9 @@ use pixel;
 use view;
 
 /// Trait for rotatable types.
-pub trait Rotate<PI, CI>
-	where PI: pixel::Read<CI>,
-	      CI: pixel::Channel,
+pub trait Rotate<P, C>
+	where P: pixel::Read<C> + pixel::Write<C>,
+	      C: pixel::Channel,
 {
 	/// Rotate by the given degree, negative degrees will turn counter-clockwise.
 	///
@@ -31,40 +31,33 @@ pub trait Rotate<PI, CI>
 	/// use picto::processing::prelude::*;
 	///
 	/// let image   = read::from_path::<Rgb, u8, _>("tests/boat.xyz").unwrap();
-	/// let rotated = image.rotate::<Rgb, u8>(90.0);
+	/// let rotated = image.rotate(90.0);
 	///
 	/// assert_eq!(rotated.width(), 240);
 	/// assert_eq!(rotated.height(), 320);
 	/// ```
-	fn rotate<PO, CO>(self, by: f32) -> Buffer<PO, CO, Vec<CO>>
-		where PO: From<PI>,
-		      PO: pixel::Write<CO>,
-		      CO: pixel::Channel;
+	fn rotate(self, by: f32) -> Buffer<P, C, Vec<C>>;
 }
 
-impl<'i, PI, CI, I> Rotate<PI, CI> for I
-	where PI: pixel::Read<CI>,
-	      CI: pixel::Channel,
-	      I:  Into<view::Read<'i, PI, CI>>
+impl<'i, P, C, I> Rotate<P, C> for I
+	where P: pixel::Read<C> + pixel::Write<C>,
+	      C: pixel::Channel,
+	      I: Into<view::Read<'i, P, C>>
 {
 	#[inline]
-	fn rotate<PO, CO>(self, by: f32) -> Buffer<PO, CO, Vec<CO>>
-		where PO: From<PI>,
-		      PO: pixel::Write<CO>,
-		      CO: pixel::Channel,
-	{
-		it(self, by)
+	fn rotate(self, by: f32) -> Buffer<P, C, Vec<C>> {
+		it::<_, P, C, P, C>(self, by)
 	}
 }
 
 /// Rotate by the given degree, negative degrees will turn counter-clockwise.
-pub fn it<'i, PO, CO, PI, CI, I>(input: I, by: f32) -> Buffer<PO, CO, Vec<CO>>
-	where PO: From<PI>,
+pub fn it<'i, I, PI, CI, PO, CO>(input: I, by: f32) -> Buffer<PO, CO, Vec<CO>>
+	where I:  Into<view::Read<'i, PI, CI>>,
+	      PO: From<PI>,
 	      PO: pixel::Write<CO>,
 	      CO: pixel::Channel,
 	      PI: pixel::Read<CI>,
 	      CI: pixel::Channel,
-	      I:  Into<view::Read<'i, PI, CI>>
 {
 	let input = input.into();
 	let by    = if by.is_sign_positive() {

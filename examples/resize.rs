@@ -50,25 +50,25 @@ fn main() {
 
 	picto::write::to_path(matches.value_of("OUTPUT").unwrap(), &match &*matches.value_of("scaler").unwrap_or("nearest").to_lowercase() {
 		"nearest" =>
-			image.scale_by::<scaler::Nearest, Rgba, u8>(by),
+			image.scale_by::<scaler::Nearest>(by),
 
 		"linear" =>
-			image.scale_by::<scaler::Linear, Rgba, u8>(by),
+			image.scale_by::<scaler::Linear>(by),
 
 		"cubic" =>
-			image.scale_by::<scaler::Cubic, Rgba, u8>(by),
+			image.scale_by::<scaler::Cubic>(by),
 
 		"gaussian" =>
-			image.scale_by::<scaler::Gaussian, Rgba, u8>(by),
+			image.scale_by::<scaler::Gaussian>(by),
 
 		"lanczos2" =>
-			image.scale_by::<scaler::Lanczos2, Rgba, u8>(by),
+			image.scale_by::<scaler::Lanczos2>(by),
 
 		"lanczos3" =>
-			image.scale_by::<scaler::Lanczos3, Rgba, u8>(by),
+			image.scale_by::<scaler::Lanczos3>(by),
 
 		"super-xbr" =>
-			image.scale_by::<scaler::xbr::Super, Rgba, u8>(by),
+			image.scale_by::<scaler::xbr::Super>(by),
 
 		_ =>
 			unreachable!()

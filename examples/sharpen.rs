@@ -50,5 +50,5 @@ fn main() {
 	let threshold = matches.value_of("threshold").unwrap().parse::<f32>().unwrap();
 
 
-	picto::write::to_path(matches.value_of("OUTPUT").unwrap(), &image.sharpen::<Rgba, u8>(by, threshold)).unwrap();
+	picto::write::to_path(matches.value_of("OUTPUT").unwrap(), &image.sharpen(by, threshold)).unwrap();
 }

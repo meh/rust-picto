@@ -26,7 +26,7 @@ pub mod util;
 /// use picto::processing::prelude::*;
 ///
 /// buffer::Rgb::from_pixel(1, 1, &Rgb::new(1.0, 0.0, 0.0))
-/// 	.scale_by::<scaler::Nearest, Rgb, u8>(20.0);
+/// 	.scale_by::<scaler::Nearest>(20.0);
 /// ```
 pub mod prelude;
 

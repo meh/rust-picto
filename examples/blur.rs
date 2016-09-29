@@ -42,5 +42,5 @@ fn main() {
 	let image = picto::read::from_path::<Rgba, u8, _>(matches.value_of("INPUT").unwrap()).unwrap();
 	let by    = matches.value_of("by").unwrap().parse::<f32>().unwrap();
 
-	picto::write::to_path(matches.value_of("OUTPUT").unwrap(), &image.blur::<Rgba, u8>(by)).unwrap();
+	picto::write::to_path(matches.value_of("OUTPUT").unwrap(), &image.blur(by)).unwrap();
 }
