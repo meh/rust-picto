@@ -23,6 +23,33 @@ use color;
 use iter::pixel::{Iter as Pixels, IterMut as PixelsMut};
 
 /// Buffer for an image.
+///
+/// The `Buffer` is parametrized over three types, the `Pixel`, the `Channel`
+/// and the `Data`, and it's the owner of the `Data`.
+///
+/// The `Pixel` is out-of-the-box handled by the `palette` crate, but it could
+/// be any other type behaving like a color.
+///
+/// The `Channel` is a primitive type from which the `Pixel` can be read from
+/// or written to, this is typically `u8`.
+///
+/// The `Data` is the backing storage which contains a serie of `Channel` in
+/// amount equal to `Pixel::channels() * width * height`.
+///
+///	The most common `Buffer` types are available in the `buffer` module:
+///
+/// - `buffer::Luma` is an alias for `Buffer<color::Luma, u8, Vec<u8>>`
+/// - `buffer::Lumaa` is an alias for `Buffer<color::Lumaa, u8, Vec<u8>>`
+/// - `buffer::Rgb` is an alias for `Buffer<color::Rgb, u8, Vec<u8>>`
+/// - `buffer::Rgba` is an alias for `Buffer<color::Rgba, u8, Vec<u8>>`
+///
+/// # Notes
+///
+/// The `Data` can be any type, but most functionality will only be available
+/// when that type implements `Deref<Target = [Channel]>`.
+///
+/// This in practice means that for example you could use a `Box<[u8]>` as
+/// `Data` and almost everything would work like it were a `Vec<u8>`.
 #[derive(Clone, PartialEq, Debug)]
 pub struct Buffer<P, C, D>
 	where P: Pixel<C>,
