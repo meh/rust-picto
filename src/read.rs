@@ -60,14 +60,15 @@ pub fn from<P, C, R>(mut input: R) -> error::Result<Buffer<P, C, Vec<C>>>
 /// let mut file   = File::open("tests/boat.xyz").unwrap();
 /// file.read_to_end(&mut buffer).unwrap();
 ///
-/// read::from_memory::<Rgb, u8>(&buffer).unwrap();
+/// read::from_memory::<Rgb, u8, _>(buffer).unwrap();
 /// ```
-pub fn from_memory<P, C>(slice: &[u8]) -> error::Result<Buffer<P, C, Vec<C>>>
+pub fn from_memory<P, C, R>(input: R) -> error::Result<Buffer<P, C, Vec<C>>>
 	where P: From<color::Rgb> + From<color::Rgba> + From<color::Luma> + From<color::Lumaa>,
 	      P: pixel::Write<C>,
 	      C: pixel::Channel,
+	      R: AsRef<[u8]>
 {
-	from(Cursor::new(slice))
+	from(Cursor::new(input))
 }
 
 /// Load an image from the given path, guessing its format.
