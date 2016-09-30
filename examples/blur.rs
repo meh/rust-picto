@@ -22,7 +22,7 @@ use picto::processing::prelude::*;
 fn main() {
 	let matches = App::new("blur")
 		.version(env!("CARGO_PKG_VERSION"))
-		.about("Resize an image.")
+		.about("Blur an image.")
 		.arg(Arg::with_name("INPUT")
 			.index(1)
 			.required(true)
