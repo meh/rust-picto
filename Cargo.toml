@@ -5,9 +5,10 @@ version = "0.3.0"
 authors = ["meh. <meh@schizofreni.co>"]
 license = "WTFPL"
 
-description = "Image handling library."
-repository  = "https://github.com/meh/rust-picto"
-keywords    = ["image", "color"]
+description   = "Image handling library."
+repository    = "https://github.com/meh/rust-picto"
+documentation = "https://docs.rs/picto"
+keywords      = ["image", "color"]
 
 [dev-dependencies]
 # Benchmarks and tests.
