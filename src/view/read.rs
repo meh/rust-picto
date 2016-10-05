@@ -118,7 +118,8 @@ impl<'a, P, C> Read<'a, P, C>
 		Pixels::new(self.data, self.owner, self.area)
 	}
 
-	/// Convert the `Buffer` to another `Buffer` with different channel and pixel type.
+	/// Convert the `view::Read` to another `Buffer` with different channel and
+	/// pixel type.
 	///
 	/// # Example
 	///
@@ -143,6 +144,37 @@ impl<'a, P, C> Read<'a, P, C>
 
 		for (x, y) in self.area.absolute() {
 			result.set(x, y, &self.get(x, y).into());
+		}
+
+		result
+	}
+
+	/// Convert the `view::Read` to a `Buffer` with a closure handling the
+	/// conversion.
+	///
+	/// # Example
+	///
+	/// ```
+	/// use picto::read;
+	/// use picto::Area;
+	/// use picto::color::{Rgb, Rgba, Srgb};
+	///
+	/// let mut image = read::from_path::<Rgba, u8, _>("tests/rainbow.png").unwrap();
+	/// let     view  = image.readable(Area::new().x(10).y(10).width(20).height(20));
+	///
+	/// // Convert the 20x20 area from Rgba to sRGB.
+	/// view.convert_with::<Rgb, u8, _>(|p| Srgb::from(p).into());
+	/// ```
+	#[inline]
+	pub fn convert_with<PO, CO, F>(&self, mut func: F) -> Buffer<PO, CO, Vec<CO>>
+		where F:  FnMut(P) -> PO,
+		      PO: pixel::Write<CO>,
+		      CO: pixel::Channel,
+	{
+		let mut result = Buffer::<PO, CO, Vec<_>>::new(self.area.width, self.area.height);
+
+		for (x, y) in self.area.absolute() {
+			result.set(x, y, &func(self.get(x, y)));
 		}
 
 		result

@@ -232,6 +232,30 @@ impl<'a, P, C> View<'a, P, C>
 	{
 		Read::<P, C>::new(self.data, self.owner, self.area).convert()
 	}
+
+	/// Convert the `View` to a `Buffer` with a closure handling the conversion.
+	///
+	/// # Example
+	///
+	/// ```
+	/// use picto::read;
+	/// use picto::Area;
+	/// use picto::color::{Rgb, Rgba, Srgb};
+	///
+	/// let mut image = read::from_path::<Rgba, u8, _>("tests/rainbow.png").unwrap();
+	/// let     view  = image.view(Area::new().x(10).y(10).width(20).height(20));
+	///
+	/// // Convert the 20x20 area from Rgba to sRGB.
+	/// view.convert_with::<Rgb, u8, _>(|p| Srgb::from(p).into());
+	/// ```
+	#[inline]
+	pub fn convert_with<PO, CO, F>(&self, mut func: F) -> Buffer<PO, CO, Vec<CO>>
+		where F:  FnMut(P) -> PO,
+		      PO: pixel::Write<CO>,
+		      CO: pixel::Channel,
+	{
+		Read::<P, C>::new(self.data, self.owner, self.area).convert_with(func)
+	}
 }
 
 impl<'a, P, C> From<&'a mut View<'a, P, C>> for View<'a, P, C>

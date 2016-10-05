@@ -326,6 +326,36 @@ impl<P, C, D> Buffer<P, C, D>
 
 		result
 	}
+
+	/// Convert the `Buffer` to another `Buffer` with a closure handling the
+	/// conversion.
+	///
+	/// # Example
+	///
+	/// ```
+	/// use picto::read;
+	/// use picto::Area;
+	/// use picto::color::{Rgb, Srgb};
+	///
+	/// let image = read::from_path::<Rgb, u8, _>("tests/rainbow.png").unwrap();
+	///
+	/// // Conver the `Buffer` to the sRGB color space.
+	/// image.convert_with::<Rgb, u8, _>(|p| Srgb::from(p).into());
+	/// ```
+	#[inline]
+	pub fn convert_with<PO, CO, F>(&self, mut func: F) -> Buffer<PO, CO, Vec<CO>>
+		where F:  FnMut(P) -> PO,
+		      PO: pixel::Write<CO>,
+		      CO: pixel::Channel,
+	{
+		let mut result = Buffer::<PO, CO, Vec<CO>>::new(self.area.width, self.area.height);
+
+		for (input, output) in self.chunks(P::channels()).zip(result.chunks_mut(PO::channels())) {
+			func(P::read(input)).write(output)
+		}
+
+		result
+	}
 }
 
 impl<P, C, D> Buffer<P, C, D>
