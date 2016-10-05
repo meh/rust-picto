@@ -340,7 +340,7 @@ impl<P, C, D> Buffer<P, C, D>
 	/// let image = read::from_path::<Rgb, u8, _>("tests/rainbow.png").unwrap();
 	///
 	/// // Conver the `Buffer` to the sRGB color space.
-	/// image.convert_with::<Rgb, u8, _>(|p| Srgb::new(p.red, p.green, p.blue).into());
+	/// image.convert_with::<Rgb, f32, _>(|p| Srgb::new(p.red, p.green, p.blue).into());
 	/// ```
 	#[inline]
 	pub fn convert_with<PO, CO, F>(&self, mut func: F) -> Buffer<PO, CO, Vec<CO>>
