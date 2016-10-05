@@ -49,3 +49,20 @@ fn main() {
       .blur::<u8, Rgba>(4.0)).unwrap();
 }
 ```
+
+sRGB and friends
+----------------
+The RGB types and operations provided by picto assume the colors are given in
+linear RGB space, but many images contain the data in sRGB color space, this
+means some conversion needs to happen to have accurate operations.
+
+The following code will load an image, and convert it to a `Buffer` usable from
+an sRGB space.
+
+```rust
+use picto;
+use picto::color::{Rgb, Srgb};
+
+let image = picto::read::from_path::<Rgb, u8, _>("path-to-image.jpg")
+  .convert_with::<Rgb, f32, _>(|p| Srgb::new(p.red, p.green, p.blue).into());
+```

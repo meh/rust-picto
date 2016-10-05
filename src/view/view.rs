@@ -246,7 +246,7 @@ impl<'a, P, C> View<'a, P, C>
 	/// let     view  = image.view(Area::new().x(10).y(10).width(20).height(20));
 	///
 	/// // Convert the 20x20 area from Rgba to sRGB.
-	/// view.convert_with::<Rgb, u8, _>(|p| Srgb::from(p).into());
+	/// view.convert_with::<Rgb, u8, _>(|p| Srgb::new(p.red, p.green, p.blue).into());
 	/// ```
 	#[inline]
 	pub fn convert_with<PO, CO, F>(&self, func: F) -> Buffer<PO, CO, Vec<CO>>
