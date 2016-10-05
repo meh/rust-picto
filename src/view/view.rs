@@ -249,7 +249,7 @@ impl<'a, P, C> View<'a, P, C>
 	/// view.convert_with::<Rgb, u8, _>(|p| Srgb::from(p).into());
 	/// ```
 	#[inline]
-	pub fn convert_with<PO, CO, F>(&self, mut func: F) -> Buffer<PO, CO, Vec<CO>>
+	pub fn convert_with<PO, CO, F>(&self, func: F) -> Buffer<PO, CO, Vec<CO>>
 		where F:  FnMut(P) -> PO,
 		      PO: pixel::Write<CO>,
 		      CO: pixel::Channel,
