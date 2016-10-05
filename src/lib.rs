@@ -22,7 +22,12 @@ extern crate num;
 
 #[doc(hidden)]
 pub extern crate palette;
-pub use palette as color;
+
+/// Color types.
+pub mod color {
+	pub use palette::*;
+	pub use palette::pixel::*;
+}
 
 #[cfg(feature = "png")]
 extern crate png;
