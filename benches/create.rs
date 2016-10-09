@@ -23,7 +23,7 @@ mod from_fn {
 
 	#[bench]
 	fn picto(b: &mut Bencher) {
-		b.iter(|| picto::Buffer::<u8, picto::color::Rgb, _>::from_fn(1024, 1024, |x, y| {
+		b.iter(|| picto::Buffer::<picto::color::Rgb, u8, _>::from_fn(1024, 1024, |x, y| {
 			let w = (x as f32 + y as f32) / 2048.0;
 
 			picto::color::Rgb::new(w, w, w)
@@ -43,6 +43,6 @@ mod from_pixel {
 
 	#[bench]
 	fn picto(b: &mut Bencher) {
-		b.iter(|| picto::Buffer::<u8, picto::color::Rgb, _>::from_pixel(1024, 1024, &picto::color::Rgb::new_u8(0, 0, 0)))
+		b.iter(|| picto::Buffer::<picto::color::Rgb, u8, _>::from_pixel(1024, 1024, &picto::color::Rgb::new_u8(0, 0, 0)))
 	}
 }

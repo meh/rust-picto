@@ -8,6 +8,7 @@ mod png {
 		use test::Bencher;
 		use image;
 		use picto;
+		use picto::color::{Rgb, Rgba};
 
 		#[bench]
 		fn image(b: &mut Bencher) {
@@ -16,12 +17,12 @@ mod png {
 
 		#[bench]
 		fn picto_with_convert(b: &mut Bencher) {
-			b.iter(|| picto::read::from_path::<u8, picto::color::Rgba, _>("tests/rainbow.png").unwrap());
+			b.iter(|| picto::read::from_path::<Rgba, u8, _>("tests/rainbow.png").unwrap());
 		}
 
 		#[bench]
 		fn picto_as_is(b: &mut Bencher) {
-			b.iter(|| picto::read::from_path::<u8, picto::color::Rgb, _>("tests/rainbow.png").unwrap());
+			b.iter(|| picto::read::from_path::<Rgb, u8, _>("tests/rainbow.png").unwrap());
 		}
 	}
 }
@@ -31,6 +32,7 @@ mod jpeg {
 		use test::Bencher;
 		use image;
 		use picto;
+		use picto::color::{Rgb, Rgba};
 
 		#[bench]
 		fn image(b: &mut Bencher) {
@@ -39,12 +41,12 @@ mod jpeg {
 
 		#[bench]
 		fn picto_with_convert(b: &mut Bencher) {
-			b.iter(|| picto::read::from_path::<u8, picto::color::Rgba, _>("tests/rainbow.jpeg").unwrap());
+			b.iter(|| picto::read::from_path::<Rgba, u8, _>("tests/rainbow.jpeg").unwrap());
 		}
 
 		#[bench]
 		fn picto_as_is(b: &mut Bencher) {
-			b.iter(|| picto::read::from_path::<u8, picto::color::Rgb, _>("tests/rainbow.jpeg").unwrap());
+			b.iter(|| picto::read::from_path::<Rgb, u8, _>("tests/rainbow.jpeg").unwrap());
 		}
 	}
 }
@@ -54,6 +56,7 @@ mod bmp {
 		use test::Bencher;
 		use image;
 		use picto;
+		use picto::color::{Rgb, Rgba};
 
 		#[bench]
 		fn image(b: &mut Bencher) {
@@ -62,12 +65,12 @@ mod bmp {
 
 		#[bench]
 		fn picto_with_convert(b: &mut Bencher) {
-			b.iter(|| picto::read::from_path::<u8, picto::color::Rgba, _>("tests/rainbow.bmp").unwrap());
+			b.iter(|| picto::read::from_path::<Rgba, u8, _>("tests/rainbow.bmp").unwrap());
 		}
 
 		#[bench]
 		fn picto_as_is(b: &mut Bencher) {
-			b.iter(|| picto::read::from_path::<u8, picto::color::Rgb, _>("tests/rainbow.bmp").unwrap());
+			b.iter(|| picto::read::from_path::<Rgb, u8, _>("tests/rainbow.bmp").unwrap());
 		}
 	}
 }
@@ -77,6 +80,7 @@ mod tga {
 		use test::Bencher;
 		use image;
 		use picto;
+		use picto::color::{Rgb, Rgba};
 
 		#[bench]
 		fn image(b: &mut Bencher) {
@@ -85,12 +89,12 @@ mod tga {
 
 		#[bench]
 		fn picto_with_convert(b: &mut Bencher) {
-			b.iter(|| picto::read::from_path::<u8, picto::color::Rgba, _>("tests/rainbow.tga").unwrap());
+			b.iter(|| picto::read::from_path::<Rgba, u8, _>("tests/rainbow.tga").unwrap());
 		}
 
 		#[bench]
 		fn picto_as_is(b: &mut Bencher) {
-			b.iter(|| picto::read::from_path::<u8, picto::color::Rgb, _>("tests/rainbow.tga").unwrap());
+			b.iter(|| picto::read::from_path::<Rgb, u8, _>("tests/rainbow.tga").unwrap());
 		}
 	}
 }
@@ -99,15 +103,16 @@ mod xyz {
 	mod read {
 		use test::Bencher;
 		use picto;
+		use picto::color::{Rgb, Rgba};
 
 		#[bench]
 		fn picto_with_convert(b: &mut Bencher) {
-			b.iter(|| picto::read::from_path::<u8, picto::color::Rgba, _>("tests/boat.xyz").unwrap());
+			b.iter(|| picto::read::from_path::<Rgba, u8, _>("tests/boat.xyz").unwrap());
 		}
 
 		#[bench]
 		fn picto_as_is(b: &mut Bencher) {
-			b.iter(|| picto::read::from_path::<u8, picto::color::Rgb, _>("tests/boat.xyz").unwrap());
+			b.iter(|| picto::read::from_path::<Rgb, u8, _>("tests/boat.xyz").unwrap());
 		}
 	}
 }

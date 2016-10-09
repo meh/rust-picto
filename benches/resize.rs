@@ -17,20 +17,20 @@ macro_rules! image {
 
 macro_rules! picto {
 	($b:expr, $path:expr, $algorithm:ident, $by:expr) => (
-		let image           = picto::read::from_path::<u8, Rgba, _>($path).unwrap();
+		let image           = picto::read::from_path::<Rgba, u8, _>($path).unwrap();
 		let (width, height) = image.dimensions();
 
-		$b.iter(|| image.resize::<scaler::$algorithm, u8, Rgba>(
+		$b.iter(|| image.resize::<scaler::$algorithm>(
 			(width as f32 * $by) as u32,
 			(height as f32 * $by) as u32
 		));
 	);
 
 	($b:expr, $path:expr, $module:ident::$algorithm:ident, $by:expr) => (
-		let image           = picto::read::from_path::<u8, Rgba, _>($path).unwrap();
+		let image           = picto::read::from_path::<Rgba, u8, _>($path).unwrap();
 		let (width, height) = image.dimensions();
 
-		$b.iter(|| image.resize::<scaler::$module::$algorithm, u8, Rgba>(
+		$b.iter(|| image.resize::<scaler::$module::$algorithm>(
 			(width as f32 * $by) as u32,
 			(height as f32 * $by) as u32
 		));

@@ -7,6 +7,7 @@ mod pixels {
 	use test::{self, Bencher};
 	use image;
 	use picto;
+	use picto::color::Rgba;
 
 	#[bench]
 	fn image(b: &mut Bencher) {
@@ -21,7 +22,7 @@ mod pixels {
 
 	#[bench]
 	fn picto(b: &mut Bencher) {
-		let image = picto::read::from_path::<u8, picto::color::Rgba, _>("tests/rainbow.png").unwrap();
+		let image = picto::read::from_path::<Rgba, u8, _>("tests/rainbow.png").unwrap();
 
 		b.iter(|| {
 			for (x, y, px) in image.pixels() {
@@ -35,6 +36,7 @@ mod pixels_mut {
 	use test::{self, Bencher};
 	use image;
 	use picto;
+	use picto::color::Rgba;
 
 	#[bench]
 	fn image(b: &mut Bencher) {
@@ -50,11 +52,11 @@ mod pixels_mut {
 
 	#[bench]
 	fn picto(b: &mut Bencher) {
-		let mut image = picto::read::from_path::<u8, picto::color::Rgba, _>("tests/rainbow.png").unwrap();
+		let mut image = picto::read::from_path::<Rgba, u8, _>("tests/rainbow.png").unwrap();
 
 		b.iter(|| {
 			for (x, y, mut px) in image.pixels_mut() {
-				px.set(&picto::color::Rgba::new(0.0, 0.5, 1.0, 1.0));
+				px.set(&Rgba::new(0.0, 0.5, 1.0, 1.0));
 				test::black_box((x, y));
 			}
 		})
