@@ -17,7 +17,7 @@ image  = "0.10"
 
 # Examples.
 clap      = "2"
-term_size = "0."
+term_size = "0"
 
 [dependencies]
 byteorder = "0.5"
