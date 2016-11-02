@@ -18,7 +18,7 @@ use std::marker::PhantomData;
 use orientation::Orientation;
 use pixel::{self, Pixel};
 use view::{self, View};
-use area::{self, Area};
+use region::{self, Region};
 use color;
 use iter::pixel::{Iter as Pixels, IterMut as PixelsMut};
 
@@ -55,7 +55,7 @@ pub struct Buffer<P, C, D>
 	where P: Pixel<C>,
 	      C: pixel::Channel,
 {
-	area: Area,
+	region: Region,
 
 	pixel:   PhantomData<P>,
 	channel: PhantomData<C>,
@@ -80,7 +80,7 @@ impl<P, C> Buffer<P, C, Vec<C>>
 	#[inline]
 	pub fn new(width: u32, height: u32) -> Self {
 		Buffer {
-			area: Area::from(0, 0, width, height),
+			region: Region::from(0, 0, width, height),
 
 			channel: PhantomData,
 			pixel:   PhantomData,
@@ -135,7 +135,7 @@ impl<P, C> Buffer<P, C, Vec<C>>
 	{
 		let mut buffer = Self::new(width, height);
 
-		for (x, y) in buffer.area().absolute() {
+		for (x, y) in buffer.region().absolute() {
 			buffer.set(x, y, &func(x, y).into());
 		}
 
@@ -214,7 +214,7 @@ impl<P, C, D> Buffer<P, C, D>
 		}
 
 		Ok(Buffer {
-			area: Area::from(0, 0, width, height),
+			region: Region::from(0, 0, width, height),
 
 			pixel:   PhantomData,
 			channel: PhantomData,
@@ -233,28 +233,28 @@ impl<P, C, D> Buffer<P, C, D>
 		self.data
 	}
 
-	/// Get the `Area` of the `Buffer`.
+	/// Get the `Region` of the `Buffer`.
 	#[inline]
-	pub fn area(&self) -> Area {
-		self.area
+	pub fn region(&self) -> Region {
+		self.region
 	}
 
 	/// Get the dimensions as a tuple containing width and height.
 	#[inline]
 	pub fn dimensions(&self) -> (u32, u32) {
-		(self.area.width, self.area.height)
+		(self.region.width, self.region.height)
 	}
 
 	/// Get the width.
 	#[inline]
 	pub fn width(&self) -> u32 {
-		self.area.width
+		self.region.width
 	}
 
 	/// Get the height.
 	#[inline]
 	pub fn height(&self) -> u32 {
-		self.area.height
+		self.region.height
 	}
 }
 
@@ -270,32 +270,32 @@ impl<P, C, D> Buffer<P, C, D>
 	/// Requires that `x < self.width()` and `y < self.height()`, otherwise it will panic.
 	#[inline]
 	pub fn get(&self, x: u32, y: u32) -> P {
-		view::Read::new(&self.data, self.area, self.area).get(x, y)
+		view::Read::new(&self.data, self.region, self.region).get(x, y)
 	}
 
-	/// Get a read-only of the given area.
+	/// Get a read-only of the given region.
 	///
-	/// Passing `Default::default()` as `area` will create a view on the whole
+	/// Passing `Default::default()` as `region` will create a view on the whole
 	/// `Buffer`.
 	///
 	/// # Panics
 	///
 	/// Requires that `x + width <= self.width()` and `y + height <= self.height()`, otherwise it will panic.
 	#[inline]
-	pub fn readable(&self, area: area::Builder) -> view::Read<P, C> {
-		let area = area.complete(self.area);
+	pub fn readable(&self, region: region::Builder) -> view::Read<P, C> {
+		let region = region.complete(self.region);
 
-		if area.x + area.width > self.area.width || area.y + area.height > self.area.height {
+		if region.x + region.width > self.region.width || region.y + region.height > self.region.height {
 			panic!("out of bounds");
 		}
 
-		view::Read::new(&self.data, self.area, area)
+		view::Read::new(&self.data, self.region, region)
 	}
 
 	/// Get an immutable `Iterator` over the pixels.
 	#[inline]
 	pub fn pixels(&self) -> Pixels<P, C> {
-		Pixels::new(&self.data, self.area, self.area)
+		Pixels::new(&self.data, self.region, self.region)
 	}
 
 	/// Convert the `Buffer` to another `Buffer` with different channel and pixel type.
@@ -304,7 +304,7 @@ impl<P, C, D> Buffer<P, C, D>
 	///
 	/// ```
 	/// use picto::read;
-	/// use picto::Area;
+	/// use picto::Region;
 	/// use picto::color::{Rgb, Lumaa};
 	///
 	/// let image = read::from_path::<Rgb, u8, _>("tests/boat.xyz").unwrap();
@@ -318,7 +318,7 @@ impl<P, C, D> Buffer<P, C, D>
 		      PO: pixel::Write<CO>,
 		      CO: pixel::Channel,
 	{
-		let mut result = Buffer::<PO, CO, Vec<CO>>::new(self.area.width, self.area.height);
+		let mut result = Buffer::<PO, CO, Vec<CO>>::new(self.region.width, self.region.height);
 
 		for (input, output) in self.chunks(P::channels()).zip(result.chunks_mut(PO::channels())) {
 			P::read(input).into().write(output)
@@ -334,7 +334,7 @@ impl<P, C, D> Buffer<P, C, D>
 	///
 	/// ```
 	/// use picto::read;
-	/// use picto::Area;
+	/// use picto::Region;
 	/// use picto::color::{Rgb, Srgb};
 	///
 	/// let image = read::from_path::<Rgb, u8, _>("tests/rainbow.png").unwrap();
@@ -348,7 +348,7 @@ impl<P, C, D> Buffer<P, C, D>
 		      PO: pixel::Write<CO>,
 		      CO: pixel::Channel,
 	{
-		let mut result = Buffer::<PO, CO, Vec<CO>>::new(self.area.width, self.area.height);
+		let mut result = Buffer::<PO, CO, Vec<CO>>::new(self.region.width, self.region.height);
 
 		for (input, output) in self.chunks(P::channels()).zip(result.chunks_mut(PO::channels())) {
 			func(P::read(input)).write(output)
@@ -370,26 +370,26 @@ impl<P, C, D> Buffer<P, C, D>
 	/// Requires that `x < self.width()` and `y < self.height()`, otherwise it will panic.
 	#[inline]
 	pub fn set(&mut self, x: u32, y: u32, pixel: &P) {
-		view::Write::new(&mut self.data, self.area, self.area).set(x, y, pixel)
+		view::Write::new(&mut self.data, self.region, self.region).set(x, y, pixel)
 	}
 
-	/// Get a write-only view of the given area.
+	/// Get a write-only view of the given region.
 	///
-	/// Passing `Default::default()` as `area` will create a view on the whole
+	/// Passing `Default::default()` as `region` will create a view on the whole
 	/// `Buffer`.
 	///
 	/// # Panics
 	///
 	/// Requires that `x + width <= self.width()` and `y + height <= self.height()`, otherwise it will panic.
 	#[inline]
-	pub fn writable(&mut self, area: area::Builder) -> view::Write<P, C> {
-		let area = area.complete(self.area);
+	pub fn writable(&mut self, region: region::Builder) -> view::Write<P, C> {
+		let region = region.complete(self.region);
 
-		if area.x + area.width > self.area.width || area.y + area.height > self.area.height {
+		if region.x + region.width > self.region.width || region.y + region.height > self.region.height {
 			panic!("out of bounds");
 		}
 
-		view::Write::new(&mut self.data, self.area, area)
+		view::Write::new(&mut self.data, self.region, region)
 	}
 
 	/// Fill the buffer with the given pixel.
@@ -416,9 +416,9 @@ impl<P, C, D> Buffer<P, C, D>
 	      C: pixel::Channel,
 	      D: DerefMut<Target = [C]>,
 {
-	/// Get a view of the given area.
+	/// Get a view of the given region.
 	///
-	/// Passing `Default::default()` as `area` will create a view on the whole
+	/// Passing `Default::default()` as `region` will create a view on the whole
 	/// `Buffer`.
 	///
 	/// # Panics
@@ -430,11 +430,11 @@ impl<P, C, D> Buffer<P, C, D>
 	///
 	/// ```
 	/// use picto::read;
-	/// use picto::Area;
+	/// use picto::Region;
 	/// use picto::color::Rgba;
 	///
 	/// let mut image = read::from_path::<Rgba, u8, _>("tests/boat.xyz").unwrap();
-	/// let mut view  = image.view(Area::new().x(10).y(10).width(20).height(30));
+	/// let mut view  = image.view(Region::new().x(10).y(10).width(20).height(30));
 	///
 	/// for (_, _, mut px) in view.pixels_mut() {
 	///     // Get the current value.
@@ -445,14 +445,14 @@ impl<P, C, D> Buffer<P, C, D>
 	/// }
 	/// ```
 	#[inline]
-	pub fn view(&mut self, area: area::Builder) -> View<P, C> {
-		let area = area.complete(self.area);
+	pub fn view(&mut self, region: region::Builder) -> View<P, C> {
+		let region = region.complete(self.region);
 
-		if area.x + area.width > self.area.width || area.y + area.height > self.area.height {
+		if region.x + region.width > self.region.width || region.y + region.height > self.region.height {
 			panic!("out of bounds");
 		}
 
-		View::new(&mut self.data, self.area, area)
+		View::new(&mut self.data, self.region, region)
 	}
 
 	/// Get a mutable `Iterator` over the pixels.
@@ -478,7 +478,7 @@ impl<P, C, D> Buffer<P, C, D>
 	/// ```
 	#[inline]
 	pub fn pixels_mut(&mut self) -> PixelsMut<P, C> {
-		PixelsMut::new(&mut self.data, self.area, self.area)
+		PixelsMut::new(&mut self.data, self.region, self.region)
 	}
 }
 

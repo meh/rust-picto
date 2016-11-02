@@ -14,9 +14,9 @@
 
 use iter::Coordinates;
 
-/// An area within a buffer or view.
+/// A region within a buffer or view.
 #[derive(Eq, PartialEq, Copy, Clone, Debug)]
-pub struct Area {
+pub struct Region {
 	pub x: u32,
 	pub y: u32,
 
@@ -24,16 +24,16 @@ pub struct Area {
 	pub height: u32,
 }
 
-impl Area {
-	/// Create a `Builder` to create an `Area`.
+impl Region {
+	/// Create a `Builder` to create an `Region`.
 	pub fn new() -> Builder {
 		Default::default()
 	}
 
-	/// Create an `Area` from the given parameters.
+	/// Create an `Region` from the given parameters.
 	#[inline]
 	pub fn from(x: u32, y: u32, width: u32, height: u32) -> Self {
-		Area {
+		Region {
 			x: x,
 			y: y,
 
@@ -52,7 +52,7 @@ impl Area {
 	/// Get an iterator over absolute coordinates.
 	#[inline]
 	pub fn absolute(&self) -> Coordinates {
-		Coordinates::new(Area {
+		Coordinates::new(Region {
 			x: 0,
 			y: 0,
 
@@ -73,19 +73,19 @@ pub struct Builder {
 
 impl Builder {
 	/// Complete any missing parts of the `Builder` and return the resulting
-	/// `Area`.
+	/// `Region`.
 	#[inline]
-	pub fn complete(&self, area: Area) -> Area {
+	pub fn complete(&self, region: Region) -> Region {
 		let (x, width) = if let Some(x) = self.x {
 			if let Some(width) = self.width {
 				(x, width)
 			}
 			else {
-				(x, area.width - x)
+				(x, region.width - x)
 			}
 		}
 		else {
-			(area.x, self.width.unwrap_or(area.width))
+			(region.x, self.width.unwrap_or(region.width))
 		};
 
 		let (y, height) = if let Some(y) = self.y {
@@ -93,14 +93,14 @@ impl Builder {
 				(y, height)
 			}
 			else {
-				(y, area.height - y)
+				(y, region.height - y)
 			}
 		}
 		else {
-			(area.y, self.height.unwrap_or(area.height))
+			(region.y, self.height.unwrap_or(region.height))
 		};
 
-		Area {
+		Region {
 			x: x,
 			y: y,
 
@@ -109,16 +109,16 @@ impl Builder {
 		}
 	}
 
-	/// Create an `Area` based on the `Builder` state.
+	/// Create an `Region` based on the `Builder` state.
 	#[inline]
-	pub fn with<F: FnMut(&Builder) -> Area>(&self, mut func: F) -> Area {
+	pub fn with<F: FnMut(&Builder) -> Region>(&self, mut func: F) -> Region {
 		func(self)
 	}
 
-	/// Builds an `Area` panicking if any fields are missing.
+	/// Builds an `Region` panicking if any fields are missing.
 	#[inline]
-	pub fn unwrap(self) -> Area {
-		Area {
+	pub fn unwrap(self) -> Region {
+		Region {
 			x: self.x.unwrap(),
 			y: self.y.unwrap(),
 
@@ -162,22 +162,22 @@ mod test {
 
 	#[test]
 	fn complete() {
-		assert_eq!(Area::from(5, 0, 5, 10),
-			Area::new().x(5).complete(Area::from(0, 0, 10, 10)));
+		assert_eq!(Region::from(5, 0, 5, 10),
+			Region::new().x(5).complete(Region::from(0, 0, 10, 10)));
 
-		assert_eq!(Area::from(0, 0, 5, 10),
-			Area::new().width(5).complete(Area::from(0, 0, 10, 10)));
+		assert_eq!(Region::from(0, 0, 5, 10),
+			Region::new().width(5).complete(Region::from(0, 0, 10, 10)));
 	}
 
 	#[test]
 	fn relative() {
 		assert_eq!(vec![(2, 4), (3, 4), (2, 5), (3, 5), (2, 6), (3, 6), (2, 7), (3, 7)],
-		 Area::new().x(2).y(4).width(2).height(4).unwrap().relative().collect::<Vec<(u32, u32)>>());
+		 Region::new().x(2).y(4).width(2).height(4).unwrap().relative().collect::<Vec<(u32, u32)>>());
 	}
 
 	#[test]
 	fn absolute() {
 		assert_eq!(vec![(0, 0), (1, 0), (0, 1), (1, 1), (0, 2), (1, 2), (0, 3), (1, 3)],
-		 Area::new().x(2).y(4).width(2).height(4).unwrap().absolute().collect::<Vec<(u32, u32)>>());
+		 Region::new().x(2).y(4).width(2).height(4).unwrap().absolute().collect::<Vec<(u32, u32)>>());
 	}
 }

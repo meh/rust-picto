@@ -53,8 +53,8 @@ pub use error::{Error, Result};
 mod parameter;
 pub use parameter::{HasParameters, Parameter};
 
-mod area;
-pub use area::Area;
+mod region;
+pub use region::Region;
 
 mod orientation;
 pub use orientation::Orientation;

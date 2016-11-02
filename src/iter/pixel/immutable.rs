@@ -15,7 +15,7 @@
 use std::marker::PhantomData;
 
 use pixel;
-use area::Area;
+use region::Region;
 use iter::Coordinates;
 
 /// Immutable iterator over pixels.
@@ -24,7 +24,7 @@ pub struct Iter<'a, P, C>
 	      C: pixel::Channel,
 {
 	inner: Coordinates,
-	owner: Area,
+	owner: Region,
 
 	pixel:   PhantomData<P>,
 	channel: PhantomData<C>,
@@ -37,9 +37,9 @@ impl<'a, P, C> Iter<'a, P, C>
 {
 	#[doc(hidden)]
 	#[inline]
-	pub fn new(data: &[C], owner: Area, area: Area) -> Iter<P, C> {
+	pub fn new(data: &[C], owner: Region, region: Region) -> Iter<P, C> {
 		Iter {
-			inner: Coordinates::new(area),
+			inner: Coordinates::new(region),
 			owner: owner,
 
 			pixel:   PhantomData,
@@ -99,8 +99,8 @@ impl<'a, P, C> Iterator for Iter<'a, P, C>
 		let index    = channels * (y as usize * self.owner.width as usize + x as usize);
 
 		Some((
-			x - self.inner.area().x,
-			y - self.inner.area().y,
+			x - self.inner.region().x,
+			y - self.inner.region().y,
 
 			Item::new(&self.data[index .. index + channels])
 		))

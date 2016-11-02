@@ -12,33 +12,33 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-use area::Area;
+use region::Region;
 
-/// Iterator over X and Y coordinates within an `Area`.
+/// Iterator over X and Y coordinates within an `Region`.
 #[derive(Eq, PartialEq, Debug)]
 pub struct Coordinates {
 	x: u32,
 	y: u32,
 
-	area: Area,
+	region: Region,
 }
 
 impl Coordinates {
-	/// Create a new `Iterator` for the given `Area`.
+	/// Create a new `Iterator` for the given `Region`.
 	#[inline]
-	pub fn new(area: Area) -> Self {
+	pub fn new(region: Region) -> Self {
 		Coordinates {
 			x: 0,
 			y: 0,
 
-			area: area,
+			region: region,
 		}
 	}
 
-	/// The `Area` being iterated over.
+	/// The `Region` being iterated over.
 	#[inline]
-	pub fn area(&self) -> Area {
-		self.area
+	pub fn region(&self) -> Region {
+		self.region
 	}
 }
 
@@ -47,18 +47,18 @@ impl Iterator for Coordinates {
 
 	#[inline]
 	fn next(&mut self) -> Option<Self::Item> {
-		if self.x >= self.area.width {
+		if self.x >= self.region.width {
 			self.x  = 0;
 			self.y += 1;
 		}
 
-		if self.y >= self.area.height {
+		if self.y >= self.region.height {
 			return None;
 		}
 
 		self.x += 1;
 
-		Some((self.x - 1 + self.area.x, self.y + self.area.y))
+		Some((self.x - 1 + self.region.x, self.y + self.region.y))
 	}
 
 	#[inline]
@@ -70,8 +70,8 @@ impl Iterator for Coordinates {
 impl ExactSizeIterator for Coordinates {
 	#[inline]
 	fn len(&self) -> usize {
-		let length    = self.area.width * self.area.height;
-		let remaining = length - (self.y * self.area.width + self.x);
+		let length    = self.region.width * self.region.height;
+		let remaining = length - (self.y * self.region.width + self.x);
 
 		remaining as usize
 	}
@@ -80,11 +80,11 @@ impl ExactSizeIterator for Coordinates {
 #[cfg(test)]
 mod test {
 	use super::*;
-	use area::Area;
+	use region::Region;
 
 	#[test]
 	fn size_hint() {
-		let mut coord = Coordinates::new(Area::from(0, 0, 2, 2));
+		let mut coord = Coordinates::new(Region::from(0, 0, 2, 2));
 
 		assert_eq!(4, coord.size_hint().0);
 		coord.next().unwrap();

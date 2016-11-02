@@ -16,26 +16,26 @@ use std::marker::PhantomData;
 
 use pixel;
 use buffer::Buffer;
-use area::{self, Area};
+use region::{self, Region};
 use iter::pixel::Iter as Pixels;
 
 /// A read-only view into a `Buffer`.
 ///
-/// The `view::Read` is a readable borrowed area within a `Buffer` and it's
+/// The `view::Read` is a readable borrowed region within a `Buffer` and it's
 /// parametrized over two types, the `Pixel` and `Channel`.
 ///
 /// The same details on those types from `Buffer` hold true for `View`, except
 /// it doesn't own any `Data`.
 ///
 /// There is no functional difference between an immutable `Buffer` and a
-/// `view::Read` that encompasses the whole `Buffer` area.
+/// `view::Read` that encompasses the whole `Buffer` region.
 #[derive(PartialEq, Debug)]
 pub struct Read<'a, P, C>
 	where P: pixel::Read<C>,
 	      C: pixel::Channel,
 {
-	owner: Area,
-	area:  Area,
+	owner:  Region,
+	region: Region,
 
 	channel: PhantomData<C>,
 	pixel:   PhantomData<P>,
@@ -48,10 +48,10 @@ impl<'a, P, C> Read<'a, P, C>
 {
 	#[doc(hidden)]
 	#[inline]
-	pub fn new(data: &[C], owner: Area, area: Area) -> Read<P, C> {
+	pub fn new(data: &[C], owner: Region, region: Region) -> Read<P, C> {
 		Read {
-			owner: owner,
-			area:  area,
+			owner:  owner,
+			region: region,
 
 			channel: PhantomData,
 			pixel:   PhantomData,
@@ -59,22 +59,22 @@ impl<'a, P, C> Read<'a, P, C>
 		}
 	}
 
-	/// Get the area.
+	/// Get the region.
 	#[inline]
-	pub fn area(&self) -> Area {
-		self.area
+	pub fn region(&self) -> Region {
+		self.region
 	}
 
 	/// Get the width.
 	#[inline]
 	pub fn width(&self) -> u32 {
-		self.area.width
+		self.region.width
 	}
 
 	/// Get the height.
 	#[inline]
 	pub fn height(&self) -> u32 {
-		self.area.height
+		self.region.height
 	}
 
 	/// Get the `Pixel` at the given coordinates.
@@ -85,17 +85,17 @@ impl<'a, P, C> Read<'a, P, C>
 	/// will panic.
 	#[inline]
 	pub fn get(&self, x: u32, y: u32) -> P {
-		if x >= self.area.width || y >= self.area.height {
+		if x >= self.region.width || y >= self.region.height {
 			panic!("out of bounds");
 		}
 
 		let channels = P::channels();
-		let index    = channels * ((self.area.y + y) as usize * self.owner.width as usize + (self.area.x + x) as usize);
+		let index    = channels * ((self.region.y + y) as usize * self.owner.width as usize + (self.region.x + x) as usize);
 
 		P::read(&self.data[index .. index + channels])
 	}
 
-	/// Get a read-only view of the given area, refining further from the
+	/// Get a read-only view of the given region, refining further from the
 	/// current.
 	///
 	/// # Panics
@@ -103,19 +103,19 @@ impl<'a, P, C> Read<'a, P, C>
 	/// Requires that `x + width <= self.width()` and `y + height <= self.height()`,
 	/// otherwise it will panic.
 	#[inline]
-	pub fn readable(&self, area: area::Builder) -> Read<P, C> {
-		let area = area.complete(Area::from(0, 0, self.area.width, self.area.height));
+	pub fn readable(&self, region: region::Builder) -> Read<P, C> {
+		let region = region.complete(Region::from(0, 0, self.region.width, self.region.height));
 
-		if area.x + area.width > self.area.width || area.y + area.height > self.area.height {
+		if region.x + region.width > self.region.width || region.y + region.height > self.region.height {
 			panic!("out of bounds");
 		}
 
-		Read::new(&self.data, self.owner, Area { x: area.x + self.area.x, y: area.y + self.area.y, .. area })
+		Read::new(&self.data, self.owner, Region { x: region.x + self.region.x, y: region.y + self.region.y, .. region })
 	}
 
 	/// Get an immutable `Iterator` over the pixels.
 	pub fn pixels(&self) -> Pixels<P, C> {
-		Pixels::new(self.data, self.owner, self.area)
+		Pixels::new(self.data, self.owner, self.region)
 	}
 
 	/// Convert the `view::Read` to another `Buffer` with different channel and
@@ -125,13 +125,13 @@ impl<'a, P, C> Read<'a, P, C>
 	///
 	/// ```
 	/// use picto::read;
-	/// use picto::Area;
+	/// use picto::Region;
 	/// use picto::color::{Rgb, Rgba};
 	///
 	/// let image = read::from_path::<Rgba, u8, _>("tests/rainbow.png").unwrap();
-	/// let view  = image.readable(Area::new().x(10).y(10).width(20).height(20));
+	/// let view  = image.readable(Region::new().x(10).y(10).width(20).height(20));
 	///
-	/// // Convert the 20x20 area from Rgba to Rgb.
+	/// // Convert the 20x20 region from Rgba to Rgb.
 	/// view.convert::<Rgb, u8>();
 	/// ```
 	#[inline]
@@ -140,9 +140,9 @@ impl<'a, P, C> Read<'a, P, C>
 		      PO: pixel::Write<CO>,
 		      CO: pixel::Channel,
 	{
-		let mut result = Buffer::<PO, CO, Vec<_>>::new(self.area.width, self.area.height);
+		let mut result = Buffer::<PO, CO, Vec<_>>::new(self.region.width, self.region.height);
 
-		for (x, y) in self.area.absolute() {
+		for (x, y) in self.region.absolute() {
 			result.set(x, y, &self.get(x, y).into());
 		}
 
@@ -156,13 +156,13 @@ impl<'a, P, C> Read<'a, P, C>
 	///
 	/// ```
 	/// use picto::read;
-	/// use picto::Area;
+	/// use picto::Region;
 	/// use picto::color::{Rgb, Rgba, Srgb};
 	///
 	/// let mut image = read::from_path::<Rgba, u8, _>("tests/rainbow.png").unwrap();
-	/// let     view  = image.readable(Area::new().x(10).y(10).width(20).height(20));
+	/// let     view  = image.readable(Region::new().x(10).y(10).width(20).height(20));
 	///
-	/// // Convert the 20x20 area from Rgba to sRGB.
+	/// // Convert the 20x20 region from Rgba to sRGB.
 	/// view.convert_with::<Rgb, f32, _>(|p| Srgb::new(p.red, p.green, p.blue).into());
 	/// ```
 	#[inline]
@@ -171,9 +171,9 @@ impl<'a, P, C> Read<'a, P, C>
 		      PO: pixel::Write<CO>,
 		      CO: pixel::Channel,
 	{
-		let mut result = Buffer::<PO, CO, Vec<_>>::new(self.area.width, self.area.height);
+		let mut result = Buffer::<PO, CO, Vec<_>>::new(self.region.width, self.region.height);
 
-		for (x, y) in self.area.absolute() {
+		for (x, y) in self.region.absolute() {
 			result.set(x, y, &func(self.get(x, y)));
 		}
 
@@ -187,7 +187,7 @@ impl<'a, P, C> From<&'a Read<'a, P, C>> for Read<'a, P, C>
 {
 	#[inline]
 	fn from(value: &'a Read<'a, P, C>) -> Read<'a, P, C> {
-		Read::new(value.data, value.owner, value.area)
+		Read::new(value.data, value.owner, value.region)
 	}
 }
 
@@ -195,7 +195,7 @@ impl<'a, P, C> From<&'a Read<'a, P, C>> for Read<'a, P, C>
 mod test {
 	use buffer::Buffer;
 	use color::*;
-	use area::Area;
+	use region::Region;
 
 	#[test]
 	fn get() {
@@ -204,7 +204,7 @@ mod test {
 			Rgba::new(w, w, w, w)
 		});
 
-		let view = image.readable(Area::new().x(10).y(10).width(10).height(10));
+		let view = image.readable(Region::new().x(10).y(10).width(10).height(10));
 		assert_relative_eq!(Rgba::new(0.5, 0.5, 0.5, 0.5),
 			view.get(0, 0), epsilon = 0.01);
 	}
@@ -212,26 +212,26 @@ mod test {
 	#[test]
 	fn readable() {
 		let image = Buffer::<Rgb, u8, Vec<_>>::new(50, 50);
-		let image = image.readable(Area::new().x(10).y(10).width(4).height(4));
+		let image = image.readable(Region::new().x(10).y(10).width(4).height(4));
 
 		assert_eq!(vec![
 			(10, 10), (11, 10), (12, 10), (13, 10),
 			(10, 11), (11, 11), (12, 11), (13, 11),
 			(10, 12), (11, 12), (12, 12), (13, 12),
 			(10, 13), (11, 13), (12, 13), (13, 13),
-		], image.area().relative().collect::<Vec<_>>());
+		], image.region().relative().collect::<Vec<_>>());
 
-		let image = image.readable(Area::new().x(1).y(1).width(2).height(2));
+		let image = image.readable(Region::new().x(1).y(1).width(2).height(2));
 
 		assert_eq!(vec![
 			(11, 11), (12, 11),
 			(11, 12), (12, 12),
-		], image.area().relative().collect::<Vec<_>>());
+		], image.region().relative().collect::<Vec<_>>());
 
-		let image = image.readable(Area::new().width(2).height(1));
+		let image = image.readable(Region::new().width(2).height(1));
 
 		assert_eq!(vec![
 			(11, 11), (12, 11),
-		], image.area().relative().collect::<Vec<_>>());
+		], image.region().relative().collect::<Vec<_>>());
 	}
 }
