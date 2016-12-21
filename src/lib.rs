@@ -44,6 +44,12 @@ extern crate gif;
 #[cfg(feature = "xyz")]
 extern crate xyz;
 
+#[cfg(feature = "processing")]
+extern crate color_quant;
+
+#[cfg(feature = "processing")]
+extern crate exoquant;
+
 #[macro_use]
 mod util;
 
@@ -75,6 +81,7 @@ pub use view::View;
 pub mod iter;
 
 /// Image manipulation functions.
+#[cfg(feature = "processing")]
 pub mod processing;
 
 /// Image format related functions.

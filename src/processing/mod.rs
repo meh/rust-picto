@@ -38,6 +38,10 @@ pub use self::sampler::Sampler;
 pub mod scaler;
 pub use self::scaler::Scaler;
 
+/// Image dithering algorithms.
+pub mod ditherer;
+pub use self::ditherer::Ditherer;
+
 /// Image flipping.
 pub mod flip;
 pub use self::flip::Flip;
@@ -61,3 +65,7 @@ pub use self::blur::Blur;
 /// Image sharpening.
 pub mod sharpen;
 pub use self::sharpen::Sharpen;
+
+/// Image dithering.
+pub mod dither;
+pub use self::dither::Dither;

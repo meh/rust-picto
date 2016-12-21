@@ -14,6 +14,7 @@
 
 pub use processing::sampler;
 pub use processing::scaler;
+pub use processing::ditherer;
 
 pub use processing::Flip;
 pub use processing::Rotate;
@@ -21,6 +22,7 @@ pub use processing::Scale;
 pub use processing::Sample;
 pub use processing::Blur;
 pub use processing::Sharpen;
+pub use processing::Dither;
 
 /// Flipping orientation.
 pub mod flip {
@@ -28,6 +30,7 @@ pub mod flip {
 	pub use orientation::Orientation::Horizontal as Horizontally;
 }
 
+/// Sampling orientation.
 pub mod sample {
 	pub use orientation::Orientation::Vertical as Vertically;
 	pub use orientation::Orientation::Horizontal as Horizontally;
