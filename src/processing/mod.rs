@@ -12,10 +12,6 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-/// Miscellaneous processing utilities.
-#[macro_use]
-pub mod util;
-
 /// Module grouping all the processing functionality for easier usage.
 ///
 /// # Example

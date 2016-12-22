@@ -19,7 +19,7 @@ use buffer::Buffer;
 use pixel;
 use color::{Rgba, Limited};
 use processing::Scaler;
-use processing::util::{clamp, GetClamped};
+use util::{clamp, GetClamped};
 
 pub struct Super;
 

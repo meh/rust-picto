@@ -17,7 +17,7 @@ use view;
 use orientation::Orientation;
 use color::{Limited, Rgba};
 use super::Sampler;
-use super::util::GetClamped;
+use util::GetClamped;
 
 /// Trait for samplable types.
 pub trait Sample<PI, CI, PO, CO>

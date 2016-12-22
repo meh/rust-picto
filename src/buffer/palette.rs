@@ -14,7 +14,7 @@
 
 use pixel;
 use color::{Shade, Mix, Limited, ComponentWise, Saturate};
-use processing::util::GetClamped;
+use util::GetClamped;
 use super::Buffer;
 
 impl<P, C> Shade for Buffer<P, C, Vec<C>>

@@ -15,7 +15,7 @@
 use view;
 use buffer::Buffer;
 use pixel;
-use processing::util::GetClamped;
+use util::GetClamped;
 
 pub struct Nearest;
 
