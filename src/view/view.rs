@@ -35,12 +35,14 @@ pub struct View<'a, P, C>
 	where P: pixel::Read<C> + pixel::Write<C>,
 	      C: pixel::Channel,
 {
+	data:   &'a mut [C],
+	stride: usize,
+
 	owner:  Region,
 	region: Region,
 
 	pixel:   PhantomData<P>,
 	channel: PhantomData<C>,
-	data:    &'a mut [C],
 }
 
 impl<'a, P, C> View<'a, P, C>
@@ -49,15 +51,45 @@ impl<'a, P, C> View<'a, P, C>
 {
 	#[doc(hidden)]
 	#[inline]
-	pub fn new(data: &mut [C], owner: Region, region: Region) -> View<P, C> {
+	pub fn new(data: &mut [C], stride: usize, owner: Region, region: Region) -> View<P, C> {
 		View {
+			data:   data,
+			stride: stride,
+
 			owner:  owner,
 			region: region,
 
 			pixel:   PhantomData,
 			channel: PhantomData,
-			data:    data,
 		}
+	}
+
+	#[inline]
+	pub fn from_raw(width: u32, height: u32, data: &mut [C]) -> Result<View<P, C>, ()> {
+		if data.len() < width as usize * height as usize * P::channels() {
+			return Err(());
+		}
+
+		Ok(Self::new(data, width as usize * P::channels(),
+			Region::from(0, 0, width, height),
+			Region::from(0, 0, width, height)))
+	}
+
+	#[inline]
+	pub fn with_stride(width: u32, height: u32, stride: usize, data: &mut [C]) -> Result<View<P, C>, ()> {
+		if data.len() < stride as usize * height as usize || stride < width as usize * P::channels() {
+			return Err(());
+		}
+
+		Ok(Self::new(data, stride,
+			Region::from(0, 0, width, height),
+			Region::from(0, 0, width, height)))
+	}
+
+	/// Get the stride.
+	#[inline]
+	pub fn stride(&self) -> usize {
+		self.stride
 	}
 
 	/// Get the region.
@@ -85,7 +117,7 @@ impl<'a, P, C> View<'a, P, C>
 	/// Requires that `x < self.width()` and `y < self.height()`, otherwise it will panic.
 	#[inline]
 	pub fn get(&self, x: u32, y: u32) -> P {
-		Read::new(self.data, self.owner, self.region).get(x, y)
+		Read::new(self.data, self.stride, self.owner, self.region).get(x, y)
 	}
 
 	/// Set the `Pixel` at the given coordinates.
@@ -95,7 +127,7 @@ impl<'a, P, C> View<'a, P, C>
 	/// Requires that `x < self.width()` and `y < self.height()`, otherwise it will panic.
 	#[inline]
 	pub fn set(&mut self, x: u32, y: u32, pixel: &P) {
-		Write::new(self.data, self.owner, self.region).set(x, y, pixel)
+		Write::new(self.data, self.stride, self.owner, self.region).set(x, y, pixel)
 	}
 
 	/// Get a read-only view of the given region.
@@ -111,7 +143,7 @@ impl<'a, P, C> View<'a, P, C>
 			panic!("out of bounds");
 		}
 
-		Read::new(&self.data, self.owner, Region { x: region.x + self.region.x, y: region.y + self.region.y, .. region })
+		Read::new(&self.data, self.stride, self.owner, Region { x: region.x + self.region.x, y: region.y + self.region.y, .. region })
 	}
 
 	/// Get a write-only view of the given region.
@@ -127,7 +159,7 @@ impl<'a, P, C> View<'a, P, C>
 			panic!("out of bounds");
 		}
 
-		Write::new(&mut self.data, self.owner, Region { x: region.x + self.region.x, y: region.y + self.region.y, .. region })
+		Write::new(&mut self.data, self.stride, self.owner, Region { x: region.x + self.region.x, y: region.y + self.region.y, .. region })
 	}
 
 	/// Get a mutable view of the given region.
@@ -143,7 +175,7 @@ impl<'a, P, C> View<'a, P, C>
 			panic!("out of bounds");
 		}
 
-		View::new(&mut self.data, self.owner, Region { x: region.x + self.region.x, y: region.y + self.region.y, .. region })
+		View::new(&mut self.data, self.stride, self.owner, Region { x: region.x + self.region.x, y: region.y + self.region.y, .. region })
 	}
 
 	/// Fill the view with the given pixel.
@@ -168,7 +200,7 @@ impl<'a, P, C> View<'a, P, C>
 
 	/// Get a mutable `Iterator` over the pixels.
 	pub fn pixels(&self) -> Pixels<P, C> {
-		Pixels::new(self.data, self.owner, self.region)
+		Pixels::new(self.data, self.stride, self.owner, self.region)
 	}
 
 	/// Get a mutable `Iterator` over the pixels.
@@ -195,7 +227,7 @@ impl<'a, P, C> View<'a, P, C>
 	/// }
 	/// ```
 	pub fn pixels_mut(&mut self) -> PixelsMut<P, C> {
-		PixelsMut::new(self.data, self.owner, self.region)
+		PixelsMut::new(self.data, self.stride, self.owner, self.region)
 	}
 
 	/// Create a `Buffer` from the `View`.
@@ -230,7 +262,7 @@ impl<'a, P, C> View<'a, P, C>
 		      PO: pixel::Write<CO>,
 		      CO: pixel::Channel,
 	{
-		Read::<P, C>::new(self.data, self.owner, self.region).convert()
+		Read::<P, C>::new(self.data, self.stride, self.owner, self.region).convert()
 	}
 
 	/// Convert the `View` to a `Buffer` with a closure handling the conversion.
@@ -254,7 +286,7 @@ impl<'a, P, C> View<'a, P, C>
 		      PO: pixel::Write<CO>,
 		      CO: pixel::Channel,
 	{
-		Read::<P, C>::new(self.data, self.owner, self.region).convert_with(func)
+		Read::<P, C>::new(self.data, self.stride, self.owner, self.region).convert_with(func)
 	}
 }
 
@@ -264,7 +296,7 @@ impl<'a, P, C> From<&'a mut View<'a, P, C>> for View<'a, P, C>
 {
 	#[inline]
 	fn from(value: &'a mut View<'a, P, C>) -> View<'a, P, C> {
-		View::new(value.data, value.owner, value.region)
+		View::new(value.data, value.stride, value.owner, value.region)
 	}
 }
 
@@ -274,7 +306,7 @@ impl<'a, P, C> From<View<'a, P, C>> for Read<'a, P, C>
 {
 	#[inline]
 	fn from(value: View<'a, P, C>) -> Read<'a, P, C> {
-		Read::new(value.data, value.owner, value.region)
+		Read::new(value.data, value.stride, value.owner, value.region)
 	}
 }
 
@@ -284,7 +316,7 @@ impl<'a, P, C> From<&'a View<'a, P, C>> for Read<'a, P, C>
 {
 	#[inline]
 	fn from(value: &'a View<'a, P, C>) -> Read<'a, P, C> {
-		Read::new(value.data, value.owner, value.region)
+		Read::new(value.data, value.stride, value.owner, value.region)
 	}
 }
 
@@ -294,7 +326,7 @@ impl<'a, P, C> From<View<'a, P, C>> for Write<'a, P, C>
 {
 	#[inline]
 	fn from(value: View<'a, P, C>) -> Write<'a, P, C> {
-		Write::new(value.data, value.owner, value.region)
+		Write::new(value.data, value.stride, value.owner, value.region)
 	}
 }
 
@@ -304,7 +336,7 @@ impl<'a, P, C> From<&'a mut View<'a, P, C>> for Write<'a, P, C>
 {
 	#[inline]
 	fn from(value: &'a mut View<'a, P, C>) -> Write<'a, P, C> {
-		Write::new(value.data, value.owner, value.region)
+		Write::new(value.data, value.stride, value.owner, value.region)
 	}
 }
 

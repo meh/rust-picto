@@ -29,12 +29,14 @@ pub struct Write<'a, P, C>
 	where P: pixel::Write<C>,
 	      C: pixel::Channel,
 {
+	data:   &'a mut [C],
+	stride: usize,
+
 	owner:  Region,
 	region: Region,
 
 	pixel:   PhantomData<P>,
 	channel: PhantomData<C>,
-	data:    &'a mut [C],
 }
 
 impl<'a, P, C> Write<'a, P, C>
@@ -43,15 +45,45 @@ impl<'a, P, C> Write<'a, P, C>
 {
 	#[doc(hidden)]
 	#[inline]
-	pub fn new(data: &mut [C], owner: Region, region: Region) -> Write<P, C> {
+	pub fn new(data: &mut [C], stride: usize, owner: Region, region: Region) -> Write<P, C> {
 		Write {
+			data:   data,
+			stride: stride,
+
 			owner:  owner,
 			region: region,
 
 			pixel:   PhantomData,
 			channel: PhantomData,
-			data:    data,
 		}
+	}
+
+	#[inline]
+	pub fn from_raw(width: u32, height: u32, data: &mut [C]) -> Result<Write<P, C>, ()> {
+		if data.len() < width as usize * height as usize * P::channels() {
+			return Err(());
+		}
+
+		Ok(Self::new(data, width as usize * P::channels(),
+			Region::from(0, 0, width, height),
+			Region::from(0, 0, width, height)))
+	}
+
+	#[inline]
+	pub fn with_stride(width: u32, height: u32, stride: usize, data: &mut [C]) -> Result<Write<P, C>, ()> {
+		if data.len() < stride as usize * height as usize || stride < width as usize * P::channels() {
+			return Err(());
+		}
+
+		Ok(Self::new(data, stride,
+			Region::from(0, 0, width, height),
+			Region::from(0, 0, width, height)))
+	}
+
+	/// Get the stride.
+	#[inline]
+	pub fn stride(&self) -> usize {
+		self.stride
 	}
 
 	/// Get the region.
@@ -85,7 +117,8 @@ impl<'a, P, C> Write<'a, P, C>
 		}
 
 		let channels = P::channels();
-		let index    = channels * ((self.region.y + y) as usize * self.owner.width as usize + (self.region.x + x) as usize);
+		let index    = ((self.region.y + y) as usize * self.stride)
+			+ ((self.region.x + x) as usize * channels);
 
 		value.write(&mut self.data[index .. index + channels]);
 	}
@@ -105,7 +138,7 @@ impl<'a, P, C> Write<'a, P, C>
 			panic!("out of bounds");
 		}
 
-		Write::new(&mut self.data, self.owner, Region { x: region.x + self.region.x, y: region.y + self.region.y, .. region })
+		Write::new(&mut self.data, self.stride, self.owner, Region { x: region.x + self.region.x, y: region.y + self.region.y, .. region })
 	}
 
 	/// Fill the view with the given pixel.
@@ -137,7 +170,7 @@ impl<'a, P, C> From<&'a mut Write<'a, P, C>> for Write<'a, P, C>
 {
 	#[inline]
 	fn from(value: &'a mut Write<'a, P, C>) -> Write<'a, P, C> {
-		Write::new(value.data, value.owner, value.region)
+		Write::new(value.data, value.stride, value.owner, value.region)
 	}
 }
 

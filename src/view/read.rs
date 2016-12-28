@@ -34,12 +34,14 @@ pub struct Read<'a, P, C>
 	where P: pixel::Read<C>,
 	      C: pixel::Channel,
 {
+	data:   &'a [C],
+	stride: usize,
+
 	owner:  Region,
 	region: Region,
 
-	channel: PhantomData<C>,
 	pixel:   PhantomData<P>,
-	data:    &'a [C],
+	channel: PhantomData<C>,
 }
 
 impl<'a, P, C> Read<'a, P, C>
@@ -48,21 +50,57 @@ impl<'a, P, C> Read<'a, P, C>
 {
 	#[doc(hidden)]
 	#[inline]
-	pub fn new(data: &[C], owner: Region, region: Region) -> Read<P, C> {
+	pub fn new(data: &[C], stride: usize, owner: Region, region: Region) -> Read<P, C> {
 		Read {
+			data:   data,
+			stride: stride,
+
 			owner:  owner,
 			region: region,
 
-			channel: PhantomData,
 			pixel:   PhantomData,
-			data:    data,
+			channel: PhantomData,
 		}
+	}
+
+	#[inline]
+	pub fn from_raw(width: u32, height: u32, data: &[C]) -> Result<Read<P, C>, ()> {
+		if data.len() < width as usize * height as usize * P::channels() {
+			return Err(());
+		}
+
+		Ok(Self::new(data, width as usize * P::channels(),
+			Region::from(0, 0, width, height),
+			Region::from(0, 0, width, height)))
+	}
+
+	#[inline]
+	pub fn with_stride(width: u32, height: u32, stride: usize, data: &[C]) -> Result<Read<P, C>, ()> {
+		if data.len() < stride as usize * height as usize || stride < width as usize * P::channels() {
+			return Err(());
+		}
+
+		Ok(Self::new(data, stride,
+			Region::from(0, 0, width, height),
+			Region::from(0, 0, width, height)))
+	}
+
+	/// Get the stride.
+	#[inline]
+	pub fn stride(&self) -> usize {
+		self.stride
 	}
 
 	/// Get the region.
 	#[inline]
 	pub fn region(&self) -> Region {
 		self.region
+	}
+
+	/// Get the dimensions as a tuple containing width and height.
+	#[inline]
+	pub fn dimensions(&self) -> (u32, u32) {
+		(self.region.width, self.region.height)
 	}
 
 	/// Get the width.
@@ -90,7 +128,8 @@ impl<'a, P, C> Read<'a, P, C>
 		}
 
 		let channels = P::channels();
-		let index    = channels * ((self.region.y + y) as usize * self.owner.width as usize + (self.region.x + x) as usize);
+		let index    = ((self.region.y + y) as usize * self.stride)
+			+ ((self.region.x + x) as usize * channels);
 
 		P::read(&self.data[index .. index + channels])
 	}
@@ -110,12 +149,12 @@ impl<'a, P, C> Read<'a, P, C>
 			panic!("out of bounds");
 		}
 
-		Read::new(&self.data, self.owner, Region { x: region.x + self.region.x, y: region.y + self.region.y, .. region })
+		Read::new(&self.data, self.stride, self.owner, Region { x: region.x + self.region.x, y: region.y + self.region.y, .. region })
 	}
 
 	/// Get an immutable `Iterator` over the pixels.
 	pub fn pixels(&self) -> Pixels<P, C> {
-		Pixels::new(self.data, self.owner, self.region)
+		Pixels::new(self.data, self.stride, self.owner, self.region)
 	}
 
 	/// Convert the `view::Read` to another `Buffer` with different channel and
@@ -187,7 +226,7 @@ impl<'a, P, C> From<&'a Read<'a, P, C>> for Read<'a, P, C>
 {
 	#[inline]
 	fn from(value: &'a Read<'a, P, C>) -> Read<'a, P, C> {
-		Read::new(value.data, value.owner, value.region)
+		Read::new(value.data, value.stride, value.owner, value.region)
 	}
 }
 

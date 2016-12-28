@@ -26,9 +26,11 @@ pub struct Iter<'a, P, C>
 	inner: Coordinates,
 	owner: Region,
 
+	data:   &'a [C],
+	stride: usize,
+
 	pixel:   PhantomData<P>,
 	channel: PhantomData<C>,
-	data:    &'a [C],
 }
 
 impl<'a, P, C> Iter<'a, P, C>
@@ -37,14 +39,16 @@ impl<'a, P, C> Iter<'a, P, C>
 {
 	#[doc(hidden)]
 	#[inline]
-	pub fn new(data: &[C], owner: Region, region: Region) -> Iter<P, C> {
+	pub fn new(data: &[C], stride: usize, owner: Region, region: Region) -> Iter<P, C> {
 		Iter {
 			inner: Coordinates::new(region),
 			owner: owner,
 
+			data:   data,
+			stride: stride,
+
 			pixel:   PhantomData,
 			channel: PhantomData,
-			data:    data,
 		}
 	}
 }
@@ -96,7 +100,8 @@ impl<'a, P, C> Iterator for Iter<'a, P, C>
 		};
 
 		let channels = P::channels();
-		let index    = channels * (y as usize * self.owner.width as usize + x as usize);
+		let index    = (y as usize * self.stride)
+			+ (x as usize * channels);
 
 		Some((
 			x - self.inner.region().x,

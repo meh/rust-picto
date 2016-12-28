@@ -57,9 +57,11 @@ pub struct Buffer<P, C, D>
 {
 	region: Region,
 
+	data:   D,
+	stride: usize,
+
 	pixel:   PhantomData<P>,
 	channel: PhantomData<C>,
-	data:    D,
 }
 
 impl<P, C> Buffer<P, C, Vec<C>>
@@ -82,9 +84,11 @@ impl<P, C> Buffer<P, C, Vec<C>>
 		Buffer {
 			region: Region::from(0, 0, width, height),
 
+			data:   vec![zero!(); width as usize * height as usize * P::channels()],
+			stride: width as usize * P::channels(),
+
 			channel: PhantomData,
 			pixel:   PhantomData,
-			data:    vec![zero!(); width as usize * height as usize * P::channels()],
 		}
 	}
 }
@@ -209,16 +213,18 @@ impl<P, C, D> Buffer<P, C, D>
 	/// ```
 	#[inline]
 	pub fn from_raw(width: u32, height: u32, data: D) -> Result<Self, ()> {
-		if width as usize * height as usize * P::channels() != data.len() {
+		if data.len() < width as usize * height as usize * P::channels() {
 			return Err(());
 		}
 
 		Ok(Buffer {
 			region: Region::from(0, 0, width, height),
 
+			data:   data,
+			stride: width as usize * P::channels(),
+
 			pixel:   PhantomData,
 			channel: PhantomData,
-			data:    data,
 		})
 	}
 }
@@ -231,6 +237,12 @@ impl<P, C, D> Buffer<P, C, D>
 	#[inline]
 	pub fn into_raw(self) -> D {
 		self.data
+	}
+
+	/// Get the stride.
+	#[inline]
+	pub fn stride(&self) -> usize {
+		self.stride
 	}
 
 	/// Get the `Region` of the `Buffer`.
@@ -270,7 +282,7 @@ impl<P, C, D> Buffer<P, C, D>
 	/// Requires that `x < self.width()` and `y < self.height()`, otherwise it will panic.
 	#[inline]
 	pub fn get(&self, x: u32, y: u32) -> P {
-		view::Read::new(&self.data, self.region, self.region).get(x, y)
+		view::Read::new(&self.data, self.stride, self.region, self.region).get(x, y)
 	}
 
 	/// Get a read-only of the given region.
@@ -289,13 +301,13 @@ impl<P, C, D> Buffer<P, C, D>
 			panic!("out of bounds");
 		}
 
-		view::Read::new(&self.data, self.region, region)
+		view::Read::new(&self.data, self.stride, self.region, region)
 	}
 
 	/// Get an immutable `Iterator` over the pixels.
 	#[inline]
 	pub fn pixels(&self) -> Pixels<P, C> {
-		Pixels::new(&self.data, self.region, self.region)
+		Pixels::new(&self.data, self.stride, self.region, self.region)
 	}
 
 	/// Convert the `Buffer` to another `Buffer` with different channel and pixel type.
@@ -370,7 +382,7 @@ impl<P, C, D> Buffer<P, C, D>
 	/// Requires that `x < self.width()` and `y < self.height()`, otherwise it will panic.
 	#[inline]
 	pub fn set(&mut self, x: u32, y: u32, pixel: &P) {
-		view::Write::new(&mut self.data, self.region, self.region).set(x, y, pixel)
+		view::Write::new(&mut self.data, self.stride, self.region, self.region).set(x, y, pixel)
 	}
 
 	/// Get a write-only view of the given region.
@@ -389,7 +401,7 @@ impl<P, C, D> Buffer<P, C, D>
 			panic!("out of bounds");
 		}
 
-		view::Write::new(&mut self.data, self.region, region)
+		view::Write::new(&mut self.data, self.stride, self.region, region)
 	}
 
 	/// Fill the buffer with the given pixel.
@@ -452,7 +464,7 @@ impl<P, C, D> Buffer<P, C, D>
 			panic!("out of bounds");
 		}
 
-		View::new(&mut self.data, self.region, region)
+		View::new(&mut self.data, self.stride, self.region, region)
 	}
 
 	/// Get a mutable `Iterator` over the pixels.
@@ -478,7 +490,7 @@ impl<P, C, D> Buffer<P, C, D>
 	/// ```
 	#[inline]
 	pub fn pixels_mut(&mut self) -> PixelsMut<P, C> {
-		PixelsMut::new(&mut self.data, self.region, self.region)
+		PixelsMut::new(&mut self.data, self.stride, self.region, self.region)
 	}
 }
 
