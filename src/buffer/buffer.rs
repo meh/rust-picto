@@ -571,8 +571,7 @@ mod test {
 		assert!(Buffer::<Rgb, u8, _>::from_raw(2, 1, vec![0, 0, 0, 0, 0, 0]).is_ok());
 		assert!(Buffer::<Rgb, u8, _>::from_raw(2, 2, vec![0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]).is_ok());
 
-		assert!(Buffer::<Rgb, u8, _>::from_raw(1, 1, vec![0, 0, 0, 0]).is_err());
-		assert!(Buffer::<Rgb, u8, _>::from_raw(1, 1, vec![0, 0, 0, 0]).is_err());
+		assert!(Buffer::<Rgb, u8, _>::from_raw(1, 1, vec![0, 0]).is_err());
 	}
 
 	#[test]
