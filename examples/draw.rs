@@ -21,7 +21,6 @@ use picto::processing::prelude::*;
 
 extern crate term_size;
 
-
 const UPPER: char = '▀';
 const LOWER: char = '▄';
 
