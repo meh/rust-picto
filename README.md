@@ -10,7 +10,7 @@ Add the following to the `Cargo.toml` in your project:
 
 ```toml
 [dependencies]
-picto = "0.2"
+picto = "0.4"
 ```
 
 Supported Formats
