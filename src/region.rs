@@ -12,7 +12,7 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-use iter::Coordinates;
+use crate::iter::Coordinates;
 
 /// A region within a buffer or view.
 #[derive(Eq, PartialEq, Copy, Clone, Debug)]

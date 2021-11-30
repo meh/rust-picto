@@ -12,7 +12,7 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-use error::{self, Error};
+use crate::error::{self, Error};
 
 /// A value with parameters.
 pub trait HasParameters {

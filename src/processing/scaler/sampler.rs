@@ -12,11 +12,11 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-use view;
-use buffer::Buffer;
-use pixel;
-use color::Rgba;
-use processing::{sample, Sampler};
+use crate::view;
+use crate::buffer::Buffer;
+use crate::pixel;
+use crate::color::Rgba;
+use crate::processing::{sample, Sampler};
 
 impl<A, PI, CI, PO, CO> super::Scaler<PI, CI, PO, CO> for A
 	where A:  Sampler,

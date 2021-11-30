@@ -1,12 +1,8 @@
 #![feature(test)]
 extern crate test;
-extern crate picto;
-extern crate image;
 
 mod from_fn {
 	use test::Bencher;
-	use image;
-	use picto;
 
 	#[bench]
 	fn image(b: &mut Bencher) {
@@ -33,8 +29,6 @@ mod from_fn {
 
 mod from_pixel {
 	use test::Bencher;
-	use image;
-	use picto;
 
 	#[bench]
 	fn image(b: &mut Bencher) {

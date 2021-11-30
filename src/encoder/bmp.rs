@@ -16,10 +16,10 @@ use std::io::Write;
 use std::ops::Deref;
 
 use imagefmt::{bmp, ColFmt, ColType};
-use error;
-use pixel;
-use buffer::{Buffer, cast};
-use color;
+use crate::error;
+use crate::pixel;
+use crate::buffer::{Buffer, cast};
+use crate::color;
 
 pub struct Encoder<W: Write> {
 	inner: W,
@@ -46,7 +46,7 @@ impl<P, C, D, W> super::Encoder<P, C, D> for Encoder<W>
 
 		macro_rules! write {
 			($ch:ty, $ty:path) => (
-				try!(bmp::write(self.inner.by_ref(), buffer.width() as usize, buffer.height() as usize,
+				r#try!(bmp::write(self.inner.by_ref(), buffer.width() as usize, buffer.height() as usize,
 					format, cast::Bytes::<$ty, $ch>::bytes(buffer).as_ref(), ColType::Auto, None))
 			);
 		}
@@ -72,8 +72,8 @@ trait Color {
 #[cfg(not(feature = "nightly"))]
 mod stable {
 	use imagefmt::ColFmt;
-	use buffer::Buffer;
-	use pixel::{self, Pixel};
+	use crate::buffer::Buffer;
+	use crate::pixel::{self, Pixel};
 	use super::Color;
 
 	impl<P, C, D> Color for Buffer<P, C, D>

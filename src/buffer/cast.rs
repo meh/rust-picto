@@ -13,8 +13,8 @@
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
 use std::borrow::Cow;
-use pixel::{self, Pixel};
-use buffer::Buffer;
+use crate::pixel::{self, Pixel};
+use crate::buffer::Buffer;
 
 /// This trait is used for optimizations where turning a `Buffer` into another
 /// can just reuse the inner data as is.
@@ -40,8 +40,8 @@ pub trait Bytes<P, C>
 mod stable {
 	use std::borrow::Cow;
 	use std::ops::Deref;
-	use pixel;
-	use buffer::Buffer;
+	use crate::pixel;
+	use crate::buffer::Buffer;
 
 	impl<PI, CI, DI, PO, CO> super::Into<PO, CO> for Buffer<PI, CI, DI>
 		where PI: pixel::Read<CI>,

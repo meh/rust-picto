@@ -54,28 +54,28 @@ extern crate exoquant;
 mod util;
 
 mod error;
-pub use error::{Error, Result};
+pub use crate::error::{Error, Result};
 
 mod parameter;
-pub use parameter::{HasParameters, Parameter};
+pub use crate::parameter::{HasParameters, Parameter};
 
 mod region;
-pub use region::Region;
+pub use crate::region::Region;
 
 mod orientation;
-pub use orientation::Orientation;
+pub use crate::orientation::Orientation;
 
 /// Basic traits for types within buffers and views.
 pub mod pixel;
-pub use pixel::Pixel;
+pub use crate::pixel::Pixel;
 
 /// Buffer related functionality.
 pub mod buffer;
-pub use buffer::Buffer;
+pub use crate::buffer::Buffer;
 
 /// Types of view within a `Buffer`.
 pub mod view;
-pub use view::View;
+pub use crate::view::View;
 
 /// Iterator types.
 pub mod iter;
@@ -86,13 +86,13 @@ pub mod processing;
 
 /// Image format related functions.
 pub mod format;
-pub use format::Format;
+pub use crate::format::Format;
 
 mod decoder;
-pub use decoder::Decoder;
+pub use crate::decoder::Decoder;
 
 mod encoder;
-pub use encoder::Encoder;
+pub use crate::encoder::Encoder;
 
 /// Image decoding functions.
 pub mod read;

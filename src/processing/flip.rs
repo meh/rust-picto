@@ -12,10 +12,10 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-use buffer::Buffer;
-use pixel;
-use view::View;
-use orientation::Orientation;
+use crate::buffer::Buffer;
+use crate::pixel;
+use crate::view::View;
+use crate::orientation::Orientation;
 
 /// Trait for flippable types.
 pub trait Flip<P, C>
@@ -128,9 +128,9 @@ pub fn it<'a, P, C, T>(value: T, mode: Orientation)
 #[cfg(test)]
 mod test {
 	use super::*;
-	use buffer::Buffer;
-	use color::Rgb;
-	use orientation::Orientation;
+	use crate::buffer::Buffer;
+	use crate::color::Rgb;
+	use crate::orientation::Orientation;
 
 	#[test]
 	fn vertical_none() {

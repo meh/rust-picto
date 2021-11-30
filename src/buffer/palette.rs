@@ -12,9 +12,9 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-use pixel;
-use color::{Shade, Mix, Limited, ComponentWise, Saturate};
-use util::GetClamped;
+use crate::pixel;
+use crate::color::{Shade, Mix, Limited, ComponentWise, Saturate};
+use crate::util::GetClamped;
 use super::Buffer;
 
 impl<P, C> Shade for Buffer<P, C, Vec<C>>

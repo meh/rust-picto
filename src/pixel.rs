@@ -14,10 +14,10 @@
 
 use num::{Float, Zero};
 
-use color::{Luma, Rgb, Hsl, Hsv, Hwb, Lab, Lch, Xyz, Yxy};
-use color::{Lumaa, Rgba, Hsla, Hsva, Hwba, Laba, Lcha, Xyza, Yxya};
-use color::pixel::Srgb;
-use color::RgbHue;
+use crate::color::{Luma, Rgb, Hsl, Hsv, Hwb, Lab, Lch, Xyz, Yxy};
+use crate::color::{Lumaa, Rgba, Hsla, Hsva, Hwba, Laba, Lcha, Xyza, Yxya};
+use crate::color::pixel::Srgb;
+use crate::color::RgbHue;
 
 /// A `Channel` abstracts away the underlying type the `Pixel` components are
 /// stored as.

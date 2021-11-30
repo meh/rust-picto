@@ -12,9 +12,9 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-use buffer::Buffer;
-use pixel;
-use view;
+use crate::buffer::Buffer;
+use crate::pixel;
+use crate::view;
 use super::Scaler;
 
 /// Trait for scalable types.
@@ -173,9 +173,9 @@ pub fn to<'i, A, I, PI, CI, PO, CO>(input: I, width: u32, height: u32) -> Buffer
 #[cfg(test)]
 mod test {
 	use super::*;
-	use processing::scaler::Nearest;
-	use buffer;
-	use color::Rgb;
+	use crate::processing::scaler::Nearest;
+	use crate::buffer;
+	use crate::color::Rgb;
 
 	#[test]
 	fn nearest() {

@@ -1,12 +1,8 @@
 #![feature(test)]
 extern crate test;
-extern crate picto;
-extern crate image;
 
 mod pixels {
 	use test::{self, Bencher};
-	use image;
-	use picto;
 	use picto::color::Rgba;
 
 	#[bench]
@@ -34,8 +30,6 @@ mod pixels {
 
 mod pixels_mut {
 	use test::{self, Bencher};
-	use image;
-	use picto;
 	use picto::color::Rgba;
 
 	#[bench]

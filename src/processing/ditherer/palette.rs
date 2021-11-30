@@ -14,10 +14,10 @@
 
 use std::marker::PhantomData;
 
-use view;
-use buffer::{Buffer, cast};
-use pixel;
-use color::Rgba;
+use crate::view;
+use crate::buffer::{Buffer, cast};
+use crate::pixel;
+use crate::color::Rgba;
 
 pub use exoquant::Color;
 
@@ -66,8 +66,8 @@ impl<T, M, PI, CI, PO, CO> super::Ditherer<PI, CI, PO, CO> for Palette<T, M>
 pub mod mapper {
 	use std::slice;
 	use exoquant::{Color, SimpleColorSpace, Remapper, ditherer};
-	use buffer::Buffer;
-	use color::Rgba;
+	use crate::buffer::Buffer;
+	use crate::color::Rgba;
 
 	pub struct None;
 	pub struct Ordered;
@@ -97,8 +97,8 @@ pub mod mapper {
 	pub mod floyd_steinberg {
 		use std::slice;
 		use exoquant::{Color, SimpleColorSpace, Remapper, ditherer};
-		use buffer::Buffer;
-		use color::Rgba;
+		use crate::buffer::Buffer;
+		use crate::color::Rgba;
 
 		pub struct Vanilla;
 		pub struct Checkered;

@@ -17,12 +17,12 @@ use std::path::Path;
 use std::fs::File;
 use std::ops::Deref;
 
-use encoder::{self, Encoder};
-use color;
-use pixel;
-use buffer::Buffer;
-use format::Format;
-use error::{self, Error};
+use crate::encoder::{self, Encoder};
+use crate::color;
+use crate::pixel;
+use crate::buffer::Buffer;
+use crate::format::Format;
+use crate::error::{self, Error};
 
 /// Write the buffer to the output stream in PNG format.
 ///
@@ -92,7 +92,7 @@ pub fn to_path<P, C, D, W>(path: W, buffer: &Buffer<P, C, D>) -> error::Result<(
 			return Err(Error::Unsupported("unsupported image format".into()))
 	};
 
-	with_format(BufWriter::new(try!(File::create(path))), format, buffer)
+	with_format(BufWriter::new(r#try!(File::create(path))), format, buffer)
 }
 
 /// Write the buffer to the output stream using the given format.

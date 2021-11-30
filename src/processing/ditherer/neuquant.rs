@@ -13,10 +13,10 @@
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
 use color_quant::NeuQuant;
-use view;
-use buffer::{Buffer, cast};
-use pixel;
-use color::Rgba;
+use crate::view;
+use crate::buffer::{Buffer, cast};
+use crate::pixel;
+use crate::color::Rgba;
 
 pub struct Best;
 pub struct Good;

@@ -14,12 +14,12 @@
 
 use std::ops::Range;
 
-use view;
-use buffer::Buffer;
-use pixel;
-use color::{Rgba, Limited};
-use processing::Scaler;
-use util::{clamp, GetClamped};
+use crate::view;
+use crate::buffer::Buffer;
+use crate::pixel;
+use crate::color::{Rgba, Limited};
+use crate::processing::Scaler;
+use crate::util::{clamp, GetClamped};
 
 pub struct Super;
 

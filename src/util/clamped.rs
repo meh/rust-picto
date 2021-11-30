@@ -12,8 +12,8 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-use pixel;
-use view;
+use crate::pixel;
+use crate::view;
 
 /// Clamped getter.
 pub trait Get<P, C>

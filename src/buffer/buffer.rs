@@ -15,12 +15,12 @@
 use std::ops::{Deref, DerefMut};
 use std::marker::PhantomData;
 
-use orientation::Orientation;
-use pixel::{self, Pixel};
-use view::{self, View};
-use region::{self, Region};
-use color;
-use iter::pixel::{Iter as Pixels, IterMut as PixelsMut};
+use crate::orientation::Orientation;
+use crate::pixel::{self, Pixel};
+use crate::view::{self, View};
+use crate::region::{self, Region};
+use crate::color;
+use crate::iter::pixel::{Iter as Pixels, IterMut as PixelsMut};
 
 /// Buffer for an image.
 ///
@@ -554,7 +554,7 @@ impl<P, C, D> DerefMut for Buffer<P, C, D>
 #[cfg(test)]
 mod test {
 	use super::*;
-	use color::*;
+	use crate::color::*;
 
 	#[test]
 	fn new() {

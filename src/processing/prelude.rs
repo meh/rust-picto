@@ -12,26 +12,26 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-pub use processing::sampler;
-pub use processing::scaler;
-pub use processing::ditherer;
+pub use crate::processing::sampler;
+pub use crate::processing::scaler;
+pub use crate::processing::ditherer;
 
-pub use processing::Flip;
-pub use processing::Rotate;
-pub use processing::Scale;
-pub use processing::Sample;
-pub use processing::Blur;
-pub use processing::Sharpen;
-pub use processing::Dither;
+pub use crate::processing::Flip;
+pub use crate::processing::Rotate;
+pub use crate::processing::Scale;
+pub use crate::processing::Sample;
+pub use crate::processing::Blur;
+pub use crate::processing::Sharpen;
+pub use crate::processing::Dither;
 
 /// Flipping orientation.
 pub mod flip {
-	pub use orientation::Orientation::Vertical as Vertically;
-	pub use orientation::Orientation::Horizontal as Horizontally;
+	pub use crate::orientation::Orientation::Vertical as Vertically;
+	pub use crate::orientation::Orientation::Horizontal as Horizontally;
 }
 
 /// Sampling orientation.
 pub mod sample {
-	pub use orientation::Orientation::Vertical as Vertically;
-	pub use orientation::Orientation::Horizontal as Horizontally;
+	pub use crate::orientation::Orientation::Vertical as Vertically;
+	pub use crate::orientation::Orientation::Horizontal as Horizontally;
 }

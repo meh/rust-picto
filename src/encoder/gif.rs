@@ -16,11 +16,11 @@ use std::io::Write;
 use std::ops::Deref;
 
 use gif;
-use error;
-use pixel;
-use buffer::Buffer;
-use color;
-use parameter::{Parameter, HasParameters};
+use crate::error;
+use crate::pixel;
+use crate::buffer::Buffer;
+use crate::color;
+use crate::parameter::{Parameter, HasParameters};
 
 pub struct Encoder<W: Write> {
 	inner:   W,
@@ -60,10 +60,10 @@ impl<P, C, D, W> super::Encoder<P, C, D> for Encoder<W>
 	#[inline]
 	fn frame(&mut self, buffer: &Buffer<P, C, D>) -> error::Result<()> {
 		let mut buffer  = buffer.convert::<color::Rgba, u8>();
-		let mut encoder = try!(gif::Encoder::new(self.inner.by_ref(),
+		let mut encoder = r#try!(gif::Encoder::new(self.inner.by_ref(),
 			buffer.width() as u16, buffer.height() as u16, &self.palette));
 
-		try!(encoder.write_frame(&gif::Frame::from_rgba(
+		r#try!(encoder.write_frame(&gif::Frame::from_rgba(
 			buffer.width() as u16, buffer.height() as u16, &mut buffer)));
 
 		Ok(())

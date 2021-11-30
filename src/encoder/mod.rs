@@ -14,9 +14,9 @@
 
 use std::ops::Deref;
 
-use buffer::Buffer;
-use pixel::{self, Pixel};
-use error;
+use crate::buffer::Buffer;
+use crate::pixel::{self, Pixel};
+use crate::error;
 
 /// An image encoder.
 pub trait Encoder<P, C, D>

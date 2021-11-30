@@ -14,10 +14,10 @@
 
 use std::marker::PhantomData;
 
-use pixel;
-use buffer::Buffer;
-use region::{self, Region};
-use iter::pixel::Iter as Pixels;
+use crate::pixel;
+use crate::buffer::Buffer;
+use crate::region::{self, Region};
+use crate::iter::pixel::Iter as Pixels;
 
 /// A read-only view into a `Buffer`.
 ///
@@ -232,9 +232,9 @@ impl<'a, P, C> From<&'a Read<'a, P, C>> for Read<'a, P, C>
 
 #[cfg(test)]
 mod test {
-	use buffer::Buffer;
-	use color::*;
-	use region::Region;
+	use crate::buffer::Buffer;
+	use crate::color::*;
+	use crate::region::Region;
 
 	#[test]
 	fn get() {

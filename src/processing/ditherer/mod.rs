@@ -12,9 +12,9 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-use view;
-use buffer::Buffer;
-use pixel;
+use crate::view;
+use crate::buffer::Buffer;
+use crate::pixel;
 
 pub trait Ditherer<PI, CI, PO, CO>
 	where PI: pixel::Read<CI>,

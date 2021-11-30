@@ -12,11 +12,11 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-use buffer::Buffer;
-use pixel;
-use view;
-use color::{Rgba, ComponentWise, Limited};
-use processing::blur;
+use crate::buffer::Buffer;
+use crate::pixel;
+use crate::view;
+use crate::color::{Rgba, ComponentWise, Limited};
+use crate::processing::blur;
 
 /// Trait for blurrable types.
 pub trait Sharpen<P, C>

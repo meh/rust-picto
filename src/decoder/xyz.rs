@@ -15,10 +15,10 @@
 use std::io::Read;
 
 use xyz;
-use error::{self, Error};
-use buffer::{Buffer, cast};
-use pixel;
-use color;
+use crate::error::{self, Error};
+use crate::buffer::{Buffer, cast};
+use crate::pixel;
+use crate::color;
 
 pub struct Decoder<R: Read> {
 	inner: R,
@@ -41,9 +41,9 @@ impl<P, C, R> super::Decoder<P, C> for Decoder<R>
 {
 	#[inline]
 	fn frame(&mut self) -> error::Result<Buffer<P, C, Vec<C>>> {
-		let image = try!(xyz::read(self.inner.by_ref()));
+		let image = r#try!(xyz::read(self.inner.by_ref()));
 
-		Ok(cast::Into::<P, C>::into(try!(Buffer::<color::Rgb, u8, _>::from_raw(
+		Ok(cast::Into::<P, C>::into(r#try!(Buffer::<color::Rgb, u8, _>::from_raw(
 			image.width as u32, image.height as u32,
 			image.to_rgb_buffer())
 				.map_err(|_| Error::Format("wrong dimensions".into())))))

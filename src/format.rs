@@ -46,7 +46,7 @@ pub fn guess<R: Read + Seek>(mut input: R) -> Option<Format> {
 		(b"#?RADIANCE",             Format::Hdr),
 	];
 
-	macro_rules! try {
+	macro_rules! r#try {
 		(return $body:expr) => (
 			if let Ok(value) = $body {
 				value
@@ -70,10 +70,10 @@ pub fn guess<R: Read + Seek>(mut input: R) -> Option<Format> {
 
 	// Check through static MAGIC fields.
 	for &(magic, format) in MAGIC.iter() {
-		try!(continue input.seek(SeekFrom::Start(0)));
+		r#try!(continue input.seek(SeekFrom::Start(0)));
 
 		let mut buffer = vec![0; magic.len()];
-		try!(continue input.read_exact(&mut buffer));
+		r#try!(continue input.read_exact(&mut buffer));
 
 		if buffer == &magic[..] {
 			result = Some(format);
@@ -83,16 +83,16 @@ pub fn guess<R: Read + Seek>(mut input: R) -> Option<Format> {
 
 	// Check for TGA
 	if result.is_none() {
-		try!(return input.seek(SeekFrom::Start(1)));
+		r#try!(return input.seek(SeekFrom::Start(1)));
 
-		let byte = try!(return input.read_u32::<BigEndian>()) & 0xfff7ffff;
+		let byte = r#try!(return input.read_u32::<BigEndian>()) & 0xfff7ffff;
 
 		if byte == 0x01010000 || byte == 0x00020000 || byte == 0x00030000 {
 			result = Some(Format::Tga);
 		}
 	}
 
-	try!(return input.seek(SeekFrom::Start(0)));
+	r#try!(return input.seek(SeekFrom::Start(0)));
 
 	result
 }

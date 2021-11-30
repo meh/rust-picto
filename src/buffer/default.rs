@@ -12,7 +12,7 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-use color;
+use crate::color;
 
 pub type Luma<T = f32> = super::Buffer<color::Luma<T>, u8, Vec<u8>>;
 pub type Lumaa<T = f32> = super::Buffer<color::Lumaa<T>, u8, Vec<u8>>;

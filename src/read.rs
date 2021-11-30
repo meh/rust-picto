@@ -16,12 +16,12 @@ use std::path::Path;
 use std::fs::File;
 use std::io::{Read, Seek, Cursor, BufReader};
 
-use decoder::{self, Decoder};
-use color;
-use pixel;
-use buffer::Buffer;
-use format::{self, Format};
-use error::{self, Error};
+use crate::decoder::{self, Decoder};
+use crate::color;
+use crate::pixel;
+use crate::buffer::Buffer;
+use crate::format::{self, Format};
+use crate::error::{self, Error};
 
 /// Load an image from an input stream, guessing its format.
 ///
@@ -41,7 +41,7 @@ pub fn from<P, C, R>(mut input: R) -> error::Result<Buffer<P, C, Vec<C>>>
 	      C: pixel::Channel,
 	      R: Read + Seek
 {
-	let format = try!(format::guess(input.by_ref()).ok_or(Error::Format("unsupported image format".into())));
+	let format = r#try!(format::guess(input.by_ref()).ok_or(Error::Format("unsupported image format".into())));
 	with_format(input, format)
 }
 
@@ -87,7 +87,7 @@ pub fn from_path<P, C, R>(path: R) -> error::Result<Buffer<P, C, Vec<C>>>
 	      C: pixel::Channel,
 	      R: AsRef<Path>
 {
-	from(BufReader::new(try!(File::open(path))))
+	from(BufReader::new(r#try!(File::open(path))))
 }
 
 /// Load an image from an input stream with the given format.

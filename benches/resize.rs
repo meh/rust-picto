@@ -1,7 +1,5 @@
 #![feature(test)]
 extern crate test;
-extern crate picto;
-extern crate image;
 
 macro_rules! image {
 	($b:expr, $path:expr, $algorithm:ident, $by:expr) => (
@@ -40,7 +38,6 @@ macro_rules! picto {
 mod nearest {
 	use test::Bencher;
 	use image::{self, GenericImage};
-	use picto;
 	use picto::color::Rgba;
 	use picto::processing::prelude::*;
 
@@ -98,7 +95,6 @@ mod nearest {
 mod linear {
 	use test::Bencher;
 	use image::{self, GenericImage};
-	use picto;
 	use picto::color::Rgba;
 	use picto::processing::prelude::*;
 
@@ -156,7 +152,6 @@ mod linear {
 mod cubic {
 	use test::Bencher;
 	use image::{self, GenericImage};
-	use picto;
 	use picto::color::Rgba;
 	use picto::processing::prelude::*;
 
@@ -214,7 +209,6 @@ mod cubic {
 mod gaussian {
 	use test::Bencher;
 	use image::{self, GenericImage};
-	use picto;
 	use picto::color::Rgba;
 	use picto::processing::prelude::*;
 
@@ -271,7 +265,6 @@ mod gaussian {
 
 mod lanczos2 {
 	use test::Bencher;
-	use picto;
 	use picto::color::Rgba;
 	use picto::processing::prelude::*;
 
@@ -304,7 +297,6 @@ mod lanczos2 {
 mod lanczos3 {
 	use test::Bencher;
 	use image::{self, GenericImage};
-	use picto;
 	use picto::color::Rgba;
 	use picto::processing::prelude::*;
 
@@ -362,7 +354,6 @@ mod lanczos3 {
 mod xbr {
 	mod zuper {
 		use test::Bencher;
-		use picto;
 		use picto::color::Rgba;
 		use picto::processing::prelude::*;
 

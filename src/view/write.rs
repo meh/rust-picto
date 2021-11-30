@@ -14,8 +14,8 @@
 
 use std::marker::PhantomData;
 
-use pixel;
-use region::{self, Region};
+use crate::pixel;
+use crate::region::{self, Region};
 
 /// A write-only view into a `Buffer`.
 ///
@@ -176,9 +176,9 @@ impl<'a, P, C> From<&'a mut Write<'a, P, C>> for Write<'a, P, C>
 
 #[cfg(test)]
 mod test {
-	use buffer::Buffer;
-	use color::*;
-	use region::Region;
+	use crate::buffer::Buffer;
+	use crate::color::*;
+	use crate::region::Region;
 
 	#[test]
 	fn set() {

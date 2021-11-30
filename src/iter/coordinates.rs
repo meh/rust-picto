@@ -12,7 +12,7 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-use region::Region;
+use crate::region::Region;
 
 /// Iterator over X and Y coordinates within an `Region`.
 #[derive(Eq, PartialEq, Debug)]
@@ -80,7 +80,7 @@ impl ExactSizeIterator for Coordinates {
 #[cfg(test)]
 mod test {
 	use super::*;
-	use region::Region;
+	use crate::region::Region;
 
 	#[test]
 	fn size_hint() {

@@ -12,9 +12,9 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-use buffer::Buffer;
-use pixel::{self, Pixel};
-use error;
+use crate::buffer::Buffer;
+use crate::pixel::{self, Pixel};
+use crate::error;
 
 /// An image decoder.
 pub trait Decoder<P, C>

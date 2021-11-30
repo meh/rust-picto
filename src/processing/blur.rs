@@ -12,12 +12,12 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-use buffer::Buffer;
-use pixel;
-use view;
-use color::Rgba;
-use processing::sampler::gaussian;
-use processing::sample;
+use crate::buffer::Buffer;
+use crate::pixel;
+use crate::view;
+use crate::color::Rgba;
+use crate::processing::sampler::gaussian;
+use crate::processing::sample;
 
 /// Trait for blurrable types.
 pub trait Blur<P, C>

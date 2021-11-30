@@ -15,9 +15,9 @@
 use std::slice;
 use std::marker::PhantomData;
 
-use pixel;
-use region::Region;
-use iter::Coordinates;
+use crate::pixel;
+use crate::region::Region;
+use crate::iter::Coordinates;
 
 /// Mutable iterator over pixels.
 pub struct Iter<'a, P, C>

@@ -15,10 +15,10 @@
 use std::io::Read;
 
 use jpeg_decoder as jpeg;
-use error::{self, Error};
-use buffer::{Buffer, cast};
-use pixel;
-use color;
+use crate::error::{self, Error};
+use crate::buffer::{Buffer, cast};
+use crate::pixel;
+use crate::color;
 
 pub struct Decoder<R: Read> {
 	inner:    jpeg::Decoder<R>,
@@ -37,7 +37,7 @@ impl<R: Read> Decoder<R> {
 	#[inline]
 	pub fn metadata(&mut self) -> error::Result<jpeg::ImageInfo> {
 		if self.metadata.is_none() {
-			try!(self.inner.read_info());
+			r#try!(self.inner.read_info());
 			self.metadata = Some(self.inner.info().unwrap());
 		}
 
@@ -86,18 +86,18 @@ impl<P, C, R> super::Decoder<P, C> for Decoder<R>
 			buffer.shrink_to_fit();
 		}
 
-		let mut buffer = try!(self.inner.decode());
+		let mut buffer = r#try!(self.inner.decode());
 
 		macro_rules! buffer {
 			($ch:ty, $ty:path) => ({
-				Ok(cast::Into::<P, C>::into(try!(Buffer::<$ty, $ch, _>::from_raw(
-					try!(self.metadata()).width as u32,
-					try!(self.metadata()).height as u32,
+				Ok(cast::Into::<P, C>::into(r#try!(Buffer::<$ty, $ch, _>::from_raw(
+					r#try!(self.metadata()).width as u32,
+					r#try!(self.metadata()).height as u32,
 					buffer).map_err(|_| Error::Format("wrong dimensions".into())))))
 			});
 		}
 
-		match try!(self.metadata()).pixel_format {
+		match r#try!(self.metadata()).pixel_format {
 			jpeg::PixelFormat::L8 =>
 				buffer!(u8, color::Luma),
 

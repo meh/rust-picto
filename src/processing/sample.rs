@@ -12,12 +12,12 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-use pixel;
-use view;
-use orientation::Orientation;
-use color::{Limited, Rgba};
+use crate::pixel;
+use crate::view;
+use crate::orientation::Orientation;
+use crate::color::{Limited, Rgba};
 use super::Sampler;
-use util::GetClamped;
+use crate::util::GetClamped;
 
 /// Trait for samplable types.
 pub trait Sample<PI, CI, PO, CO>

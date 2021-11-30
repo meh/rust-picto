@@ -16,10 +16,10 @@ use std::io::Write;
 use std::ops::Deref;
 
 use png::{self, HasParameters};
-use error;
-use pixel;
-use buffer::{Buffer, cast};
-use color;
+use crate::error;
+use crate::pixel;
+use crate::buffer::{Buffer, cast};
+use crate::color;
 
 pub struct Encoder<W: Write> {
 	inner: W,
@@ -47,11 +47,11 @@ impl<P, C, D, W> super::Encoder<P, C, D> for Encoder<W>
 		let mut encoder = png::Encoder::new(self.inner.by_ref(), buffer.width(), buffer.height());
 		encoder.set(color).set(depth);
 
-		let mut writer = try!(encoder.write_header());
+		let mut writer = r#try!(encoder.write_header());
 
 		macro_rules! write {
 			($ch:ty, $ty:path) => (
-				try!(writer.write_image_data(cast::Bytes::<$ty, $ch>::bytes(buffer).as_ref()))
+				r#try!(writer.write_image_data(cast::Bytes::<$ty, $ch>::bytes(buffer).as_ref()))
 			);
 		}
 
@@ -94,8 +94,8 @@ trait Color {
 #[cfg(not(feature = "nightly"))]
 mod stable {
 	use png;
-	use buffer::Buffer;
-	use pixel::{self, Pixel};
+	use crate::buffer::Buffer;
+	use crate::pixel::{self, Pixel};
 	use super::Color;
 
 	impl<P, C, D> Color for Buffer<P, C, D>

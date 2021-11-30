@@ -15,10 +15,10 @@
 use std::io::Read;
 
 use png;
-use error::{self, Error};
-use buffer::{Buffer, cast};
-use pixel;
-use color;
+use crate::error::{self, Error};
+use crate::buffer::{Buffer, cast};
+use crate::pixel;
+use crate::color;
 
 enum State<R: Read> {
 	Decoder(png::Decoder<R>),
@@ -42,7 +42,7 @@ impl<R: Read> Decoder<R> {
 
 		match inner {
 			Some(State::Decoder(decoder)) => {
-				let (_, reader) = try!(decoder.read_info());
+				let (_, reader) = r#try!(decoder.read_info());
 				self.state = Some(State::Reader(reader));
 			}
 
@@ -71,19 +71,19 @@ impl<P, C, R> super::Decoder<P, C> for Decoder<R>
 	      R: Read
 {
 	fn frame(&mut self) -> error::Result<Buffer<P, C, Vec<C>>> {
-		let mut buffer = vec![0; try!(self.reader()).output_buffer_size()];
-		try!(try!(self.reader()).next_frame(&mut buffer));
+		let mut buffer = vec![0; r#try!(self.reader()).output_buffer_size()];
+		r#try!(r#try!(self.reader()).next_frame(&mut buffer));
 
 		macro_rules! buffer {
 			($ch:ty, $ty:path) => ({
-				Ok(cast::Into::<P, C>::into(try!(Buffer::<$ty, _, _>::from_raw(
-					try!(self.reader()).info().size().0,
-					try!(self.reader()).info().size().1,
+				Ok(cast::Into::<P, C>::into(r#try!(Buffer::<$ty, _, _>::from_raw(
+					r#try!(self.reader()).info().size().0,
+					r#try!(self.reader()).info().size().1,
 					buffer).map_err(|_| Error::Format("wrong dimensions".into())))))
 			});
 		}
 
-		match try!(self.reader()).output_color_type() {
+		match r#try!(self.reader()).output_color_type() {
 			(png::ColorType::Grayscale, png::BitDepth::Eight) =>
 				buffer!(u8, color::Luma),
 

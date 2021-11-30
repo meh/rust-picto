@@ -15,10 +15,10 @@
 use std::io::{Read, Seek};
 
 use imagefmt::{tga, ColFmt};
-use error::{self, Error};
-use buffer::{Buffer, cast};
-use pixel;
-use color;
+use crate::error::{self, Error};
+use crate::buffer::{Buffer, cast};
+use crate::pixel;
+use crate::color;
 
 pub struct Decoder<R: Read + Seek> {
 	inner: R,
@@ -40,11 +40,11 @@ impl<P, C, R> super::Decoder<P, C> for Decoder<R>
 	      R: Read + Seek
 {
 	fn frame(&mut self) -> error::Result<Buffer<P, C, Vec<C>>> {
-		let image = try!(tga::read(self.inner.by_ref(), ColFmt::Auto));
+		let image = r#try!(tga::read(self.inner.by_ref(), ColFmt::Auto));
 
 		macro_rules! buffer {
 			($ch:ty, $ty:path) => ({
-				Ok(cast::Into::<P, C>::into(try!(Buffer::<$ty, $ch, _>::from_raw(
+				Ok(cast::Into::<P, C>::into(r#try!(Buffer::<$ty, $ch, _>::from_raw(
 					image.w as u32,
 					image.h as u32,
 					image.buf).map_err(|_| Error::Format("wrong dimensions".into())))))

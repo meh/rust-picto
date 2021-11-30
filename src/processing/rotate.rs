@@ -12,9 +12,9 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-use buffer::Buffer;
-use pixel;
-use view;
+use crate::buffer::Buffer;
+use crate::pixel;
+use crate::view;
 
 /// Trait for rotatable types.
 pub trait Rotate<P, C>
