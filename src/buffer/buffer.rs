@@ -534,7 +534,7 @@ where
 	D: DerefMut<Target = [C]>,
 {
 	#[inline]
-	fn from(mut value: &'a mut Buffer<P, C, D>) -> view::Write<'a, P, C> {
+	fn from(value: &'a mut Buffer<P, C, D>) -> view::Write<'a, P, C> {
 		value.writable(Default::default())
 	}
 }
@@ -546,7 +546,7 @@ where
 	D: DerefMut<Target = [C]>,
 {
 	#[inline]
-	fn from(mut value: &'a mut Buffer<P, C, D>) -> View<'a, P, C> {
+	fn from(value: &'a mut Buffer<P, C, D>) -> View<'a, P, C> {
 		value.view(Default::default())
 	}
 }
