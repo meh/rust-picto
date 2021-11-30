@@ -14,10 +14,10 @@
 
 use num::{Float, Zero};
 
-use crate::color::{Luma, Rgb, Hsl, Hsv, Hwb, Lab, Lch, Xyz, Yxy};
-use crate::color::{Lumaa, Rgba, Hsla, Hsva, Hwba, Laba, Lcha, Xyza, Yxya};
-use crate::color::pixel::Srgb;
-use crate::color::RgbHue;
+use crate::color::{
+	pixel::Srgb, Hsl, Hsla, Hsv, Hsva, Hwb, Hwba, Lab, Laba, Lch, Lcha, Luma, Lumaa, Rgb, RgbHue, Rgba, Xyz, Xyza, Yxy,
+	Yxya,
+};
 
 /// A `Channel` abstracts away the underlying type the `Pixel` components are
 /// stored as.
@@ -256,16 +256,16 @@ pub trait Write<C: Channel = u8>: Pixel<C> {
 }
 
 macro_rules! impl_for {
-	($ty:ident -> $a:ident) => (
+	($ty:ident -> $a:ident) => {
 		impl<C: Channel, T: Float + 'static> Write<C> for $ty<T> {
 			#[inline]
 			fn write(&self, data: &mut [C]) {
 				data[0] = C::from(self.$a);
 			}
 		}
-	);
+	};
 
-	($ty:ident -> $a:ident, $b:ident) => (
+	($ty:ident -> $a:ident, $b:ident) => {
 		impl<C: Channel, T: Float + 'static> Write<C> for $ty<T> {
 			#[inline]
 			fn write(&self, data: &mut [C]) {
@@ -273,9 +273,9 @@ macro_rules! impl_for {
 				data[1] = C::from(self.$b);
 			}
 		}
-	);
+	};
 
-	($ty:ident -> $a:ident, $b:ident, $c:ident) => (
+	($ty:ident -> $a:ident, $b:ident, $c:ident) => {
 		impl<C: Channel, T: Float + 'static> Write<C> for $ty<T> {
 			#[inline]
 			fn write(&self, data: &mut [C]) {
@@ -284,9 +284,9 @@ macro_rules! impl_for {
 				data[2] = C::from(self.$c);
 			}
 		}
-	);
+	};
 
-	($ty:ident -> $a:ident, $b:ident, $c:ident, $d:ident) => (
+	($ty:ident -> $a:ident, $b:ident, $c:ident, $d:ident) => {
 		impl<C: Channel, T: Float + 'static> Write<C> for $ty<T> {
 			#[inline]
 			fn write(&self, data: &mut [C]) {
@@ -296,9 +296,9 @@ macro_rules! impl_for {
 				data[3] = C::from(self.$d);
 			}
 		}
-	);
+	};
 
-	($ty:ident -> $a:ident($hue:ident), $b:ident, $c:ident) => (
+	($ty:ident -> $a:ident($hue:ident), $b:ident, $c:ident) => {
 		impl<C: Channel, T: Float + 'static> Write<C> for $ty<T> {
 			#[inline]
 			fn write(&self, data: &mut [C]) {
@@ -307,9 +307,9 @@ macro_rules! impl_for {
 				data[2] = C::from(self.$c);
 			}
 		}
-	);
+	};
 
-	($ty:ident -> $a:ident($hue:ident), $b:ident, $c:ident, $d:ident) => (
+	($ty:ident -> $a:ident($hue:ident), $b:ident, $c:ident, $d:ident) => {
 		impl<C: Channel, T: Float + 'static> Write<C> for $ty<T> {
 			#[inline]
 			fn write(&self, data: &mut [C]) {
@@ -319,7 +319,7 @@ macro_rules! impl_for {
 				data[3] = C::from(self.$d);
 			}
 		}
-	);
+	};
 }
 
 impl_for!(Luma -> luma);

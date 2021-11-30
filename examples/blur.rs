@@ -16,31 +16,36 @@ extern crate clap;
 use clap::{App, Arg};
 
 extern crate picto;
-use picto::color::Rgba;
-use picto::processing::prelude::*;
+use picto::{color::Rgba, processing::prelude::*};
 
 fn main() {
 	let matches = App::new("blur")
 		.version(env!("CARGO_PKG_VERSION"))
 		.about("Blur an image.")
-		.arg(Arg::with_name("INPUT")
-			.index(1)
-			.required(true)
-			.help("Path to the input image."))
-		.arg(Arg::with_name("OUTPUT")
-			.index(2)
-			.required(true)
-			.help("Path to the output image"))
-		.arg(Arg::with_name("by")
-			.short("b")
-			.long("by")
-			.takes_value(true)
-			.required(true)
-			.help("The amount to blur by."))
+		.arg(
+			Arg::with_name("INPUT")
+				.index(1)
+				.required(true)
+				.help("Path to the input image."),
+		)
+		.arg(
+			Arg::with_name("OUTPUT")
+				.index(2)
+				.required(true)
+				.help("Path to the output image"),
+		)
+		.arg(
+			Arg::with_name("by")
+				.short("b")
+				.long("by")
+				.takes_value(true)
+				.required(true)
+				.help("The amount to blur by."),
+		)
 		.get_matches();
 
 	let image = picto::read::from_path::<Rgba, u8, _>(matches.value_of("INPUT").unwrap()).unwrap();
-	let by    = matches.value_of("by").unwrap().parse::<f32>().unwrap();
+	let by = matches.value_of("by").unwrap().parse::<f32>().unwrap();
 
 	picto::write::to_path(matches.value_of("OUTPUT").unwrap(), &image.blur(by)).unwrap();
 }

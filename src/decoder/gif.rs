@@ -15,10 +15,13 @@
 use std::io::Read;
 
 use gif::{self, SetParameter};
-use crate::error::{self, Error};
-use crate::buffer::{Buffer, cast};
-use crate::pixel;
-use crate::color;
+
+use crate::{
+	buffer::{cast, Buffer},
+	color,
+	error::{self, Error},
+	pixel,
+};
 
 enum State<R: Read> {
 	Decoder(gif::Decoder<R>),
@@ -45,7 +48,7 @@ impl<R: Read> Decoder<R> {
 
 		match inner {
 			Some(State::Decoder(decoder)) => {
-				self.state = Some(State::Reader(r#try!(decoder.read_info())));
+				self.state = Some(State::Reader(decoder.read_info()?));
 			}
 
 			Some(State::Reader(reader)) => {
@@ -67,18 +70,24 @@ impl<R: Read> Decoder<R> {
 }
 
 impl<P, C, R> super::Decoder<P, C> for Decoder<R>
-	where P: pixel::Write<C>,
-	      P: From<color::Rgb> + From<color::Rgba> + From<color::Luma> + From<color::Lumaa>,
-	      C: pixel::Channel,
-	      R: Read
+where
+	P: pixel::Write<C>,
+	P: From<color::Rgb> + From<color::Rgba> + From<color::Luma> + From<color::Lumaa>,
+	C: pixel::Channel,
+	R: Read,
 {
 	#[inline]
 	fn frame(&mut self) -> error::Result<Buffer<P, C, Vec<C>>> {
-		let frame = r#try!(r#try!(r#try!(self.reader()).read_next_frame()).ok_or(Error::Format("no frames".into())));
+		let frame = self
+			.reader()?
+			.read_next_frame()?
+			.ok_or(Error::Format("no frames".into()))?;
 
-		Ok(cast::Into::<P, C>::into(r#try!(Buffer::<color::Rgba, u8, _>::from_raw(
-			frame.width as u32, frame.height as u32,
-			frame.buffer.clone().into_owned())
-				.map_err(|_| Error::Format("wrong dimensions".into())))))
+		Ok(cast::Into::<P, C>::into(Buffer::<color::Rgba, u8, _>::from_raw(
+			frame.width as u32,
+			frame.height as u32,
+			frame.buffer.clone().into_owned(),
+		)
+		.map_err(|_| Error::Format("wrong dimensions".into()))?))
 	}
 }

@@ -3,8 +3,7 @@ extern crate approx;
 extern crate picto;
 
 mod png {
-	use picto;
-	use picto::color::*;
+	use picto::{self, color::*};
 
 	#[test]
 	fn read_as_is() {
@@ -13,11 +12,8 @@ mod png {
 		assert_eq!(400, image.width());
 		assert_eq!(326, image.height());
 
-		assert_relative_eq!(Rgb::new_u8(0xff, 0x00, 0x00),
-			image.get(0, 0), epsilon = 0.01);
-
-		assert_relative_eq!(Rgb::new_u8(0x00, 0x02, 0xff),
-			image.get(399, 0), epsilon = 0.01);
+		assert_relative_eq!(Rgb::new_u8(0xff, 0x00, 0x00), image.get(0, 0), epsilon = 0.01);
+		assert_relative_eq!(Rgb::new_u8(0x00, 0x02, 0xff), image.get(399, 0), epsilon = 0.01);
 	}
 
 	#[test]
@@ -27,11 +23,8 @@ mod png {
 		assert_eq!(400, image.width());
 		assert_eq!(326, image.height());
 
-		assert_relative_eq!(Rgba::new_u8(0xff, 0x00, 0x00, 0xff),
-			image.get(0, 0), epsilon = 0.01);
-
-		assert_relative_eq!(Rgba::new_u8(0x00, 0x02, 0xff, 0xff),
-			image.get(399, 0), epsilon = 0.01);
+		assert_relative_eq!(Rgba::new_u8(0xff, 0x00, 0x00, 0xff), image.get(0, 0), epsilon = 0.01);
+		assert_relative_eq!(Rgba::new_u8(0x00, 0x02, 0xff, 0xff), image.get(399, 0), epsilon = 0.01);
 	}
 
 	#[test]
@@ -53,24 +46,16 @@ mod png {
 			assert_eq!(2, image.width());
 			assert_eq!(2, image.height());
 
-			assert_relative_eq!(Rgb::new(1.0, 0.0, 0.0),
-				image.get(0, 0), epsilon = 0.01);
-
-			assert_relative_eq!(Rgb::new(0.0, 1.0, 0.0),
-				image.get(0, 1), epsilon = 0.01);
-
-			assert_relative_eq!(Rgb::new(0.0, 0.0, 1.0),
-				image.get(1, 0), epsilon = 0.01);
-
-			assert_relative_eq!(Rgb::new(1.0, 0.0, 1.0),
-				image.get(1, 1), epsilon = 0.01);
+			assert_relative_eq!(Rgb::new(1.0, 0.0, 0.0), image.get(0, 0), epsilon = 0.01);
+			assert_relative_eq!(Rgb::new(0.0, 1.0, 0.0), image.get(0, 1), epsilon = 0.01);
+			assert_relative_eq!(Rgb::new(0.0, 0.0, 1.0), image.get(1, 0), epsilon = 0.01);
+			assert_relative_eq!(Rgb::new(1.0, 0.0, 1.0), image.get(1, 1), epsilon = 0.01);
 		}
 	}
 }
 
 mod jpeg {
-	use picto;
-	use picto::color::*;
+	use picto::{self, color::*};
 
 	#[test]
 	fn read_as_is() {
@@ -79,11 +64,8 @@ mod jpeg {
 		assert_eq!(400, image.width());
 		assert_eq!(326, image.height());
 
-		assert_relative_eq!(Rgb::new_u8(0xff, 0x00, 0x00),
-			image.get(0, 0), epsilon = 0.01);
-
-		assert_relative_eq!(Rgb::new_u8(0x00, 0x02, 0xff),
-			image.get(399, 0), epsilon = 0.01);
+		assert_relative_eq!(Rgb::new_u8(0xff, 0x00, 0x00), image.get(0, 0), epsilon = 0.01);
+		assert_relative_eq!(Rgb::new_u8(0x00, 0x02, 0xff), image.get(399, 0), epsilon = 0.01);
 	}
 
 	#[test]
@@ -93,17 +75,13 @@ mod jpeg {
 		assert_eq!(400, image.width());
 		assert_eq!(326, image.height());
 
-		assert_relative_eq!(Rgba::new_u8(0xff, 0x00, 0x00, 0xff),
-			image.get(0, 0), epsilon = 0.01);
-
-		assert_relative_eq!(Rgba::new_u8(0x00, 0x02, 0xff, 0xff),
-			image.get(399, 0), epsilon = 0.01);
+		assert_relative_eq!(Rgba::new_u8(0xff, 0x00, 0x00, 0xff), image.get(0, 0), epsilon = 0.01);
+		assert_relative_eq!(Rgba::new_u8(0x00, 0x02, 0xff, 0xff), image.get(399, 0), epsilon = 0.01);
 	}
 }
 
 mod bmp {
-	use picto;
-	use picto::color::*;
+	use picto::{self, color::*};
 
 	#[test]
 	fn read_as_is() {
@@ -112,11 +90,8 @@ mod bmp {
 		assert_eq!(400, image.width());
 		assert_eq!(326, image.height());
 
-		assert_relative_eq!(Rgb::new_u8(0xff, 0x00, 0x00),
-			image.get(0, 0), epsilon = 0.01);
-
-		assert_relative_eq!(Rgb::new_u8(0x00, 0x02, 0xff),
-			image.get(399, 0), epsilon = 0.01);
+		assert_relative_eq!(Rgb::new_u8(0xff, 0x00, 0x00), image.get(0, 0), epsilon = 0.01);
+		assert_relative_eq!(Rgb::new_u8(0x00, 0x02, 0xff), image.get(399, 0), epsilon = 0.01);
 	}
 
 	#[test]
@@ -126,11 +101,8 @@ mod bmp {
 		assert_eq!(400, image.width());
 		assert_eq!(326, image.height());
 
-		assert_relative_eq!(Rgba::new_u8(0xff, 0x00, 0x00, 0xff),
-			image.get(0, 0), epsilon = 0.01);
-
-		assert_relative_eq!(Rgba::new_u8(0x00, 0x02, 0xff, 0xff),
-			image.get(399, 0), epsilon = 0.01);
+		assert_relative_eq!(Rgba::new_u8(0xff, 0x00, 0x00, 0xff), image.get(0, 0), epsilon = 0.01);
+		assert_relative_eq!(Rgba::new_u8(0x00, 0x02, 0xff, 0xff), image.get(399, 0), epsilon = 0.01);
 	}
 
 	#[test]
@@ -152,24 +124,16 @@ mod bmp {
 			assert_eq!(2, image.width());
 			assert_eq!(2, image.height());
 
-			assert_relative_eq!(Rgb::new(1.0, 0.0, 0.0),
-				image.get(0, 0), epsilon = 0.01);
-
-			assert_relative_eq!(Rgb::new(0.0, 1.0, 0.0),
-				image.get(0, 1), epsilon = 0.01);
-
-			assert_relative_eq!(Rgb::new(0.0, 0.0, 1.0),
-				image.get(1, 0), epsilon = 0.01);
-
-			assert_relative_eq!(Rgb::new(1.0, 0.0, 1.0),
-				image.get(1, 1), epsilon = 0.01);
+			assert_relative_eq!(Rgb::new(1.0, 0.0, 0.0), image.get(0, 0), epsilon = 0.01);
+			assert_relative_eq!(Rgb::new(0.0, 1.0, 0.0), image.get(0, 1), epsilon = 0.01);
+			assert_relative_eq!(Rgb::new(0.0, 0.0, 1.0), image.get(1, 0), epsilon = 0.01);
+			assert_relative_eq!(Rgb::new(1.0, 0.0, 1.0), image.get(1, 1), epsilon = 0.01);
 		}
 	}
 }
 
 mod tga {
-	use picto;
-	use picto::color::*;
+	use picto::{self, color::*};
 
 	#[test]
 	fn read_as_is() {
@@ -178,11 +142,8 @@ mod tga {
 		assert_eq!(400, image.width());
 		assert_eq!(326, image.height());
 
-		assert_relative_eq!(Rgb::new_u8(0xff, 0x00, 0x00),
-			image.get(0, 0), epsilon = 0.01);
-
-		assert_relative_eq!(Rgb::new_u8(0x00, 0x02, 0xff),
-			image.get(399, 0), epsilon = 0.01);
+		assert_relative_eq!(Rgb::new_u8(0xff, 0x00, 0x00), image.get(0, 0), epsilon = 0.01);
+		assert_relative_eq!(Rgb::new_u8(0x00, 0x02, 0xff), image.get(399, 0), epsilon = 0.01);
 	}
 
 	#[test]
@@ -192,11 +153,8 @@ mod tga {
 		assert_eq!(400, image.width());
 		assert_eq!(326, image.height());
 
-		assert_relative_eq!(Rgba::new_u8(0xff, 0x00, 0x00, 0xff),
-			image.get(0, 0), epsilon = 0.01);
-
-		assert_relative_eq!(Rgba::new_u8(0x00, 0x02, 0xff, 0xff),
-			image.get(399, 0), epsilon = 0.01);
+		assert_relative_eq!(Rgba::new_u8(0xff, 0x00, 0x00, 0xff), image.get(0, 0), epsilon = 0.01);
+		assert_relative_eq!(Rgba::new_u8(0x00, 0x02, 0xff, 0xff), image.get(399, 0), epsilon = 0.01);
 	}
 
 	#[test]
@@ -218,26 +176,18 @@ mod tga {
 			assert_eq!(2, image.width());
 			assert_eq!(2, image.height());
 
-			assert_relative_eq!(Rgb::new(1.0, 0.0, 0.0),
-				image.get(0, 0), epsilon = 0.01);
-
-			assert_relative_eq!(Rgb::new(0.0, 1.0, 0.0),
-				image.get(0, 1), epsilon = 0.01);
-
-			assert_relative_eq!(Rgb::new(0.0, 0.0, 1.0),
-				image.get(1, 0), epsilon = 0.01);
-
-			assert_relative_eq!(Rgb::new(1.0, 0.0, 1.0),
-				image.get(1, 1), epsilon = 0.01);
+			assert_relative_eq!(Rgb::new(1.0, 0.0, 0.0), image.get(0, 0), epsilon = 0.01);
+			assert_relative_eq!(Rgb::new(0.0, 1.0, 0.0), image.get(0, 1), epsilon = 0.01);
+			assert_relative_eq!(Rgb::new(0.0, 0.0, 1.0), image.get(1, 0), epsilon = 0.01);
+			assert_relative_eq!(Rgb::new(1.0, 0.0, 1.0), image.get(1, 1), epsilon = 0.01);
 		}
 	}
 }
 
 mod gif {
 	use std::fs::File;
-	use picto;
-	use picto::color::*;
-	use picto::HasParameters;
+
+	use picto::{self, color::*, HasParameters};
 
 	#[test]
 	fn read_as_is() {
@@ -246,11 +196,8 @@ mod gif {
 		assert_eq!(400, image.width());
 		assert_eq!(326, image.height());
 
-		assert_relative_eq!(Rgb::new_u8(0xff, 0x00, 0x00),
-			image.get(0, 0), epsilon = 0.2);
-
-		assert_relative_eq!(Rgb::new_u8(0x00, 0x02, 0xff),
-			image.get(399, 0), epsilon = 0.2);
+		assert_relative_eq!(Rgb::new_u8(0xff, 0x00, 0x00), image.get(0, 0), epsilon = 0.2);
+		assert_relative_eq!(Rgb::new_u8(0x00, 0x02, 0xff), image.get(399, 0), epsilon = 0.2);
 	}
 
 	#[test]
@@ -260,11 +207,8 @@ mod gif {
 		assert_eq!(400, image.width());
 		assert_eq!(326, image.height());
 
-		assert_relative_eq!(Rgba::new_u8(0xff, 0x00, 0x00, 0xff),
-			image.get(0, 0), epsilon = 0.2);
-
-		assert_relative_eq!(Rgba::new_u8(0x00, 0x02, 0xff, 0xff),
-			image.get(399, 0), epsilon = 0.2);
+		assert_relative_eq!(Rgba::new_u8(0xff, 0x00, 0x00, 0xff), image.get(0, 0), epsilon = 0.2);
+		assert_relative_eq!(Rgba::new_u8(0x00, 0x02, 0xff, 0xff), image.get(399, 0), epsilon = 0.2);
 	}
 
 	#[test]
@@ -279,7 +223,8 @@ mod gif {
 
 			picto::write::gif(File::create("tests/test.gif").unwrap(), &image, |gif| {
 				gif.set(vec![255u8, 0, 0, 0, 255, 0, 0, 0, 255, 255, 0, 0]).unwrap();
-			}).unwrap();
+			})
+			.unwrap();
 		}
 
 		{
@@ -288,24 +233,16 @@ mod gif {
 			assert_eq!(2, image.width());
 			assert_eq!(2, image.height());
 
-			assert_relative_eq!(Rgb::new(0.0, 0.0, 0.0),
-				image.get(0, 0), epsilon = 0.2);
-
-			assert_relative_eq!(Rgb::new(0.0, 1.0, 0.0),
-				image.get(0, 1), epsilon = 0.2);
-
-			assert_relative_eq!(Rgb::new(0.0, 0.0, 1.0),
-				image.get(1, 0), epsilon = 0.2);
-
-			assert_relative_eq!(Rgb::new(1.0, 0.0, 1.0),
-				image.get(1, 1), epsilon = 0.5);
+			assert_relative_eq!(Rgb::new(0.0, 0.0, 0.0), image.get(0, 0), epsilon = 0.2);
+			assert_relative_eq!(Rgb::new(0.0, 1.0, 0.0), image.get(0, 1), epsilon = 0.2);
+			assert_relative_eq!(Rgb::new(0.0, 0.0, 1.0), image.get(1, 0), epsilon = 0.2);
+			assert_relative_eq!(Rgb::new(1.0, 0.0, 1.0), image.get(1, 1), epsilon = 0.5);
 		}
 	}
 }
 
 mod xyz {
-	use picto;
-	use picto::color::*;
+	use picto::{self, color::*};
 
 	#[test]
 	fn read_as_is() {
@@ -314,11 +251,8 @@ mod xyz {
 		assert_eq!(320, image.width());
 		assert_eq!(240, image.height());
 
-		assert_relative_eq!(Rgb::new_u8(0x1e, 0x03, 0x43),
-			image.get(0, 0), epsilon = 0.01);
-
-		assert_relative_eq!(Rgb::new_u8(0x1f, 0x03, 0x45),
-			image.get(0, 239), epsilon = 0.01);
+		assert_relative_eq!(Rgb::new_u8(0x1e, 0x03, 0x43), image.get(0, 0), epsilon = 0.01);
+		assert_relative_eq!(Rgb::new_u8(0x1f, 0x03, 0x45), image.get(0, 239), epsilon = 0.01);
 	}
 
 	#[test]
@@ -328,10 +262,7 @@ mod xyz {
 		assert_eq!(320, image.width());
 		assert_eq!(240, image.height());
 
-		assert_relative_eq!(Rgba::new_u8(0x1e, 0x03, 0x43, 0xff),
-			image.get(0, 0), epsilon = 0.01);
-
-		assert_relative_eq!(Rgba::new_u8(0x1f, 0x03, 0x45, 0xff),
-			image.get(0, 239), epsilon = 0.01);
+		assert_relative_eq!(Rgba::new_u8(0x1e, 0x03, 0x43, 0xff), image.get(0, 0), epsilon = 0.01);
+		assert_relative_eq!(Rgba::new_u8(0x1f, 0x03, 0x45, 0xff), image.get(0, 239), epsilon = 0.01);
 	}
 }

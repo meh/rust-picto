@@ -24,11 +24,9 @@ impl Orientation {
 	#[inline]
 	pub fn rev(&self) -> Self {
 		match *self {
-			Orientation::Vertical =>
-				Orientation::Horizontal,
+			Orientation::Vertical => Orientation::Horizontal,
 
-			Orientation::Horizontal =>
-				Orientation::Vertical
+			Orientation::Horizontal => Orientation::Vertical,
 		}
 	}
 }

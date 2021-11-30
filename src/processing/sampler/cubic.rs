@@ -32,15 +32,15 @@ impl<T: Float> super::Sampler<T> for Cubic {
 pub fn spline<T: Float>(x: T, b: T, c: T) -> T {
 	let a = x.abs();
 	let k = if a < one!() {
-		(num!(12.0 => T) - num!(9.0 => T) * b - num!(6.0 => T) * c) * a.powi(3) +
-		(num!(-18.0 => T) + num!(12.0 => T) * b + num!(6.0 => T) * c) * a.powi(2) +
-		(num!(6.0 => T) - num!(2.0 => T) * b)
+		(num!(12.0 => T) - num!(9.0 => T) * b - num!(6.0 => T) * c) * a.powi(3)
+			+ (num!(-18.0 => T) + num!(12.0 => T) * b + num!(6.0 => T) * c) * a.powi(2)
+			+ (num!(6.0 => T) - num!(2.0 => T) * b)
 	}
 	else if a < num!(2.0) {
-		(-b - num!(6.0 => T) * c) * a.powi(3) +
-		(num!(6.0 => T) * b + num!(30.0 => T) * c) * a.powi(2) +
-		(num!(-12.0 => T) * b - num!(48.0 => T) * c) * a +
-		(num!(8.0 => T) * b + num!(24.0 => T) * c)
+		(-b - num!(6.0 => T) * c) * a.powi(3)
+			+ (num!(6.0 => T) * b + num!(30.0 => T) * c) * a.powi(2)
+			+ (num!(-12.0 => T) * b - num!(48.0 => T) * c) * a
+			+ (num!(8.0 => T) * b + num!(24.0 => T) * c)
 	}
 	else {
 		zero!()

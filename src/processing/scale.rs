@@ -12,15 +12,14 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-use crate::buffer::Buffer;
-use crate::pixel;
-use crate::view;
 use super::Scaler;
+use crate::{buffer::Buffer, pixel, view};
 
 /// Trait for scalable types.
 pub trait Scale<P, C>
-	where P: pixel::Read<C> + pixel::Write<C>,
-	      C: pixel::Channel,
+where
+	P: pixel::Read<C> + pixel::Write<C>,
+	C: pixel::Channel,
 {
 	/// Resize to the given width and height.
 	///
@@ -38,7 +37,8 @@ pub trait Scale<P, C>
 	/// assert_eq!(resized.height(), 100);
 	/// ```
 	fn resize<A>(self, width: u32, height: u32) -> Buffer<P, C, Vec<C>>
-		where A: Scaler<P, C, P, C>;
+	where
+		A: Scaler<P, C, P, C>;
 
 	/// Scale by the given factor.
 	///
@@ -56,7 +56,8 @@ pub trait Scale<P, C>
 	/// assert_eq!(resized.height(), 120);
 	/// ```
 	fn scale_by<A>(self, factor: f32) -> Buffer<P, C, Vec<C>>
-		where A: Scaler<P, C, P, C>;
+	where
+		A: Scaler<P, C, P, C>;
 
 	/// Scale to the given width and height, maintaining the aspect ratio.
 	///
@@ -74,31 +75,36 @@ pub trait Scale<P, C>
 	/// assert_eq!(resized.height(), 120);
 	/// ```
 	fn scale_to<A>(self, width: u32, height: u32) -> Buffer<P, C, Vec<C>>
-		where A: Scaler<P, C, P, C>;
+	where
+		A: Scaler<P, C, P, C>;
 }
 
 impl<'i, P, C, I> Scale<P, C> for I
-	where P: pixel::Read<C> + pixel::Write<C>,
-	      C: pixel::Channel,
-	      I: Into<view::Read<'i, P, C>>
+where
+	P: pixel::Read<C> + pixel::Write<C>,
+	C: pixel::Channel,
+	I: Into<view::Read<'i, P, C>>,
 {
 	#[inline]
 	fn resize<A>(self, width: u32, height: u32) -> Buffer<P, C, Vec<C>>
-		where A: Scaler<P, C, P, C>,
+	where
+		A: Scaler<P, C, P, C>,
 	{
 		resize::<A, _, P, C, P, C>(self, width, height)
 	}
 
 	#[inline]
 	fn scale_by<A>(self, factor: f32) -> Buffer<P, C, Vec<C>>
-		where A: Scaler<P, C, P, C>
+	where
+		A: Scaler<P, C, P, C>,
 	{
 		by::<A, _, P, C, P, C>(self, factor)
 	}
 
 	#[inline]
 	fn scale_to<A>(self, width: u32, height: u32) -> Buffer<P, C, Vec<C>>
-		where A: Scaler<P, C, P, C>,
+	where
+		A: Scaler<P, C, P, C>,
 	{
 		to::<A, _, P, C, P, C>(self, width, height)
 	}
@@ -107,13 +113,14 @@ impl<'i, P, C, I> Scale<P, C> for I
 /// Resize to the given width and height.
 #[inline]
 pub fn resize<'i, A, I, PI, CI, PO, CO>(input: I, width: u32, height: u32) -> Buffer<PO, CO, Vec<CO>>
-	where A:  Scaler<PI, CI, PO, CO>,
-	      PO: From<PI>,
-	      PO: pixel::Write<CO>,
-	      CO: pixel::Channel,
-	      PI: pixel::Read<CI>,
-	      CI: pixel::Channel,
-	      I:  Into<view::Read<'i, PI, CI>>
+where
+	A: Scaler<PI, CI, PO, CO>,
+	PO: From<PI>,
+	PO: pixel::Write<CO>,
+	CO: pixel::Channel,
+	PI: pixel::Read<CI>,
+	CI: pixel::Channel,
+	I: Into<view::Read<'i, PI, CI>>,
 {
 	let input = input.into();
 
@@ -127,16 +134,17 @@ pub fn resize<'i, A, I, PI, CI, PO, CO>(input: I, width: u32, height: u32) -> Bu
 /// Scale by the given factor.
 #[inline]
 pub fn by<'i, A, I, PI, CI, PO, CO>(input: I, factor: f32) -> Buffer<PO, CO, Vec<CO>>
-	where A:  Scaler<PI, CI, PO, CO>,
-	      PO: From<PI>,
-	      PO: pixel::Write<CO>,
-	      CO: pixel::Channel,
-	      PI: pixel::Read<CI>,
-	      CI: pixel::Channel,
-	      I:  Into<view::Read<'i, PI, CI>>
+where
+	A: Scaler<PI, CI, PO, CO>,
+	PO: From<PI>,
+	PO: pixel::Write<CO>,
+	CO: pixel::Channel,
+	PI: pixel::Read<CI>,
+	CI: pixel::Channel,
+	I: Into<view::Read<'i, PI, CI>>,
 {
-	let input  = input.into();
-	let width  = input.width() as f32 * factor;
+	let input = input.into();
+	let width = input.width() as f32 * factor;
 	let height = input.height() as f32 * factor;
 
 	resize::<A, _, PI, CI, PO, CO>(input, width as u32, height as u32)
@@ -145,13 +153,14 @@ pub fn by<'i, A, I, PI, CI, PO, CO>(input: I, factor: f32) -> Buffer<PO, CO, Vec
 /// Scale to the given width and height, maintaining the aspect ratio.
 #[inline]
 pub fn to<'i, A, I, PI, CI, PO, CO>(input: I, width: u32, height: u32) -> Buffer<PO, CO, Vec<CO>>
-	where A:  Scaler<PI, CI, PO, CO>,
-	      PO: From<PI>,
-	      PO: pixel::Write<CO>,
-	      CO: pixel::Channel,
-	      PI: pixel::Read<CI>,
-	      CI: pixel::Channel,
-	      I:  Into<view::Read<'i, PI, CI>>
+where
+	A: Scaler<PI, CI, PO, CO>,
+	PO: From<PI>,
+	PO: pixel::Write<CO>,
+	CO: pixel::Channel,
+	PI: pixel::Read<CI>,
+	CI: pixel::Channel,
+	I: Into<view::Read<'i, PI, CI>>,
 {
 	let input = input.into();
 	let r_old = input.width() as f32 / input.height() as f32;
@@ -164,7 +173,7 @@ pub fn to<'i, A, I, PI, CI, PO, CO>(input: I, width: u32, height: u32) -> Buffer
 		width as f32 / input.width() as f32
 	};
 
-	let width  = input.width() as f32 * scale;
+	let width = input.width() as f32 * scale;
 	let height = input.height() as f32 * scale;
 
 	resize::<A, _, PI, CI, PO, CO>(input, width as u32, height as u32)
@@ -173,9 +182,7 @@ pub fn to<'i, A, I, PI, CI, PO, CO>(input: I, width: u32, height: u32) -> Buffer
 #[cfg(test)]
 mod test {
 	use super::*;
-	use crate::processing::scaler::Nearest;
-	use crate::buffer;
-	use crate::color::Rgb;
+	use crate::{buffer, color::Rgb, processing::scaler::Nearest};
 
 	#[test]
 	fn nearest() {

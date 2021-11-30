@@ -15,7 +15,9 @@
 //! Image encoding/decoding and manipulation library.
 
 #![cfg_attr(feature = "nightly", feature(specialization))]
-#[cfg(test)] #[macro_use] extern crate approx;
+#[cfg(test)]
+#[macro_use]
+extern crate approx;
 
 extern crate byteorder;
 extern crate num;
@@ -25,8 +27,7 @@ pub extern crate palette;
 
 /// Color types.
 pub mod color {
-	pub use palette::*;
-	pub use palette::pixel::*;
+	pub use palette::{pixel::*, *};
 }
 
 #[cfg(feature = "png")]

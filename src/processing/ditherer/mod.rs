@@ -12,15 +12,14 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-use crate::view;
-use crate::buffer::Buffer;
-use crate::pixel;
+use crate::{buffer::Buffer, pixel, view};
 
 pub trait Ditherer<PI, CI, PO, CO>
-	where PI: pixel::Read<CI>,
-	      CI: pixel::Channel,
-	      PO: pixel::Write<CO>,
-	      CO: pixel::Channel,
+where
+	PI: pixel::Read<CI>,
+	CI: pixel::Channel,
+	PO: pixel::Write<CO>,
+	CO: pixel::Channel,
 {
 	fn dither(input: &view::Read<PI, CI>, colors: u32) -> Buffer<PO, CO, Vec<CO>>;
 }

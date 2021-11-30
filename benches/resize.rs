@@ -2,44 +2,40 @@
 extern crate test;
 
 macro_rules! image {
-	($b:expr, $path:expr, $algorithm:ident, $by:expr) => (
-		let image           = image::open($path).unwrap();
+	($b:expr, $path:expr, $algorithm:ident, $by:expr) => {
+		let image = image::open($path).unwrap();
 		let (width, height) = image.dimensions();
 
-		$b.iter(|| image.resize(
-			(width as f32 * $by) as u32,
-			(height as f32 * $by) as u32,
-			image::FilterType::$algorithm))
-	);
+		$b.iter(|| {
+			image.resize(
+				(width as f32 * $by) as u32,
+				(height as f32 * $by) as u32,
+				image::FilterType::$algorithm,
+			)
+		})
+	};
 }
 
 macro_rules! picto {
-	($b:expr, $path:expr, $algorithm:ident, $by:expr) => (
-		let image           = picto::read::from_path::<Rgba, u8, _>($path).unwrap();
+	($b:expr, $path:expr, $algorithm:ident, $by:expr) => {
+		let image = picto::read::from_path::<Rgba, u8, _>($path).unwrap();
 		let (width, height) = image.dimensions();
 
-		$b.iter(|| image.resize::<scaler::$algorithm>(
-			(width as f32 * $by) as u32,
-			(height as f32 * $by) as u32
-		));
-	);
+		$b.iter(|| image.resize::<scaler::$algorithm>((width as f32 * $by) as u32, (height as f32 * $by) as u32));
+	};
 
-	($b:expr, $path:expr, $module:ident::$algorithm:ident, $by:expr) => (
-		let image           = picto::read::from_path::<Rgba, u8, _>($path).unwrap();
+	($b:expr, $path:expr, $module:ident::$algorithm:ident, $by:expr) => {
+		let image = picto::read::from_path::<Rgba, u8, _>($path).unwrap();
 		let (width, height) = image.dimensions();
 
-		$b.iter(|| image.resize::<scaler::$module::$algorithm>(
-			(width as f32 * $by) as u32,
-			(height as f32 * $by) as u32
-		));
-	);
+		$b.iter(|| image.resize::<scaler::$module::$algorithm>((width as f32 * $by) as u32, (height as f32 * $by) as u32));
+	};
 }
 
 mod nearest {
-	use test::Bencher;
 	use image::{self, GenericImage};
-	use picto::color::Rgba;
-	use picto::processing::prelude::*;
+	use picto::{color::Rgba, processing::prelude::*};
+	use test::Bencher;
 
 	#[bench]
 	fn image_0x(b: &mut Bencher) {
@@ -93,10 +89,9 @@ mod nearest {
 }
 
 mod linear {
-	use test::Bencher;
 	use image::{self, GenericImage};
-	use picto::color::Rgba;
-	use picto::processing::prelude::*;
+	use picto::{color::Rgba, processing::prelude::*};
+	use test::Bencher;
 
 	#[bench]
 	fn image_0x(b: &mut Bencher) {
@@ -150,10 +145,9 @@ mod linear {
 }
 
 mod cubic {
-	use test::Bencher;
 	use image::{self, GenericImage};
-	use picto::color::Rgba;
-	use picto::processing::prelude::*;
+	use picto::{color::Rgba, processing::prelude::*};
+	use test::Bencher;
 
 	#[bench]
 	fn image_0x(b: &mut Bencher) {
@@ -207,10 +201,9 @@ mod cubic {
 }
 
 mod gaussian {
-	use test::Bencher;
 	use image::{self, GenericImage};
-	use picto::color::Rgba;
-	use picto::processing::prelude::*;
+	use picto::{color::Rgba, processing::prelude::*};
+	use test::Bencher;
 
 	#[bench]
 	fn image_0x(b: &mut Bencher) {
@@ -264,9 +257,8 @@ mod gaussian {
 }
 
 mod lanczos2 {
+	use picto::{color::Rgba, processing::prelude::*};
 	use test::Bencher;
-	use picto::color::Rgba;
-	use picto::processing::prelude::*;
 
 	#[bench]
 	fn picto_0x(b: &mut Bencher) {
@@ -295,10 +287,9 @@ mod lanczos2 {
 }
 
 mod lanczos3 {
-	use test::Bencher;
 	use image::{self, GenericImage};
-	use picto::color::Rgba;
-	use picto::processing::prelude::*;
+	use picto::{color::Rgba, processing::prelude::*};
+	use test::Bencher;
 
 	#[bench]
 	fn image_0x(b: &mut Bencher) {
@@ -353,9 +344,8 @@ mod lanczos3 {
 
 mod xbr {
 	mod zuper {
+		use picto::{color::Rgba, processing::prelude::*};
 		use test::Bencher;
-		use picto::color::Rgba;
-		use picto::processing::prelude::*;
 
 		#[bench]
 		fn picto_2x(b: &mut Bencher) {

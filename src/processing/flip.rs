@@ -12,15 +12,13 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-use crate::buffer::Buffer;
-use crate::pixel;
-use crate::view::View;
-use crate::orientation::Orientation;
+use crate::{buffer::Buffer, orientation::Orientation, pixel, view::View};
 
 /// Trait for flippable types.
 pub trait Flip<P, C>
-	where P: pixel::Read<C> + pixel::Write<C>,
-	      C: pixel::Channel,
+where
+	P: pixel::Read<C> + pixel::Write<C>,
+	C: pixel::Channel,
 {
 	/// Flip on the given orientation in-place.
 	///
@@ -52,9 +50,10 @@ pub trait Flip<P, C>
 }
 
 impl<'a, P, C, T> Flip<P, C> for T
-	where P: pixel::Read<C> + pixel::Write<C>,
-	      C: pixel::Channel,
-	      T: Into<View<'a, P, C>>
+where
+	P: pixel::Read<C> + pixel::Write<C>,
+	C: pixel::Channel,
+	T: Into<View<'a, P, C>>,
 {
 	fn flip(self, mode: Orientation) {
 		it(self, mode)
@@ -70,13 +69,14 @@ impl<'a, P, C, T> Flip<P, C> for T
 
 /// Flip the given value on the given orientation.
 pub fn it<'a, P, C, T>(value: T, mode: Orientation)
-	where P: pixel::Write<C> + pixel::Read<C>,
-	      C: pixel::Channel,
-	      T: Into<View<'a, P, C>>
+where
+	P: pixel::Write<C> + pixel::Read<C>,
+	C: pixel::Channel,
+	T: Into<View<'a, P, C>>,
 {
-	let mut view   = value.into();
-	let     width  = view.width();
-	let     height = view.height();
+	let mut view = value.into();
+	let width = view.width();
+	let height = view.height();
 
 	match mode {
 		Orientation::Vertical => {
@@ -84,15 +84,15 @@ pub fn it<'a, P, C, T>(value: T, mode: Orientation)
 				return;
 			}
 
-			for y in 0 .. height {
+			for y in 0..height {
 				let reverse = height - y - 1;
 
 				if y >= reverse {
 					break;
 				}
 
-				for x in 0 .. width {
-					let top    = view.get(x, y);
+				for x in 0..width {
+					let top = view.get(x, y);
 					let bottom = view.get(x, reverse);
 
 					view.set(x, y, &bottom);
@@ -106,15 +106,15 @@ pub fn it<'a, P, C, T>(value: T, mode: Orientation)
 				return;
 			}
 
-			for x in 0 .. width {
+			for x in 0..width {
 				let reverse = width - x - 1;
 
 				if x >= reverse {
 					break;
 				}
 
-				for y in 0 .. height {
-					let left  = view.get(x, y);
+				for y in 0..height {
+					let left = view.get(x, y);
 					let right = view.get(reverse, y);
 
 					view.set(x, y, &right);
@@ -128,9 +128,7 @@ pub fn it<'a, P, C, T>(value: T, mode: Orientation)
 #[cfg(test)]
 mod test {
 	use super::*;
-	use crate::buffer::Buffer;
-	use crate::color::Rgb;
-	use crate::orientation::Orientation;
+	use crate::{buffer::Buffer, color::Rgb, orientation::Orientation};
 
 	#[test]
 	fn vertical_none() {

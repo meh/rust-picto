@@ -27,12 +27,7 @@ impl Coordinates {
 	/// Create a new `Iterator` for the given `Region`.
 	#[inline]
 	pub fn new(region: Region) -> Self {
-		Coordinates {
-			x: 0,
-			y: 0,
-
-			region: region,
-		}
+		Coordinates { x: 0, y: 0, region }
 	}
 
 	/// The `Region` being iterated over.
@@ -48,7 +43,7 @@ impl Iterator for Coordinates {
 	#[inline]
 	fn next(&mut self) -> Option<Self::Item> {
 		if self.x >= self.region.width {
-			self.x  = 0;
+			self.x = 0;
 			self.y += 1;
 		}
 
@@ -70,7 +65,7 @@ impl Iterator for Coordinates {
 impl ExactSizeIterator for Coordinates {
 	#[inline]
 	fn len(&self) -> usize {
-		let length    = self.region.width * self.region.height;
+		let length = self.region.width * self.region.height;
 		let remaining = length - (self.y * self.region.width + self.x);
 
 		remaining as usize

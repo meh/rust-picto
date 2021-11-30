@@ -14,11 +14,13 @@
 
 use std::marker::PhantomData;
 
-use crate::pixel;
-use crate::region::{self, Region};
-use crate::buffer::Buffer;
-use crate::iter::pixel::{Iter as Pixels, IterMut as PixelsMut};
 use super::{Read, Write};
+use crate::{
+	buffer::Buffer,
+	iter::pixel::{Iter as Pixels, IterMut as PixelsMut},
+	pixel,
+	region::{self, Region},
+};
 
 /// A view into a `Buffer`.
 ///
@@ -32,34 +34,36 @@ use super::{Read, Write};
 /// encompasses the whole `Buffer` region.
 #[derive(PartialEq, Debug)]
 pub struct View<'a, P, C>
-	where P: pixel::Read<C> + pixel::Write<C>,
-	      C: pixel::Channel,
+where
+	P: pixel::Read<C> + pixel::Write<C>,
+	C: pixel::Channel,
 {
-	data:   &'a mut [C],
+	data: &'a mut [C],
 	stride: usize,
 
-	owner:  Region,
+	owner: Region,
 	region: Region,
 
-	pixel:   PhantomData<P>,
+	pixel: PhantomData<P>,
 	channel: PhantomData<C>,
 }
 
 impl<'a, P, C> View<'a, P, C>
-	where P: pixel::Read<C> + pixel::Write<C>,
-	      C: pixel::Channel,
+where
+	P: pixel::Read<C> + pixel::Write<C>,
+	C: pixel::Channel,
 {
 	#[doc(hidden)]
 	#[inline]
 	pub fn new(data: &mut [C], stride: usize, owner: Region, region: Region) -> View<P, C> {
 		View {
-			data:   data,
-			stride: stride,
+			data,
+			stride,
 
-			owner:  owner,
-			region: region,
+			owner,
+			region,
 
-			pixel:   PhantomData,
+			pixel: PhantomData,
 			channel: PhantomData,
 		}
 	}
@@ -70,9 +74,12 @@ impl<'a, P, C> View<'a, P, C>
 			return Err(());
 		}
 
-		Ok(Self::new(data, width as usize * P::channels(),
+		Ok(Self::new(
+			data,
+			width as usize * P::channels(),
 			Region::from(0, 0, width, height),
-			Region::from(0, 0, width, height)))
+			Region::from(0, 0, width, height),
+		))
 	}
 
 	#[inline]
@@ -81,9 +88,12 @@ impl<'a, P, C> View<'a, P, C>
 			return Err(());
 		}
 
-		Ok(Self::new(data, stride,
+		Ok(Self::new(
+			data,
+			stride,
 			Region::from(0, 0, width, height),
-			Region::from(0, 0, width, height)))
+			Region::from(0, 0, width, height),
+		))
 	}
 
 	/// Get the stride.
@@ -114,7 +124,8 @@ impl<'a, P, C> View<'a, P, C>
 	///
 	/// # Panics
 	///
-	/// Requires that `x < self.width()` and `y < self.height()`, otherwise it will panic.
+	/// Requires that `x < self.width()` and `y < self.height()`, otherwise it
+	/// will panic.
 	#[inline]
 	pub fn get(&self, x: u32, y: u32) -> P {
 		Read::new(self.data, self.stride, self.owner, self.region).get(x, y)
@@ -124,7 +135,8 @@ impl<'a, P, C> View<'a, P, C>
 	///
 	/// # Panics
 	///
-	/// Requires that `x < self.width()` and `y < self.height()`, otherwise it will panic.
+	/// Requires that `x < self.width()` and `y < self.height()`, otherwise it
+	/// will panic.
 	#[inline]
 	pub fn set(&mut self, x: u32, y: u32, pixel: &P) {
 		Write::new(self.data, self.stride, self.owner, self.region).set(x, y, pixel)
@@ -134,7 +146,8 @@ impl<'a, P, C> View<'a, P, C>
 	///
 	/// # Panics
 	///
-	/// Requires that `x + width <= self.width()` and `y + height <= self.height()`, otherwise it will panic.
+	/// Requires that `x + width <= self.width()` and `y + height <=
+	/// self.height()`, otherwise it will panic.
 	#[inline]
 	pub fn readable(&self, region: region::Builder) -> Read<P, C> {
 		let region = region.complete(Region::from(0, 0, self.region.width, self.region.height));
@@ -143,14 +156,19 @@ impl<'a, P, C> View<'a, P, C>
 			panic!("out of bounds");
 		}
 
-		Read::new(&self.data, self.stride, self.owner, Region { x: region.x + self.region.x, y: region.y + self.region.y, .. region })
+		Read::new(&self.data, self.stride, self.owner, Region {
+			x: region.x + self.region.x,
+			y: region.y + self.region.y,
+			..region
+		})
 	}
 
 	/// Get a write-only view of the given region.
 	///
 	/// # Panics
 	///
-	/// Requires that `x + width <= self.width()` and `y + height <= self.height()`, otherwise it will panic.
+	/// Requires that `x + width <= self.width()` and `y + height <=
+	/// self.height()`, otherwise it will panic.
 	#[inline]
 	pub fn writable(&mut self, region: region::Builder) -> Write<P, C> {
 		let region = region.complete(Region::from(0, 0, self.region.width, self.region.height));
@@ -159,14 +177,19 @@ impl<'a, P, C> View<'a, P, C>
 			panic!("out of bounds");
 		}
 
-		Write::new(&mut self.data, self.stride, self.owner, Region { x: region.x + self.region.x, y: region.y + self.region.y, .. region })
+		Write::new(&mut self.data, self.stride, self.owner, Region {
+			x: region.x + self.region.x,
+			y: region.y + self.region.y,
+			..region
+		})
 	}
 
 	/// Get a mutable view of the given region.
 	///
 	/// # Panics
 	///
-	/// Requires that `x + width <= self.width()` and `y + height <= self.height()`, otherwise it will panic.
+	/// Requires that `x + width <= self.width()` and `y + height <=
+	/// self.height()`, otherwise it will panic.
 	#[inline]
 	pub fn view(&mut self, region: region::Builder) -> View<P, C> {
 		let region = region.complete(Region::from(0, 0, self.region.width, self.region.height));
@@ -175,7 +198,11 @@ impl<'a, P, C> View<'a, P, C>
 			panic!("out of bounds");
 		}
 
-		View::new(&mut self.data, self.stride, self.owner, Region { x: region.x + self.region.x, y: region.y + self.region.y, .. region })
+		View::new(&mut self.data, self.stride, self.owner, Region {
+			x: region.x + self.region.x,
+			y: region.y + self.region.y,
+			..region
+		})
 	}
 
 	/// Fill the view with the given pixel.
@@ -258,9 +285,10 @@ impl<'a, P, C> View<'a, P, C>
 	/// ```
 	#[inline]
 	pub fn convert<PO, CO>(&self) -> Buffer<PO, CO, Vec<CO>>
-		where P: Into<PO>,
-		      PO: pixel::Write<CO>,
-		      CO: pixel::Channel,
+	where
+		P: Into<PO>,
+		PO: pixel::Write<CO>,
+		CO: pixel::Channel,
 	{
 		Read::<P, C>::new(self.data, self.stride, self.owner, self.region).convert()
 	}
@@ -282,17 +310,19 @@ impl<'a, P, C> View<'a, P, C>
 	/// ```
 	#[inline]
 	pub fn convert_with<PO, CO, F>(&self, func: F) -> Buffer<PO, CO, Vec<CO>>
-		where F:  FnMut(P) -> PO,
-		      PO: pixel::Write<CO>,
-		      CO: pixel::Channel,
+	where
+		F: FnMut(P) -> PO,
+		PO: pixel::Write<CO>,
+		CO: pixel::Channel,
 	{
 		Read::<P, C>::new(self.data, self.stride, self.owner, self.region).convert_with(func)
 	}
 }
 
 impl<'a, P, C> From<&'a mut View<'a, P, C>> for View<'a, P, C>
-	where P: pixel::Read<C> + pixel::Write<C>,
-	      C: pixel::Channel,
+where
+	P: pixel::Read<C> + pixel::Write<C>,
+	C: pixel::Channel,
 {
 	#[inline]
 	fn from(value: &'a mut View<'a, P, C>) -> View<'a, P, C> {
@@ -301,8 +331,9 @@ impl<'a, P, C> From<&'a mut View<'a, P, C>> for View<'a, P, C>
 }
 
 impl<'a, P, C> From<View<'a, P, C>> for Read<'a, P, C>
-	where P: pixel::Read<C> + pixel::Write<C>,
-	      C: pixel::Channel,
+where
+	P: pixel::Read<C> + pixel::Write<C>,
+	C: pixel::Channel,
 {
 	#[inline]
 	fn from(value: View<'a, P, C>) -> Read<'a, P, C> {
@@ -311,8 +342,9 @@ impl<'a, P, C> From<View<'a, P, C>> for Read<'a, P, C>
 }
 
 impl<'a, P, C> From<&'a View<'a, P, C>> for Read<'a, P, C>
-	where P: pixel::Read<C> + pixel::Write<C>,
-	      C: pixel::Channel,
+where
+	P: pixel::Read<C> + pixel::Write<C>,
+	C: pixel::Channel,
 {
 	#[inline]
 	fn from(value: &'a View<'a, P, C>) -> Read<'a, P, C> {
@@ -321,8 +353,9 @@ impl<'a, P, C> From<&'a View<'a, P, C>> for Read<'a, P, C>
 }
 
 impl<'a, P, C> From<View<'a, P, C>> for Write<'a, P, C>
-	where P: pixel::Read<C> + pixel::Write<C>,
-	      C: pixel::Channel,
+where
+	P: pixel::Read<C> + pixel::Write<C>,
+	C: pixel::Channel,
 {
 	#[inline]
 	fn from(value: View<'a, P, C>) -> Write<'a, P, C> {
@@ -331,8 +364,9 @@ impl<'a, P, C> From<View<'a, P, C>> for Write<'a, P, C>
 }
 
 impl<'a, P, C> From<&'a mut View<'a, P, C>> for Write<'a, P, C>
-	where P: pixel::Read<C> + pixel::Write<C>,
-	      C: pixel::Channel,
+where
+	P: pixel::Read<C> + pixel::Write<C>,
+	C: pixel::Channel,
 {
 	#[inline]
 	fn from(value: &'a mut View<'a, P, C>) -> Write<'a, P, C> {
@@ -342,13 +376,12 @@ impl<'a, P, C> From<&'a mut View<'a, P, C>> for Write<'a, P, C>
 
 #[cfg(test)]
 mod test {
-	use crate::buffer::Buffer;
-	use crate::color::*;
-	use crate::region::Region;
+	use crate::{buffer::Buffer, color::*, region::Region};
 
 	#[test]
 	fn pixels_mut() {
-		let mut buffer = Buffer::<Rgb, u8, _>::from_raw(2, 2, vec![0, 255, 0, 255, 0, 255, 255, 255, 255, 0, 0, 0]).unwrap();
+		let mut buffer =
+			Buffer::<Rgb, u8, _>::from_raw(2, 2, vec![0, 255, 0, 255, 0, 255, 255, 255, 255, 0, 0, 0]).unwrap();
 		let mut view = buffer.view(Default::default());
 
 		for (x, y, mut px) in view.pixels_mut() {
@@ -367,27 +400,40 @@ mod test {
 	#[test]
 	fn readable() {
 		let mut image = Buffer::<Rgb, u8, Vec<_>>::new(50, 50);
-		let     image = image.view(Region::new().x(10).y(10).width(4).height(4));
+		let image = image.view(Region::new().x(10).y(10).width(4).height(4));
 
-		assert_eq!(vec![
-			(10, 10), (11, 10), (12, 10), (13, 10),
-			(10, 11), (11, 11), (12, 11), (13, 11),
-			(10, 12), (11, 12), (12, 12), (13, 12),
-			(10, 13), (11, 13), (12, 13), (13, 13),
-		], image.region().relative().collect::<Vec<_>>());
+		assert_eq!(
+			vec![
+				(10, 10),
+				(11, 10),
+				(12, 10),
+				(13, 10),
+				(10, 11),
+				(11, 11),
+				(12, 11),
+				(13, 11),
+				(10, 12),
+				(11, 12),
+				(12, 12),
+				(13, 12),
+				(10, 13),
+				(11, 13),
+				(12, 13),
+				(13, 13),
+			],
+			image.region().relative().collect::<Vec<_>>()
+		);
 
 		let image = image.readable(Region::new().x(1).y(1).width(2).height(2));
 
-		assert_eq!(vec![
-			(11, 11), (12, 11),
-			(11, 12), (12, 12),
-		], image.region().relative().collect::<Vec<_>>());
+		assert_eq!(
+			vec![(11, 11), (12, 11), (11, 12), (12, 12),],
+			image.region().relative().collect::<Vec<_>>()
+		);
 
 		let image = image.readable(Region::new().width(2).height(1));
 
-		assert_eq!(vec![
-			(11, 11), (12, 11),
-		], image.region().relative().collect::<Vec<_>>());
+		assert_eq!(vec![(11, 11), (12, 11),], image.region().relative().collect::<Vec<_>>());
 	}
 
 	#[test]
@@ -395,25 +441,38 @@ mod test {
 		let mut image = Buffer::<Rgb, u8, Vec<_>>::new(50, 50);
 		let mut image = image.view(Region::new().x(10).y(10).width(4).height(4));
 
-		assert_eq!(vec![
-			(10, 10), (11, 10), (12, 10), (13, 10),
-			(10, 11), (11, 11), (12, 11), (13, 11),
-			(10, 12), (11, 12), (12, 12), (13, 12),
-			(10, 13), (11, 13), (12, 13), (13, 13),
-		], image.region().relative().collect::<Vec<_>>());
+		assert_eq!(
+			vec![
+				(10, 10),
+				(11, 10),
+				(12, 10),
+				(13, 10),
+				(10, 11),
+				(11, 11),
+				(12, 11),
+				(13, 11),
+				(10, 12),
+				(11, 12),
+				(12, 12),
+				(13, 12),
+				(10, 13),
+				(11, 13),
+				(12, 13),
+				(13, 13),
+			],
+			image.region().relative().collect::<Vec<_>>()
+		);
 
 		let mut image = image.writable(Region::new().x(1).y(1).width(2).height(2));
 
-		assert_eq!(vec![
-			(11, 11), (12, 11),
-			(11, 12), (12, 12),
-		], image.region().relative().collect::<Vec<_>>());
+		assert_eq!(
+			vec![(11, 11), (12, 11), (11, 12), (12, 12),],
+			image.region().relative().collect::<Vec<_>>()
+		);
 
 		let image = image.writable(Region::new().width(2).height(1));
 
-		assert_eq!(vec![
-			(11, 11), (12, 11),
-		], image.region().relative().collect::<Vec<_>>());
+		assert_eq!(vec![(11, 11), (12, 11),], image.region().relative().collect::<Vec<_>>());
 	}
 
 	#[test]
@@ -421,24 +480,37 @@ mod test {
 		let mut image = Buffer::<Rgb, u8, Vec<_>>::new(50, 50);
 		let mut image = image.view(Region::new().x(10).y(10).width(4).height(4));
 
-		assert_eq!(vec![
-			(10, 10), (11, 10), (12, 10), (13, 10),
-			(10, 11), (11, 11), (12, 11), (13, 11),
-			(10, 12), (11, 12), (12, 12), (13, 12),
-			(10, 13), (11, 13), (12, 13), (13, 13),
-		], image.region().relative().collect::<Vec<_>>());
+		assert_eq!(
+			vec![
+				(10, 10),
+				(11, 10),
+				(12, 10),
+				(13, 10),
+				(10, 11),
+				(11, 11),
+				(12, 11),
+				(13, 11),
+				(10, 12),
+				(11, 12),
+				(12, 12),
+				(13, 12),
+				(10, 13),
+				(11, 13),
+				(12, 13),
+				(13, 13),
+			],
+			image.region().relative().collect::<Vec<_>>()
+		);
 
 		let mut image = image.view(Region::new().x(1).y(1).width(2).height(2));
 
-		assert_eq!(vec![
-			(11, 11), (12, 11),
-			(11, 12), (12, 12),
-		], image.region().relative().collect::<Vec<_>>());
+		assert_eq!(
+			vec![(11, 11), (12, 11), (11, 12), (12, 12),],
+			image.region().relative().collect::<Vec<_>>()
+		);
 
 		let image = image.view(Region::new().width(2).height(1));
 
-		assert_eq!(vec![
-			(11, 11), (12, 11),
-		], image.region().relative().collect::<Vec<_>>());
+		assert_eq!(vec![(11, 11), (12, 11),], image.region().relative().collect::<Vec<_>>());
 	}
 }

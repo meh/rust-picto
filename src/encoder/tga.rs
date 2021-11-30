@@ -12,14 +12,14 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-use std::io::Write;
-use std::ops::Deref;
+use std::{io::Write, ops::Deref};
 
 use imagefmt::{tga, ColFmt, ColType};
-use crate::error;
-use crate::pixel;
-use crate::buffer::{Buffer, cast};
-use crate::color;
+
+use crate::{
+	buffer::{cast, Buffer},
+	color, error, pixel,
+};
 
 pub struct Encoder<W: Write> {
 	inner: W,
@@ -28,43 +28,42 @@ pub struct Encoder<W: Write> {
 impl<W: Write> Encoder<W> {
 	#[inline]
 	pub fn new(output: W) -> Self {
-		Encoder {
-			inner: output,
-		}
+		Encoder { inner: output }
 	}
 }
 
 impl<P, C, D, W> super::Encoder<P, C, D> for Encoder<W>
-	where P: pixel::Read<C>,
-	      P: Into<color::Luma> + Into<color::Lumaa> + Into<color::Rgb> + Into<color::Rgba>,
-	      C: pixel::Channel,
-	      D: Deref<Target = [C]>,
-	      W: Write
+where
+	P: pixel::Read<C>,
+	P: Into<color::Luma> + Into<color::Lumaa> + Into<color::Rgb> + Into<color::Rgba>,
+	C: pixel::Channel,
+	D: Deref<Target = [C]>,
+	W: Write,
 {
 	fn frame(&mut self, buffer: &Buffer<P, C, D>) -> error::Result<()> {
 		let format = buffer.color().unwrap_or(ColFmt::RGB);
 
 		macro_rules! write {
-			($ch:ty, $ty:path) => (
-				r#try!(tga::write(self.inner.by_ref(), buffer.width() as usize, buffer.height() as usize,
-					format, cast::Bytes::<$ty, $ch>::bytes(buffer).as_ref(), ColType::Auto, None))
-			);
+			($ch:ty, $ty:path) => {
+				tga::write(
+					self.inner.by_ref(),
+					buffer.width() as usize,
+					buffer.height() as usize,
+					format,
+					cast::Bytes::<$ty, $ch>::bytes(buffer).as_ref(),
+					ColType::Auto,
+					None,
+				)?
+			};
 		}
 
 		match format {
-			ColFmt::Y =>
-				write!(u8, color::Luma),
+			ColFmt::Y => write!(u8, color::Luma),
+			ColFmt::YA => write!(u8, color::Lumaa),
+			ColFmt::RGB => write!(u8, color::Rgb),
+			ColFmt::RGBA => write!(u8, color::Rgba),
 
-			ColFmt::YA =>
-				write!(u8, color::Lumaa),
-
-			ColFmt::RGB =>
-				write!(u8, color::Rgb),
-
-			ColFmt::RGBA =>
-				write!(u8, color::Rgba),
-
-			_ => unreachable!()
+			_ => unreachable!(),
 		}
 
 		Ok(())
@@ -78,13 +77,17 @@ trait Color {
 #[cfg(not(feature = "nightly"))]
 mod stable {
 	use imagefmt::ColFmt;
-	use crate::buffer::Buffer;
-	use crate::pixel::{self, Pixel};
+
 	use super::Color;
+	use crate::{
+		buffer::Buffer,
+		pixel::{self, Pixel},
+	};
 
 	impl<P, C, D> Color for Buffer<P, C, D>
-		where P: Pixel<C>,
-		      C: pixel::Channel,
+	where
+		P: Pixel<C>,
+		C: pixel::Channel,
 	{
 		#[inline]
 		fn color(&self) -> Option<ColFmt> {
@@ -95,33 +98,34 @@ mod stable {
 
 #[cfg(feature = "nightly")]
 mod nightly {
+	use buffer::Buffer;
+	use color::{Luma, Lumaa, Rgb, Rgba};
 	use imagefmt::ColFmt;
 	use num::Float;
-	use buffer::Buffer;
 	use pixel::{self, Pixel};
-	use color::{Luma, Lumaa, Rgb, Rgba};
+
 	use super::Color;
 
 	impl<P, C, D> Color for Buffer<P, C, D>
-		where P: Pixel<C>,
-		      C: pixel::Channel,
+	where
+		P: Pixel<C>,
+		C: pixel::Channel,
 	{
 		#[inline]
-		default
-		fn color(&self) -> Option<ColFmt> {
+		default fn color(&self) -> Option<ColFmt> {
 			None
 		}
 	}
 
 	macro_rules! impl_for {
-		($ch:ident, $px:ident => $fmt:path) => (
+		($ch:ident, $px:ident => $fmt:path) => {
 			impl<D, T: Float + 'static> Color for Buffer<$px<T>, $ch, D> {
 				#[inline]
 				fn color(&self) -> Option<ColFmt> {
 					Some($fmt)
 				}
 			}
-		)
+		};
 	}
 
 	impl_for!(u8, Luma => ColFmt::Y);

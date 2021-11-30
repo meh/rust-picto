@@ -12,17 +12,21 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-use std::io::{Write, BufWriter};
-use std::path::Path;
-use std::fs::File;
-use std::ops::Deref;
+use std::{
+	fs::File,
+	io::{BufWriter, Write},
+	ops::Deref,
+	path::Path,
+};
 
-use crate::encoder::{self, Encoder};
-use crate::color;
-use crate::pixel;
-use crate::buffer::Buffer;
-use crate::format::Format;
-use crate::error::{self, Error};
+use crate::{
+	buffer::Buffer,
+	color,
+	encoder::{self, Encoder},
+	error::{self, Error},
+	format::Format,
+	pixel,
+};
 
 /// Write the buffer to the output stream in PNG format.
 ///
@@ -40,11 +44,12 @@ use crate::error::{self, Error};
 /// ```
 #[inline]
 pub fn to<P, C, D, W>(output: W, buffer: &Buffer<P, C, D>) -> error::Result<()>
-	where P: Into<color::Rgb> + Into<color::Rgba> + Into<color::Luma> + Into<color::Lumaa>,
-	      P: pixel::Read<C>,
-	      C: pixel::Channel,
-	      D: Deref<Target = [C]>,
-	      W: Write
+where
+	P: Into<color::Rgb> + Into<color::Rgba> + Into<color::Luma> + Into<color::Lumaa>,
+	P: pixel::Read<C>,
+	C: pixel::Channel,
+	D: Deref<Target = [C]>,
+	W: Write,
 {
 	with_format(output, Format::Png, buffer)
 }
@@ -64,35 +69,30 @@ pub fn to<P, C, D, W>(output: W, buffer: &Buffer<P, C, D>) -> error::Result<()>
 /// ```
 #[inline]
 pub fn to_path<P, C, D, W>(path: W, buffer: &Buffer<P, C, D>) -> error::Result<()>
-	where P: Into<color::Rgb> + Into<color::Rgba> + Into<color::Luma> + Into<color::Lumaa>,
-	      P: pixel::Read<C>,
-	      C: pixel::Channel,
-	      D: Deref<Target = [C]>,
-	      W: AsRef<Path>
+where
+	P: Into<color::Rgb> + Into<color::Rgba> + Into<color::Luma> + Into<color::Lumaa>,
+	P: pixel::Read<C>,
+	C: pixel::Channel,
+	D: Deref<Target = [C]>,
+	W: AsRef<Path>,
 {
-	let path      = path.as_ref();
+	let path = path.as_ref();
 	let extension = path.extension().and_then(|p| p.to_str()).map(|p| p.to_lowercase());
-	let format    = match extension.as_ref().map(|p| p.as_ref()) {
-		Some("png") =>
-			Format::Png,
+	let format = match extension.as_ref().map(|p| p.as_ref()) {
+		Some("png") => Format::Png,
 
-		Some("jpg") | Some("jpeg") =>
-			Format::Jpeg,
+		Some("jpg") | Some("jpeg") => Format::Jpeg,
 
-		Some("bmp") =>
-			Format::Bmp,
+		Some("bmp") => Format::Bmp,
 
-		Some("tga") =>
-			Format::Tga,
+		Some("tga") => Format::Tga,
 
-		Some("gif") =>
-			Format::Gif,
+		Some("gif") => Format::Gif,
 
-		_ =>
-			return Err(Error::Unsupported("unsupported image format".into()))
+		_ => return Err(Error::Unsupported("unsupported image format".into())),
 	};
 
-	with_format(BufWriter::new(r#try!(File::create(path))), format, buffer)
+	with_format(BufWriter::new(File::create(path)?), format, buffer)
 }
 
 /// Write the buffer to the output stream using the given format.
@@ -112,31 +112,27 @@ pub fn to_path<P, C, D, W>(path: W, buffer: &Buffer<P, C, D>) -> error::Result<(
 /// ```
 #[inline]
 pub fn with_format<P, C, D, W>(output: W, format: Format, buffer: &Buffer<P, C, D>) -> error::Result<()>
-	where P: Into<color::Rgb> + Into<color::Rgba> + Into<color::Luma> + Into<color::Lumaa>,
-	      P: pixel::Read<C>,
-	      C: pixel::Channel,
-	      D: Deref<Target = [C]>,
-	      W: Write
+where
+	P: Into<color::Rgb> + Into<color::Rgba> + Into<color::Luma> + Into<color::Lumaa>,
+	P: pixel::Read<C>,
+	C: pixel::Channel,
+	D: Deref<Target = [C]>,
+	W: Write,
 {
 	match format {
 		#[cfg(feature = "png")]
-		Format::Png =>
-			png(output, buffer, |_| { }),
+		Format::Png => png(output, buffer, |_| {}),
 
 		#[cfg(feature = "bmp")]
-		Format::Bmp =>
-			bmp(output, buffer, |_| { }),
+		Format::Bmp => bmp(output, buffer, |_| {}),
 
 		#[cfg(feature = "tga")]
-		Format::Tga =>
-			tga(output, buffer, |_| { }),
+		Format::Tga => tga(output, buffer, |_| {}),
 
 		#[cfg(feature = "gif")]
-		Format::Gif =>
-			gif(output, buffer, |_| { }),
+		Format::Gif => gif(output, buffer, |_| {}),
 
-		_ =>
-			Err(Error::Unsupported("unsupported image format".into()))
+		_ => Err(Error::Unsupported("unsupported image format".into())),
 	}
 }
 
@@ -145,12 +141,13 @@ pub fn with_format<P, C, D, W>(output: W, format: Format, buffer: &Buffer<P, C, 
 #[cfg(feature = "png")]
 #[inline]
 pub fn png<P, C, D, F, W>(output: W, buffer: &Buffer<P, C, D>, func: F) -> error::Result<()>
-	where P: Into<color::Rgb> + Into<color::Rgba> + Into<color::Luma> + Into<color::Lumaa>,
-	      P: pixel::Read<C>,
-	      C: pixel::Channel,
-	      D: Deref<Target = [C]>,
-	      F: FnOnce(&mut encoder::png::Encoder<W>),
-	      W: Write
+where
+	P: Into<color::Rgb> + Into<color::Rgba> + Into<color::Luma> + Into<color::Lumaa>,
+	P: pixel::Read<C>,
+	C: pixel::Channel,
+	D: Deref<Target = [C]>,
+	F: FnOnce(&mut encoder::png::Encoder<W>),
+	W: Write,
 {
 	let mut encoder = encoder::png::Encoder::new(output);
 	func(&mut encoder);
@@ -162,12 +159,13 @@ pub fn png<P, C, D, F, W>(output: W, buffer: &Buffer<P, C, D>, func: F) -> error
 #[cfg(feature = "bmp")]
 #[inline]
 pub fn bmp<P, C, D, F, W>(output: W, buffer: &Buffer<P, C, D>, func: F) -> error::Result<()>
-	where P: Into<color::Rgb> + Into<color::Rgba>,
-	      P: pixel::Read<C>,
-	      C: pixel::Channel,
-	      D: Deref<Target = [C]>,
-	      F: FnOnce(&mut encoder::bmp::Encoder<W>),
-	      W: Write
+where
+	P: Into<color::Rgb> + Into<color::Rgba>,
+	P: pixel::Read<C>,
+	C: pixel::Channel,
+	D: Deref<Target = [C]>,
+	F: FnOnce(&mut encoder::bmp::Encoder<W>),
+	W: Write,
 {
 	let mut encoder = encoder::bmp::Encoder::new(output);
 	func(&mut encoder);
@@ -179,12 +177,13 @@ pub fn bmp<P, C, D, F, W>(output: W, buffer: &Buffer<P, C, D>, func: F) -> error
 #[cfg(feature = "tga")]
 #[inline]
 pub fn tga<P, C, D, F, W>(output: W, buffer: &Buffer<P, C, D>, func: F) -> error::Result<()>
-	where P: Into<color::Rgb> + Into<color::Rgba> + Into<color::Luma> + Into<color::Lumaa>,
-	      P: pixel::Read<C>,
-	      C: pixel::Channel,
-	      D: Deref<Target = [C]>,
-	      F: FnOnce(&mut encoder::tga::Encoder<W>),
-	      W: Write
+where
+	P: Into<color::Rgb> + Into<color::Rgba> + Into<color::Luma> + Into<color::Lumaa>,
+	P: pixel::Read<C>,
+	C: pixel::Channel,
+	D: Deref<Target = [C]>,
+	F: FnOnce(&mut encoder::tga::Encoder<W>),
+	W: Write,
 {
 	let mut encoder = encoder::tga::Encoder::new(output);
 	func(&mut encoder);
@@ -196,12 +195,13 @@ pub fn tga<P, C, D, F, W>(output: W, buffer: &Buffer<P, C, D>, func: F) -> error
 #[cfg(feature = "gif")]
 #[inline]
 pub fn gif<P, C, D, F, W>(output: W, buffer: &Buffer<P, C, D>, func: F) -> error::Result<()>
-	where P: Into<color::Rgb> + Into<color::Rgba> + Into<color::Luma> + Into<color::Lumaa>,
-	      P: pixel::Read<C>,
-	      C: pixel::Channel,
-	      D: Deref<Target = [C]>,
-	      F: FnOnce(&mut encoder::gif::Encoder<W>),
-	      W: Write
+where
+	P: Into<color::Rgb> + Into<color::Rgba> + Into<color::Luma> + Into<color::Lumaa>,
+	P: pixel::Read<C>,
+	C: pixel::Channel,
+	D: Deref<Target = [C]>,
+	F: FnOnce(&mut encoder::gif::Encoder<W>),
+	W: Write,
 {
 	let mut encoder = encoder::gif::Encoder::new(output);
 	func(&mut encoder);

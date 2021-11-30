@@ -12,14 +12,13 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-use crate::buffer::Buffer;
-use crate::pixel;
-use crate::view;
+use crate::{buffer::Buffer, pixel, view};
 
 /// Trait for rotatable types.
 pub trait Rotate<P, C>
-	where P: pixel::Read<C> + pixel::Write<C>,
-	      C: pixel::Channel,
+where
+	P: pixel::Read<C> + pixel::Write<C>,
+	C: pixel::Channel,
 {
 	/// Rotate by the given degree, negative degrees will turn counter-clockwise.
 	///
@@ -40,9 +39,10 @@ pub trait Rotate<P, C>
 }
 
 impl<'i, P, C, I> Rotate<P, C> for I
-	where P: pixel::Read<C> + pixel::Write<C>,
-	      C: pixel::Channel,
-	      I: Into<view::Read<'i, P, C>>
+where
+	P: pixel::Read<C> + pixel::Write<C>,
+	C: pixel::Channel,
+	I: Into<view::Read<'i, P, C>>,
 {
 	#[inline]
 	fn rotate(self, by: f32) -> Buffer<P, C, Vec<C>> {
@@ -52,15 +52,16 @@ impl<'i, P, C, I> Rotate<P, C> for I
 
 /// Rotate by the given degree, negative degrees will turn counter-clockwise.
 pub fn it<'i, I, PI, CI, PO, CO>(input: I, by: f32) -> Buffer<PO, CO, Vec<CO>>
-	where I:  Into<view::Read<'i, PI, CI>>,
-	      PO: From<PI>,
-	      PO: pixel::Write<CO>,
-	      CO: pixel::Channel,
-	      PI: pixel::Read<CI>,
-	      CI: pixel::Channel,
+where
+	I: Into<view::Read<'i, PI, CI>>,
+	PO: From<PI>,
+	PO: pixel::Write<CO>,
+	CO: pixel::Channel,
+	PI: pixel::Read<CI>,
+	CI: pixel::Channel,
 {
 	let input = input.into();
-	let by    = if by.is_sign_positive() {
+	let by = if by.is_sign_positive() {
 		by % 360.0
 	}
 	else {
@@ -100,7 +101,7 @@ pub fn it<'i, I, PI, CI, PO, CO>(input: I, by: f32) -> Buffer<PO, CO, Vec<CO>>
 			}
 		}
 
-		_ => unreachable!()
+		_ => unreachable!(),
 	}
 
 	output

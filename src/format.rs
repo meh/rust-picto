@@ -13,6 +13,7 @@
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
 use std::io::{Read, Seek, SeekFrom};
+
 use byteorder::{BigEndian, ReadBytesExt};
 
 /// An image format.
@@ -33,47 +34,47 @@ pub enum Format {
 /// Guess the image format.
 pub fn guess<R: Read + Seek>(mut input: R) -> Option<Format> {
 	const MAGIC: &'static [(&'static [u8], Format)] = &[
-		(b"\x89PNG\r\n\x1a\n",      Format::Png),
-		(&[0xff, 0xd8, 0xff],       Format::Jpeg),
-		(b"GIF89a",                 Format::Gif),
-		(b"GIF87a",                 Format::Gif),
-		(b"WEBP",                   Format::Webp),
-		(b"MM.*",                   Format::Tiff),
-		(b"II*.",                   Format::Tiff),
-		(b"BM",                     Format::Bmp),
-		(b"XYZ1",                   Format::Xyz),
+		(b"\x89PNG\r\n\x1a\n", Format::Png),
+		(&[0xff, 0xd8, 0xff], Format::Jpeg),
+		(b"GIF89a", Format::Gif),
+		(b"GIF87a", Format::Gif),
+		(b"WEBP", Format::Webp),
+		(b"MM.*", Format::Tiff),
+		(b"II*.", Format::Tiff),
+		(b"BM", Format::Bmp),
+		(b"XYZ1", Format::Xyz),
 		(&[0x00, 0x00, 0x01, 0x00], Format::Ico),
-		(b"#?RADIANCE",             Format::Hdr),
+		(b"#?RADIANCE", Format::Hdr),
 	];
 
 	macro_rules! r#try {
-		(return $body:expr) => (
+		(return $body:expr) => {
 			if let Ok(value) = $body {
 				value
 			}
 			else {
 				return None;
 			}
-		);
+		};
 
-		(continue $body:expr) => (
+		(continue $body:expr) => {
 			if let Ok(value) = $body {
 				value
 			}
 			else {
 				continue;
 			}
-		);
+		};
 	}
 
 	let mut result = None;
 
 	// Check through static MAGIC fields.
 	for &(magic, format) in MAGIC.iter() {
-		r#try!(continue input.seek(SeekFrom::Start(0)));
+		continue?;
 
 		let mut buffer = vec![0; magic.len()];
-		r#try!(continue input.read_exact(&mut buffer));
+		continue?;
 
 		if buffer == &magic[..] {
 			result = Some(format);
@@ -83,16 +84,16 @@ pub fn guess<R: Read + Seek>(mut input: R) -> Option<Format> {
 
 	// Check for TGA
 	if result.is_none() {
-		r#try!(return input.seek(SeekFrom::Start(1)));
+		return input.seek(SeekFrom::Start(1))?;
 
-		let byte = r#try!(return input.read_u32::<BigEndian>()) & 0xfff7ffff;
+		let byte = return input.read_u32::<BigEndian>()? & 0xfff7ffff;
 
 		if byte == 0x01010000 || byte == 0x00020000 || byte == 0x00030000 {
 			result = Some(Format::Tga);
 		}
 	}
 
-	r#try!(return input.seek(SeekFrom::Start(0)));
+	return input.seek(SeekFrom::Start(0))?;
 
 	result
 }

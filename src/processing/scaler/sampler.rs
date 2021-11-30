@@ -12,20 +12,23 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-use crate::view;
-use crate::buffer::Buffer;
-use crate::pixel;
-use crate::color::Rgba;
-use crate::processing::{sample, Sampler};
+use crate::{
+	buffer::Buffer,
+	color::Rgba,
+	pixel,
+	processing::{sample, Sampler},
+	view,
+};
 
 impl<A, PI, CI, PO, CO> super::Scaler<PI, CI, PO, CO> for A
-	where A:  Sampler,
-	      PI: Into<Rgba>,
-	      PI: pixel::Read<CI>,
-	      CI: pixel::Channel,
-	      PO: From<Rgba>,
-	      PO: pixel::Write<CO>,
-	      CO: pixel::Channel,
+where
+	A: Sampler,
+	PI: Into<Rgba>,
+	PI: pixel::Read<CI>,
+	CI: pixel::Channel,
+	PO: From<Rgba>,
+	PO: pixel::Write<CO>,
+	CO: pixel::Channel,
 {
 	#[inline]
 	fn scale(input: &view::Read<PI, CI>, width: u32, height: u32) -> Buffer<PO, CO, Vec<CO>> {

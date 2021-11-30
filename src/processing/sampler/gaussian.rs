@@ -12,8 +12,7 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-use num::Float;
-use num::traits::FloatConst;
+use num::{traits::FloatConst, Float};
 
 pub struct Gaussian;
 
@@ -31,6 +30,5 @@ impl<T: Float + FloatConst> super::Sampler<T> for Gaussian {
 
 #[inline]
 pub fn function<T: Float + FloatConst>(x: T, r: T) -> T {
-	((num!(2.0 => T) * T::PI()).sqrt() * r).recip() *
-	(-x.powi(2) / (num!(2.0 => T) * r.powi(2))).exp()
+	((num!(2.0 => T) * T::PI()).sqrt() * r).recip() * (-x.powi(2) / (num!(2.0 => T) * r.powi(2))).exp()
 }

@@ -12,26 +12,27 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-use std::io::Write;
-use std::ops::Deref;
+use std::{io::Write, ops::Deref};
 
 use gif;
-use crate::error;
-use crate::pixel;
-use crate::buffer::Buffer;
-use crate::color;
-use crate::parameter::{Parameter, HasParameters};
+
+use crate::{
+	buffer::Buffer,
+	color, error,
+	parameter::{HasParameters, Parameter},
+	pixel,
+};
 
 pub struct Encoder<W: Write> {
-	inner:   W,
-	palette: Vec<u8>
+	inner: W,
+	palette: Vec<u8>,
 }
 
 impl<W: Write> Encoder<W> {
 	#[inline]
 	pub fn new(output: W) -> Self {
 		Encoder {
-			inner:   output,
+			inner: output,
 			palette: vec![],
 		}
 	}
@@ -46,25 +47,31 @@ impl<W: Write> Parameter<Encoder<W>> for Vec<u8> {
 	}
 }
 
-impl<W: Write> HasParameters for Encoder<W>
-{
-}
+impl<W: Write> HasParameters for Encoder<W> {}
 
 impl<P, C, D, W> super::Encoder<P, C, D> for Encoder<W>
-	where P: pixel::Read<C>,
-	      P: Into<color::Luma> + Into<color::Lumaa> + Into<color::Rgb> + Into<color::Rgba>,
-	      C: pixel::Channel,
-	      D: Deref<Target = [C]>,
-	      W: Write
+where
+	P: pixel::Read<C>,
+	P: Into<color::Luma> + Into<color::Lumaa> + Into<color::Rgb> + Into<color::Rgba>,
+	C: pixel::Channel,
+	D: Deref<Target = [C]>,
+	W: Write,
 {
 	#[inline]
 	fn frame(&mut self, buffer: &Buffer<P, C, D>) -> error::Result<()> {
-		let mut buffer  = buffer.convert::<color::Rgba, u8>();
-		let mut encoder = r#try!(gif::Encoder::new(self.inner.by_ref(),
-			buffer.width() as u16, buffer.height() as u16, &self.palette));
+		let mut buffer = buffer.convert::<color::Rgba, u8>();
+		let mut encoder = gif::Encoder::new(
+			self.inner.by_ref(),
+			buffer.width() as u16,
+			buffer.height() as u16,
+			&self.palette,
+		)?;
 
-		r#try!(encoder.write_frame(&gif::Frame::from_rgba(
-			buffer.width() as u16, buffer.height() as u16, &mut buffer)));
+		encoder.write_frame(&gif::Frame::from_rgba(
+			buffer.width() as u16,
+			buffer.height() as u16,
+			&mut buffer,
+		))?;
 
 		Ok(())
 	}

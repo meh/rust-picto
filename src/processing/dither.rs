@@ -12,15 +12,14 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-use crate::buffer::Buffer;
-use crate::pixel;
-use crate::view;
 use super::Ditherer;
+use crate::{buffer::Buffer, pixel, view};
 
 /// Trait for ditherable types.
 pub trait Dither<P, C>
-	where P: pixel::Read<C> + pixel::Write<C>,
-	      C: pixel::Channel
+where
+	P: pixel::Read<C> + pixel::Write<C>,
+	C: pixel::Channel,
 {
 	/// Dither to the given number of colors.
 	///
@@ -35,16 +34,19 @@ pub trait Dither<P, C>
 	/// let dithered = image.dither::<ditherer::NeuQuant>(256);
 	/// ```
 	fn dither<A>(self, colors: u32) -> Buffer<P, C, Vec<C>>
-		where A: Ditherer<P, C, P, C>;
+	where
+		A: Ditherer<P, C, P, C>;
 }
 
 impl<'i, P, C, I> Dither<P, C> for I
-	where P: pixel::Read<C> + pixel::Write<C>,
-	      C: pixel::Channel,
-	      I: Into<view::Read<'i, P, C>>
+where
+	P: pixel::Read<C> + pixel::Write<C>,
+	C: pixel::Channel,
+	I: Into<view::Read<'i, P, C>>,
 {
 	fn dither<A>(self, colors: u32) -> Buffer<P, C, Vec<C>>
-		where A: Ditherer<P, C, P, C>
+	where
+		A: Ditherer<P, C, P, C>,
 	{
 		it::<A, _, P, C, P, C>(self, colors)
 	}
@@ -53,13 +55,14 @@ impl<'i, P, C, I> Dither<P, C> for I
 /// Dither to the given number of colors.
 #[inline]
 pub fn it<'i, A, I, PI, CI, PO, CO>(input: I, colors: u32) -> Buffer<PO, CO, Vec<CO>>
-	where A:  Ditherer<PI, CI, PO, CO>,
-	      PO: From<PI>,
-	      PO: pixel::Write<CO>,
-	      CO: pixel::Channel,
-	      PI: pixel::Read<CI>,
-	      CI: pixel::Channel,
-	      I:  Into<view::Read<'i, PI, CI>>
+where
+	A: Ditherer<PI, CI, PO, CO>,
+	PO: From<PI>,
+	PO: pixel::Write<CO>,
+	CO: pixel::Channel,
+	PI: pixel::Read<CI>,
+	CI: pixel::Channel,
+	I: Into<view::Read<'i, PI, CI>>,
 {
 	A::dither(&input.into(), colors)
 }

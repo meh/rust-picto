@@ -14,15 +14,18 @@
 
 use std::ops::Deref;
 
-use crate::buffer::Buffer;
-use crate::pixel::{self, Pixel};
-use crate::error;
+use crate::{
+	buffer::Buffer,
+	error,
+	pixel::{self, Pixel},
+};
 
 /// An image encoder.
 pub trait Encoder<P, C, D>
-	where P: Pixel<C>,
-	      C: pixel::Channel,
-	      D: Deref<Target = [C]>,
+where
+	P: Pixel<C>,
+	C: pixel::Channel,
+	D: Deref<Target = [C]>,
 {
 	/// A frame for the image, respecting the previously defined metadata.
 	fn frame(&mut self, buffer: &Buffer<P, C, D>) -> error::Result<()>;

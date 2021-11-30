@@ -14,40 +14,40 @@
 
 use std::marker::PhantomData;
 
-use crate::pixel;
-use crate::region::Region;
-use crate::iter::Coordinates;
+use crate::{iter::Coordinates, pixel, region::Region};
 
 /// Immutable iterator over pixels.
 pub struct Iter<'a, P, C>
-	where P: pixel::Read<C>,
-	      C: pixel::Channel,
+where
+	P: pixel::Read<C>,
+	C: pixel::Channel,
 {
 	inner: Coordinates,
 	owner: Region,
 
-	data:   &'a [C],
+	data: &'a [C],
 	stride: usize,
 
-	pixel:   PhantomData<P>,
+	pixel: PhantomData<P>,
 	channel: PhantomData<C>,
 }
 
 impl<'a, P, C> Iter<'a, P, C>
-	where P: pixel::Read<C>,
-	      C: pixel::Channel,
+where
+	P: pixel::Read<C>,
+	C: pixel::Channel,
 {
 	#[doc(hidden)]
 	#[inline]
 	pub fn new(data: &[C], stride: usize, owner: Region, region: Region) -> Iter<P, C> {
 		Iter {
 			inner: Coordinates::new(region),
-			owner: owner,
+			owner,
 
-			data:   data,
-			stride: stride,
+			data,
+			stride,
 
-			pixel:   PhantomData,
+			pixel: PhantomData,
 			channel: PhantomData,
 		}
 	}
@@ -56,25 +56,27 @@ impl<'a, P, C> Iter<'a, P, C>
 /// A readable pixel from the iterator.
 #[derive(Eq, PartialEq, Debug)]
 pub struct Item<'a, P, C>
-	where P: pixel::Read<C>,
-	      C: pixel::Channel,
+where
+	P: pixel::Read<C>,
+	C: pixel::Channel,
 {
-	pixel:   PhantomData<P>,
+	pixel: PhantomData<P>,
 	channel: PhantomData<C>,
-	data:    &'a [C],
+	data: &'a [C],
 }
 
 impl<'a, P, C> Item<'a, P, C>
-	where P: pixel::Read<C>,
-	      C: pixel::Channel,
+where
+	P: pixel::Read<C>,
+	C: pixel::Channel,
 {
 	#[doc(hidden)]
 	#[inline]
 	pub fn new(data: &[C]) -> Item<P, C> {
 		Item {
-			pixel:   PhantomData,
+			pixel: PhantomData,
 			channel: PhantomData,
-			data:    data,
+			data,
 		}
 	}
 
@@ -86,8 +88,9 @@ impl<'a, P, C> Item<'a, P, C>
 }
 
 impl<'a, P, C> Iterator for Iter<'a, P, C>
-	where P: pixel::Read<C>,
-	      C: pixel::Channel,
+where
+	P: pixel::Read<C>,
+	C: pixel::Channel,
 {
 	type Item = (u32, u32, Item<'a, P, C>);
 
@@ -100,14 +103,12 @@ impl<'a, P, C> Iterator for Iter<'a, P, C>
 		};
 
 		let channels = P::channels();
-		let index    = (y as usize * self.stride)
-			+ (x as usize * channels);
+		let index = (y as usize * self.stride) + (x as usize * channels);
 
 		Some((
 			x - self.inner.region().x,
 			y - self.inner.region().y,
-
-			Item::new(&self.data[index .. index + channels])
+			Item::new(&self.data[index..index + channels]),
 		))
 	}
 
@@ -118,8 +119,9 @@ impl<'a, P, C> Iterator for Iter<'a, P, C>
 }
 
 impl<'a, P, C> ExactSizeIterator for Iter<'a, P, C>
-	where P: pixel::Read<C>,
-	      C: pixel::Channel,
+where
+	P: pixel::Read<C>,
+	C: pixel::Channel,
 {
 	#[inline]
 	fn len(&self) -> usize {

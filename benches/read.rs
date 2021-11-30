@@ -3,8 +3,8 @@ extern crate test;
 
 mod png {
 	mod read {
-		use test::Bencher;
 		use picto::color::{Rgb, Rgba};
+		use test::Bencher;
 
 		#[bench]
 		fn image(b: &mut Bencher) {
@@ -25,8 +25,8 @@ mod png {
 
 mod jpeg {
 	mod read {
-		use test::Bencher;
 		use picto::color::{Rgb, Rgba};
+		use test::Bencher;
 
 		#[bench]
 		fn image(b: &mut Bencher) {
@@ -47,8 +47,8 @@ mod jpeg {
 
 mod bmp {
 	mod read {
-		use test::Bencher;
 		use picto::color::{Rgb, Rgba};
+		use test::Bencher;
 
 		#[bench]
 		fn image(b: &mut Bencher) {
@@ -69,8 +69,8 @@ mod bmp {
 
 mod tga {
 	mod read {
-		use test::Bencher;
 		use picto::color::{Rgb, Rgba};
+		use test::Bencher;
 
 		#[bench]
 		fn image(b: &mut Bencher) {
@@ -91,8 +91,8 @@ mod tga {
 
 mod xyz {
 	mod read {
-		use test::Bencher;
 		use picto::color::{Rgb, Rgba};
+		use test::Bencher;
 
 		#[bench]
 		fn picto_with_convert(b: &mut Bencher) {

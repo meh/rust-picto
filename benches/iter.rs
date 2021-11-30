@@ -2,8 +2,8 @@
 extern crate test;
 
 mod pixels {
-	use test::{self, Bencher};
 	use picto::color::Rgba;
+	use test::{self, Bencher};
 
 	#[bench]
 	fn image(b: &mut Bencher) {
@@ -29,8 +29,8 @@ mod pixels {
 }
 
 mod pixels_mut {
-	use test::{self, Bencher};
 	use picto::color::Rgba;
+	use test::{self, Bencher};
 
 	#[bench]
 	fn image(b: &mut Bencher) {
@@ -38,7 +38,9 @@ mod pixels_mut {
 
 		b.iter(|| {
 			for (x, y, mut px) in image.enumerate_pixels_mut() {
-				*px = image::Rgba { data: [0, 127, 255, 255] };
+				*px = image::Rgba {
+					data: [0, 127, 255, 255],
+				};
 				test::black_box((x, y));
 			}
 		})

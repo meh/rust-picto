@@ -14,8 +14,10 @@
 
 use std::marker::PhantomData;
 
-use crate::pixel;
-use crate::region::{self, Region};
+use crate::{
+	pixel,
+	region::{self, Region},
+};
 
 /// A write-only view into a `Buffer`.
 ///
@@ -26,34 +28,36 @@ use crate::region::{self, Region};
 /// it doesn't own any `Data`.
 #[derive(PartialEq, Debug)]
 pub struct Write<'a, P, C>
-	where P: pixel::Write<C>,
-	      C: pixel::Channel,
+where
+	P: pixel::Write<C>,
+	C: pixel::Channel,
 {
-	data:   &'a mut [C],
+	data: &'a mut [C],
 	stride: usize,
 
-	owner:  Region,
+	owner: Region,
 	region: Region,
 
-	pixel:   PhantomData<P>,
+	pixel: PhantomData<P>,
 	channel: PhantomData<C>,
 }
 
 impl<'a, P, C> Write<'a, P, C>
-	where P: pixel::Write<C>,
-	      C: pixel::Channel,
+where
+	P: pixel::Write<C>,
+	C: pixel::Channel,
 {
 	#[doc(hidden)]
 	#[inline]
 	pub fn new(data: &mut [C], stride: usize, owner: Region, region: Region) -> Write<P, C> {
 		Write {
-			data:   data,
-			stride: stride,
+			data,
+			stride,
 
-			owner:  owner,
-			region: region,
+			owner,
+			region,
 
-			pixel:   PhantomData,
+			pixel: PhantomData,
 			channel: PhantomData,
 		}
 	}
@@ -64,9 +68,12 @@ impl<'a, P, C> Write<'a, P, C>
 			return Err(());
 		}
 
-		Ok(Self::new(data, width as usize * P::channels(),
+		Ok(Self::new(
+			data,
+			width as usize * P::channels(),
 			Region::from(0, 0, width, height),
-			Region::from(0, 0, width, height)))
+			Region::from(0, 0, width, height),
+		))
 	}
 
 	#[inline]
@@ -75,9 +82,12 @@ impl<'a, P, C> Write<'a, P, C>
 			return Err(());
 		}
 
-		Ok(Self::new(data, stride,
+		Ok(Self::new(
+			data,
+			stride,
 			Region::from(0, 0, width, height),
-			Region::from(0, 0, width, height)))
+			Region::from(0, 0, width, height),
+		))
 	}
 
 	/// Get the stride.
@@ -117,10 +127,9 @@ impl<'a, P, C> Write<'a, P, C>
 		}
 
 		let channels = P::channels();
-		let index    = ((self.region.y + y) as usize * self.stride)
-			+ ((self.region.x + x) as usize * channels);
+		let index = ((self.region.y + y) as usize * self.stride) + ((self.region.x + x) as usize * channels);
 
-		value.write(&mut self.data[index .. index + channels]);
+		value.write(&mut self.data[index..index + channels]);
 	}
 
 	/// Get a write-only view of the given region, refining further from the
@@ -138,7 +147,11 @@ impl<'a, P, C> Write<'a, P, C>
 			panic!("out of bounds");
 		}
 
-		Write::new(&mut self.data, self.stride, self.owner, Region { x: region.x + self.region.x, y: region.y + self.region.y, .. region })
+		Write::new(&mut self.data, self.stride, self.owner, Region {
+			x: region.x + self.region.x,
+			y: region.y + self.region.y,
+			..region
+		})
 	}
 
 	/// Fill the view with the given pixel.
@@ -165,8 +178,9 @@ impl<'a, P, C> Write<'a, P, C>
 }
 
 impl<'a, P, C> From<&'a mut Write<'a, P, C>> for Write<'a, P, C>
-	where P: pixel::Write<C>,
-	      C: pixel::Channel,
+where
+	P: pixel::Write<C>,
+	C: pixel::Channel,
 {
 	#[inline]
 	fn from(value: &'a mut Write<'a, P, C>) -> Write<'a, P, C> {
@@ -176,17 +190,14 @@ impl<'a, P, C> From<&'a mut Write<'a, P, C>> for Write<'a, P, C>
 
 #[cfg(test)]
 mod test {
-	use crate::buffer::Buffer;
-	use crate::color::*;
-	use crate::region::Region;
+	use crate::{buffer::Buffer, color::*, region::Region};
 
 	#[test]
 	fn set() {
 		let mut image = Buffer::<Rgb, u8, Vec<_>>::new(2, 2);
 		image.set(0, 0, &Rgb::new(1.0, 0.0, 1.0));
 
-		assert_eq!(Rgb::new(1.0, 0.0, 1.0),
-			image.get(0, 0));
+		assert_eq!(Rgb::new(1.0, 0.0, 1.0), image.get(0, 0));
 	}
 
 	#[test]
@@ -194,25 +205,38 @@ mod test {
 		let mut image = Buffer::<Rgb, u8, Vec<_>>::new(50, 50);
 		let mut image = image.writable(Region::new().x(10).y(10).width(4).height(4));
 
-		assert_eq!(vec![
-			(10, 10), (11, 10), (12, 10), (13, 10),
-			(10, 11), (11, 11), (12, 11), (13, 11),
-			(10, 12), (11, 12), (12, 12), (13, 12),
-			(10, 13), (11, 13), (12, 13), (13, 13),
-		], image.region().relative().collect::<Vec<_>>());
+		assert_eq!(
+			vec![
+				(10, 10),
+				(11, 10),
+				(12, 10),
+				(13, 10),
+				(10, 11),
+				(11, 11),
+				(12, 11),
+				(13, 11),
+				(10, 12),
+				(11, 12),
+				(12, 12),
+				(13, 12),
+				(10, 13),
+				(11, 13),
+				(12, 13),
+				(13, 13),
+			],
+			image.region().relative().collect::<Vec<_>>()
+		);
 
 		let mut image = image.writable(Region::new().x(1).y(1).width(2).height(2));
 
-		assert_eq!(vec![
-			(11, 11), (12, 11),
-			(11, 12), (12, 12),
-		], image.region().relative().collect::<Vec<_>>());
+		assert_eq!(
+			vec![(11, 11), (12, 11), (11, 12), (12, 12),],
+			image.region().relative().collect::<Vec<_>>()
+		);
 
 		let image = image.writable(Region::new().width(2).height(1));
 
-		assert_eq!(vec![
-			(11, 11), (12, 11),
-		], image.region().relative().collect::<Vec<_>>());
+		assert_eq!(vec![(11, 11), (12, 11),], image.region().relative().collect::<Vec<_>>());
 	}
 
 	#[test]
@@ -223,10 +247,8 @@ mod test {
 			view.fill(&Rgb::new(1.0, 1.0, 1.0));
 		}
 
-		assert_eq!(Rgb::new(0.0, 0.0, 0.0),
-			image.get(0, 0));
+		assert_eq!(Rgb::new(0.0, 0.0, 0.0), image.get(0, 0));
 
-		assert_eq!(Rgb::new(1.0, 1.0, 1.0),
-			image.get(10, 10));
+		assert_eq!(Rgb::new(1.0, 1.0, 1.0), image.get(10, 10));
 	}
 }

@@ -12,9 +12,7 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-use std::fmt;
-use std::error;
-use std::io;
+use std::{error, fmt, io};
 
 /// Error enumeration type.
 #[derive(Debug)]
@@ -47,11 +45,9 @@ impl fmt::Display for Error {
 impl error::Error for Error {
 	fn description(&self) -> &str {
 		match *self {
-			Error::Io(ref err) =>
-				err.description(),
+			Error::Io(ref err) => err.description(),
 
-			Error::Format(ref err) | Error::Unsupported(ref err) =>
-				err,
+			Error::Format(ref err) | Error::Unsupported(ref err) => err,
 		}
 	}
 }
@@ -59,28 +55,18 @@ impl error::Error for Error {
 #[cfg(feature = "png")]
 mod png {
 	use png;
+
 	use super::Error;
 
 	impl From<png::DecodingError> for Error {
 		fn from(value: png::DecodingError) -> Self {
 			match value {
-				png::DecodingError::IoError(err) =>
-					Error::Io(err),
-
-				png::DecodingError::Format(desc) =>
-					Error::Format(desc.into_owned()),
-
-				png::DecodingError::InvalidSignature =>
-					Error::Format("invalid signature".into()),
-
-				png::DecodingError::CrcMismatch { .. } =>
-					Error::Format("CRC error".into()),
-
-				png::DecodingError::Other(desc) =>
-					Error::Format(desc.into_owned()),
-
-				png::DecodingError::CorruptFlateStream =>
-					Error::Format("compressed data stream corrupted".into())
+				png::DecodingError::IoError(err) => Error::Io(err),
+				png::DecodingError::Format(desc) => Error::Format(desc.into_owned()),
+				png::DecodingError::InvalidSignature => Error::Format("invalid signature".into()),
+				png::DecodingError::CrcMismatch { .. } => Error::Format("CRC error".into()),
+				png::DecodingError::Other(desc) => Error::Format(desc.into_owned()),
+				png::DecodingError::CorruptFlateStream => Error::Format("compressed data stream corrupted".into()),
 			}
 		}
 	}
@@ -88,11 +74,8 @@ mod png {
 	impl From<png::EncodingError> for Error {
 		fn from(value: png::EncodingError) -> Self {
 			match value {
-				png::EncodingError::IoError(err) =>
-					Error::Io(err),
-
-				png::EncodingError::Format(desc) =>
-					Error::Format(desc.into_owned()),
+				png::EncodingError::IoError(err) => Error::Io(err),
+				png::EncodingError::Format(desc) => Error::Format(desc.into_owned()),
 			}
 		}
 	}
@@ -101,22 +84,16 @@ mod png {
 #[cfg(feature = "jpeg")]
 mod jpeg {
 	use jpeg_decoder as jpeg;
+
 	use super::Error;
 
 	impl From<jpeg::Error> for Error {
 		fn from(value: jpeg::Error) -> Self {
 			match value {
-				jpeg::Error::Format(desc) =>
-					Error::Format(desc),
-
-				jpeg::Error::Unsupported(desc) =>
-					Error::Unsupported(format!("{:?}", desc)),
-
-				jpeg::Error::Io(err) =>
-					Error::Io(err),
-
-				jpeg::Error::Internal(err) =>
-					Error::Format(err.description().to_owned()),
+				jpeg::Error::Format(desc) => Error::Format(desc),
+				jpeg::Error::Unsupported(desc) => Error::Unsupported(format!("{:?}", desc)),
+				jpeg::Error::Io(err) => Error::Io(err),
+				jpeg::Error::Internal(err) => Error::Format(err.description().to_owned()),
 			}
 		}
 	}
@@ -125,21 +102,17 @@ mod jpeg {
 #[cfg(any(feature = "bmp", feature = "tga"))]
 mod imagefmt {
 	use imagefmt;
+
 	use super::Error;
 
 	impl From<imagefmt::Error> for Error {
 		fn from(value: imagefmt::Error) -> Self {
 			match value {
-				imagefmt::Error::Io(err) =>
-					Error::Io(err),
-
-				imagefmt::Error::InvalidData(desc) |
-				imagefmt::Error::InvalidArg(desc) |
-				imagefmt::Error::Internal(desc) =>
-					Error::Format(desc.into()),
-
-				imagefmt::Error::Unsupported(desc) =>
-					Error::Unsupported(desc.into()),
+				imagefmt::Error::Io(err) => Error::Io(err),
+				imagefmt::Error::InvalidData(desc) | imagefmt::Error::InvalidArg(desc) | imagefmt::Error::Internal(desc) => {
+					Error::Format(desc.into())
+				}
+				imagefmt::Error::Unsupported(desc) => Error::Unsupported(desc.into()),
 			}
 		}
 	}
@@ -148,19 +121,15 @@ mod imagefmt {
 #[cfg(feature = "gif")]
 mod gif {
 	use gif;
+
 	use super::Error;
 
 	impl From<gif::DecodingError> for Error {
 		fn from(value: gif::DecodingError) -> Self {
 			match value {
-				gif::DecodingError::Io(err) =>
-					Error::Io(err),
-
-				gif::DecodingError::Format(desc) =>
-					Error::Format(desc.into()),
-
-				gif::DecodingError::Internal(desc) =>
-					Error::Format(desc.into()),
+				gif::DecodingError::Io(err) => Error::Io(err),
+				gif::DecodingError::Format(desc) => Error::Format(desc.into()),
+				gif::DecodingError::Internal(desc) => Error::Format(desc.into()),
 			}
 		}
 	}

@@ -15,10 +15,13 @@
 use std::io::Read;
 
 use xyz;
-use crate::error::{self, Error};
-use crate::buffer::{Buffer, cast};
-use crate::pixel;
-use crate::color;
+
+use crate::{
+	buffer::{cast, Buffer},
+	color,
+	error::{self, Error},
+	pixel,
+};
 
 pub struct Decoder<R: Read> {
 	inner: R,
@@ -27,25 +30,26 @@ pub struct Decoder<R: Read> {
 impl<R: Read> Decoder<R> {
 	#[inline]
 	pub fn new(input: R) -> Self {
-		Decoder {
-			inner: input
-		}
+		Decoder { inner: input }
 	}
 }
 
 impl<P, C, R> super::Decoder<P, C> for Decoder<R>
-	where P: pixel::Write<C>,
-	      P: From<color::Rgb> + From<color::Rgba>,
-	      C: pixel::Channel,
-	      R: Read
+where
+	P: pixel::Write<C>,
+	P: From<color::Rgb> + From<color::Rgba>,
+	C: pixel::Channel,
+	R: Read,
 {
 	#[inline]
 	fn frame(&mut self) -> error::Result<Buffer<P, C, Vec<C>>> {
-		let image = r#try!(xyz::read(self.inner.by_ref()));
+		let image = xyz::read(self.inner.by_ref())?;
 
-		Ok(cast::Into::<P, C>::into(r#try!(Buffer::<color::Rgb, u8, _>::from_raw(
-			image.width as u32, image.height as u32,
-			image.to_rgb_buffer())
-				.map_err(|_| Error::Format("wrong dimensions".into())))))
+		Ok(cast::Into::<P, C>::into(Buffer::<color::Rgb, u8, _>::from_raw(
+			image.width as u32,
+			image.height as u32,
+			image.to_rgb_buffer(),
+		)
+		.map_err(|_| Error::Format("wrong dimensions".into()))?))
 	}
 }

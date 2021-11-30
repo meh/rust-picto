@@ -12,15 +12,19 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-use std::ops::{Deref, DerefMut};
-use std::marker::PhantomData;
+use std::{
+	marker::PhantomData,
+	ops::{Deref, DerefMut},
+};
 
-use crate::orientation::Orientation;
-use crate::pixel::{self, Pixel};
-use crate::view::{self, View};
-use crate::region::{self, Region};
-use crate::color;
-use crate::iter::pixel::{Iter as Pixels, IterMut as PixelsMut};
+use crate::{
+	color,
+	iter::pixel::{Iter as Pixels, IterMut as PixelsMut},
+	orientation::Orientation,
+	pixel::{self, Pixel},
+	region::{self, Region},
+	view::{self, View},
+};
 
 /// Buffer for an image.
 ///
@@ -36,7 +40,7 @@ use crate::iter::pixel::{Iter as Pixels, IterMut as PixelsMut};
 /// The `Data` is the backing storage which contains a serie of `Channel` in
 /// amount equal to `Pixel::channels() * width * height`.
 ///
-///	The most common `Buffer` types are available in the `buffer` module:
+/// 	The most common `Buffer` types are available in the `buffer` module:
 ///
 /// - `buffer::Luma` is an alias for `Buffer<color::Luma, u8, Vec<u8>>`
 /// - `buffer::Lumaa` is an alias for `Buffer<color::Lumaa, u8, Vec<u8>>`
@@ -52,21 +56,23 @@ use crate::iter::pixel::{Iter as Pixels, IterMut as PixelsMut};
 /// `Data` and almost everything would work like it were a `Vec<u8>`.
 #[derive(Clone, PartialEq, Debug)]
 pub struct Buffer<P, C, D>
-	where P: Pixel<C>,
-	      C: pixel::Channel,
+where
+	P: Pixel<C>,
+	C: pixel::Channel,
 {
 	region: Region,
 
-	data:   D,
+	data: D,
 	stride: usize,
 
-	pixel:   PhantomData<P>,
+	pixel: PhantomData<P>,
 	channel: PhantomData<C>,
 }
 
 impl<P, C> Buffer<P, C, Vec<C>>
-	where P: Pixel<C>,
-	      C: pixel::Channel,
+where
+	P: Pixel<C>,
+	C: pixel::Channel,
 {
 	/// Create a new `Buffer` with the requested space allocated and all channels
 	/// set to `0`.
@@ -84,18 +90,19 @@ impl<P, C> Buffer<P, C, Vec<C>>
 		Buffer {
 			region: Region::from(0, 0, width, height),
 
-			data:   vec![zero!(); width as usize * height as usize * P::channels()],
+			data: vec![zero!(); width as usize * height as usize * P::channels()],
 			stride: width as usize * P::channels(),
 
 			channel: PhantomData,
-			pixel:   PhantomData,
+			pixel: PhantomData,
 		}
 	}
 }
 
 impl<P, C> Buffer<P, C, Vec<C>>
-	where P: pixel::Write<C>,
-	      C: pixel::Channel,
+where
+	P: pixel::Write<C>,
+	C: pixel::Channel,
 {
 	/// Create a new `Buffer` with the request space allocated and filled with
 	/// the given pixel.
@@ -134,8 +141,9 @@ impl<P, C> Buffer<P, C, Vec<C>>
 	/// ```
 	#[inline]
 	pub fn from_fn<T, F>(width: u32, height: u32, mut func: F) -> Self
-		where T: Into<P>,
-		      F: FnMut(u32, u32) -> T
+	where
+		T: Into<P>,
+		F: FnMut(u32, u32) -> T,
 	{
 		let mut buffer = Self::new(width, height);
 
@@ -148,8 +156,9 @@ impl<P, C> Buffer<P, C, Vec<C>>
 }
 
 impl<P, C> Buffer<P, C, Vec<C>>
-	where P: pixel::Write<C> + color::Mix + Clone,
-	      C: pixel::Channel,
+where
+	P: pixel::Write<C> + color::Mix + Clone,
+	C: pixel::Channel,
 {
 	/// Create a `Buffer` from an orientation and a gradient.
 	///
@@ -168,16 +177,16 @@ impl<P, C> Buffer<P, C, Vec<C>>
 
 		match mode {
 			Orientation::Vertical => {
-				for (y, px) in (0 .. height).zip(gradient.take(height as usize)) {
-					for x in 0 .. width {
+				for (y, px) in (0..height).zip(gradient.take(height as usize)) {
+					for x in 0..width {
 						buffer.set(x, y, &px);
 					}
 				}
 			}
 
 			Orientation::Horizontal => {
-				for (x, px) in (0 .. width).zip(gradient.take(width as usize)) {
-					for y in 0 .. height {
+				for (x, px) in (0..width).zip(gradient.take(width as usize)) {
+					for y in 0..height {
 						buffer.set(x, y, &px);
 					}
 				}
@@ -189,9 +198,10 @@ impl<P, C> Buffer<P, C, Vec<C>>
 }
 
 impl<P, C, D> Buffer<P, C, D>
-	where P: Pixel<C>,
-	      C: pixel::Channel,
-	      D: Deref<Target = [C]>,
+where
+	P: Pixel<C>,
+	C: pixel::Channel,
+	D: Deref<Target = [C]>,
 {
 	/// Use an existing container as backing storage for an image `Buffer`.
 	///
@@ -220,18 +230,19 @@ impl<P, C, D> Buffer<P, C, D>
 		Ok(Buffer {
 			region: Region::from(0, 0, width, height),
 
-			data:   data,
+			data,
 			stride: width as usize * P::channels(),
 
-			pixel:   PhantomData,
+			pixel: PhantomData,
 			channel: PhantomData,
 		})
 	}
 }
 
 impl<P, C, D> Buffer<P, C, D>
-	where P: Pixel<C>,
-	      C: pixel::Channel,
+where
+	P: Pixel<C>,
+	C: pixel::Channel,
 {
 	/// Get the backing storage of the `Buffer`.
 	#[inline]
@@ -271,15 +282,17 @@ impl<P, C, D> Buffer<P, C, D>
 }
 
 impl<P, C, D> Buffer<P, C, D>
-	where P: pixel::Read<C>,
-	      C: pixel::Channel,
-	      D: Deref<Target = [C]>
+where
+	P: pixel::Read<C>,
+	C: pixel::Channel,
+	D: Deref<Target = [C]>,
 {
 	/// Get the `Pixel` at the given coordinates.
 	///
 	/// # Panics
 	///
-	/// Requires that `x < self.width()` and `y < self.height()`, otherwise it will panic.
+	/// Requires that `x < self.width()` and `y < self.height()`, otherwise it
+	/// will panic.
 	#[inline]
 	pub fn get(&self, x: u32, y: u32) -> P {
 		view::Read::new(&self.data, self.stride, self.region, self.region).get(x, y)
@@ -292,7 +305,8 @@ impl<P, C, D> Buffer<P, C, D>
 	///
 	/// # Panics
 	///
-	/// Requires that `x + width <= self.width()` and `y + height <= self.height()`, otherwise it will panic.
+	/// Requires that `x + width <= self.width()` and `y + height <=
+	/// self.height()`, otherwise it will panic.
 	#[inline]
 	pub fn readable(&self, region: region::Builder) -> view::Read<P, C> {
 		let region = region.complete(self.region);
@@ -310,7 +324,8 @@ impl<P, C, D> Buffer<P, C, D>
 		Pixels::new(&self.data, self.stride, self.region, self.region)
 	}
 
-	/// Convert the `Buffer` to another `Buffer` with different channel and pixel type.
+	/// Convert the `Buffer` to another `Buffer` with different channel and pixel
+	/// type.
 	///
 	/// # Example
 	///
@@ -326,9 +341,10 @@ impl<P, C, D> Buffer<P, C, D>
 	/// ```
 	#[inline]
 	pub fn convert<PO, CO>(&self) -> Buffer<PO, CO, Vec<CO>>
-		where P:  Into<PO>,
-		      PO: pixel::Write<CO>,
-		      CO: pixel::Channel,
+	where
+		P: Into<PO>,
+		PO: pixel::Write<CO>,
+		CO: pixel::Channel,
 	{
 		let mut result = Buffer::<PO, CO, Vec<CO>>::new(self.region.width, self.region.height);
 
@@ -356,9 +372,10 @@ impl<P, C, D> Buffer<P, C, D>
 	/// ```
 	#[inline]
 	pub fn convert_with<PO, CO, F>(&self, mut func: F) -> Buffer<PO, CO, Vec<CO>>
-		where F:  FnMut(P) -> PO,
-		      PO: pixel::Write<CO>,
-		      CO: pixel::Channel,
+	where
+		F: FnMut(P) -> PO,
+		PO: pixel::Write<CO>,
+		CO: pixel::Channel,
 	{
 		let mut result = Buffer::<PO, CO, Vec<CO>>::new(self.region.width, self.region.height);
 
@@ -371,15 +388,17 @@ impl<P, C, D> Buffer<P, C, D>
 }
 
 impl<P, C, D> Buffer<P, C, D>
-	where P: pixel::Write<C>,
-	      C: pixel::Channel,
-	      D: DerefMut<Target = [C]>,
+where
+	P: pixel::Write<C>,
+	C: pixel::Channel,
+	D: DerefMut<Target = [C]>,
 {
 	/// Set the `Pixel` at the given coordinates.
 	///
 	/// # Panics
 	///
-	/// Requires that `x < self.width()` and `y < self.height()`, otherwise it will panic.
+	/// Requires that `x < self.width()` and `y < self.height()`, otherwise it
+	/// will panic.
 	#[inline]
 	pub fn set(&mut self, x: u32, y: u32, pixel: &P) {
 		view::Write::new(&mut self.data, self.stride, self.region, self.region).set(x, y, pixel)
@@ -392,7 +411,8 @@ impl<P, C, D> Buffer<P, C, D>
 	///
 	/// # Panics
 	///
-	/// Requires that `x + width <= self.width()` and `y + height <= self.height()`, otherwise it will panic.
+	/// Requires that `x + width <= self.width()` and `y + height <=
+	/// self.height()`, otherwise it will panic.
 	#[inline]
 	pub fn writable(&mut self, region: region::Builder) -> view::Write<P, C> {
 		let region = region.complete(self.region);
@@ -424,9 +444,10 @@ impl<P, C, D> Buffer<P, C, D>
 }
 
 impl<P, C, D> Buffer<P, C, D>
-	where P: pixel::Write<C> + pixel::Read<C>,
-	      C: pixel::Channel,
-	      D: DerefMut<Target = [C]>,
+where
+	P: pixel::Write<C> + pixel::Read<C>,
+	C: pixel::Channel,
+	D: DerefMut<Target = [C]>,
 {
 	/// Get a view of the given region.
 	///
@@ -435,8 +456,8 @@ impl<P, C, D> Buffer<P, C, D>
 	///
 	/// # Panics
 	///
-	/// Requires that `x + width <= self.width()` and `y + height <= self.height()`,
-	/// otherwise it will panic.
+	/// Requires that `x + width <= self.width()` and `y + height <=
+	/// self.height()`, otherwise it will panic.
 	///
 	/// # Example
 	///
@@ -495,9 +516,10 @@ impl<P, C, D> Buffer<P, C, D>
 }
 
 impl<'a, P, C, D> From<&'a Buffer<P, C, D>> for view::Read<'a, P, C>
-	where P: pixel::Read<C>,
-	      C: pixel::Channel,
-	      D: Deref<Target = [C]>,
+where
+	P: pixel::Read<C>,
+	C: pixel::Channel,
+	D: Deref<Target = [C]>,
 {
 	#[inline]
 	fn from(value: &'a Buffer<P, C, D>) -> view::Read<'a, P, C> {
@@ -506,9 +528,10 @@ impl<'a, P, C, D> From<&'a Buffer<P, C, D>> for view::Read<'a, P, C>
 }
 
 impl<'a, P, C, D> From<&'a mut Buffer<P, C, D>> for view::Write<'a, P, C>
-	where P: pixel::Write<C>,
-	      C: pixel::Channel,
-	      D: DerefMut<Target = [C]>,
+where
+	P: pixel::Write<C>,
+	C: pixel::Channel,
+	D: DerefMut<Target = [C]>,
 {
 	#[inline]
 	fn from(mut value: &'a mut Buffer<P, C, D>) -> view::Write<'a, P, C> {
@@ -517,9 +540,10 @@ impl<'a, P, C, D> From<&'a mut Buffer<P, C, D>> for view::Write<'a, P, C>
 }
 
 impl<'a, P, C, D> From<&'a mut Buffer<P, C, D>> for View<'a, P, C>
-	where P: pixel::Write<C> + pixel::Read<C>,
-	      C: pixel::Channel,
-	      D: DerefMut<Target = [C]>,
+where
+	P: pixel::Write<C> + pixel::Read<C>,
+	C: pixel::Channel,
+	D: DerefMut<Target = [C]>,
 {
 	#[inline]
 	fn from(mut value: &'a mut Buffer<P, C, D>) -> View<'a, P, C> {
@@ -528,9 +552,10 @@ impl<'a, P, C, D> From<&'a mut Buffer<P, C, D>> for View<'a, P, C>
 }
 
 impl<P, C, D> Deref for Buffer<P, C, D>
-	where P: Pixel<C>,
-	      C: pixel::Channel,
-	      D: Deref<Target = [C]>,
+where
+	P: Pixel<C>,
+	C: pixel::Channel,
+	D: Deref<Target = [C]>,
 {
 	type Target = D::Target;
 
@@ -541,9 +566,10 @@ impl<P, C, D> Deref for Buffer<P, C, D>
 }
 
 impl<P, C, D> DerefMut for Buffer<P, C, D>
-	where P: Pixel<C>,
-	      C: pixel::Channel,
-	      D: DerefMut<Target = [C]>,
+where
+	P: Pixel<C>,
+	C: pixel::Channel,
+	D: DerefMut<Target = [C]>,
 {
 	#[inline]
 	fn deref_mut(&mut self) -> &mut Self::Target {
@@ -576,11 +602,12 @@ mod test {
 
 	#[test]
 	fn into_raw() {
-		assert_eq!(vec![1, 2, 3],
-			Buffer::<Rgb, u8, _>::from_raw(1, 1, vec![1, 2, 3]).unwrap().into_raw());
+		assert_eq!(
+			vec![1, 2, 3],
+			Buffer::<Rgb, u8, _>::from_raw(1, 1, vec![1, 2, 3]).unwrap().into_raw()
+		);
 
-		assert_eq!(vec![0, 0, 0],
-			Buffer::<Rgb, u8, Vec<_>>::new(1, 1).into_raw());
+		assert_eq!(vec![0, 0, 0], Buffer::<Rgb, u8, Vec<_>>::new(1, 1).into_raw());
 	}
 
 	#[test]
@@ -609,10 +636,8 @@ mod test {
 		let a = Buffer::<Rgb, u8, _>::from_raw(1, 1, vec![255, 0, 255]).unwrap();
 		let b = a.convert::<Rgba, u8>();
 
-		assert_eq!(Rgba::new(1.0, 0.0, 1.0, 1.0),
-			b.get(0, 0));
+		assert_eq!(Rgba::new(1.0, 0.0, 1.0, 1.0), b.get(0, 0));
 
-		assert_eq!(vec![255, 0, 255, 255],
-			b.into_raw());
+		assert_eq!(vec![255, 0, 255, 255], b.into_raw());
 	}
 }

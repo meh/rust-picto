@@ -12,16 +12,20 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-use std::path::Path;
-use std::fs::File;
-use std::io::{Read, Seek, Cursor, BufReader};
+use std::{
+	fs::File,
+	io::{BufReader, Cursor, Read, Seek},
+	path::Path,
+};
 
-use crate::decoder::{self, Decoder};
-use crate::color;
-use crate::pixel;
-use crate::buffer::Buffer;
-use crate::format::{self, Format};
-use crate::error::{self, Error};
+use crate::{
+	buffer::Buffer,
+	color,
+	decoder::{self, Decoder},
+	error::{self, Error},
+	format::{self, Format},
+	pixel,
+};
 
 /// Load an image from an input stream, guessing its format.
 ///
@@ -36,12 +40,13 @@ use crate::error::{self, Error};
 /// read::from::<Rgb, u8, _>(File::open("tests/boat.xyz").unwrap()).unwrap();
 /// ```
 pub fn from<P, C, R>(mut input: R) -> error::Result<Buffer<P, C, Vec<C>>>
-	where P: From<color::Rgb> + From<color::Rgba> + From<color::Luma> + From<color::Lumaa>,
-	      P: pixel::Write<C>,
-	      C: pixel::Channel,
-	      R: Read + Seek
+where
+	P: From<color::Rgb> + From<color::Rgba> + From<color::Luma> + From<color::Lumaa>,
+	P: pixel::Write<C>,
+	C: pixel::Channel,
+	R: Read + Seek,
 {
-	let format = r#try!(format::guess(input.by_ref()).ok_or(Error::Format("unsupported image format".into())));
+	let format = format::guess(input.by_ref()).ok_or(Error::Format("unsupported image format".into()))?;
 	with_format(input, format)
 }
 
@@ -63,10 +68,11 @@ pub fn from<P, C, R>(mut input: R) -> error::Result<Buffer<P, C, Vec<C>>>
 /// read::from_memory::<Rgb, u8, _>(buffer).unwrap();
 /// ```
 pub fn from_memory<P, C, R>(input: R) -> error::Result<Buffer<P, C, Vec<C>>>
-	where P: From<color::Rgb> + From<color::Rgba> + From<color::Luma> + From<color::Lumaa>,
-	      P: pixel::Write<C>,
-	      C: pixel::Channel,
-	      R: AsRef<[u8]>
+where
+	P: From<color::Rgb> + From<color::Rgba> + From<color::Luma> + From<color::Lumaa>,
+	P: pixel::Write<C>,
+	C: pixel::Channel,
+	R: AsRef<[u8]>,
 {
 	from(Cursor::new(input))
 }
@@ -82,12 +88,13 @@ pub fn from_memory<P, C, R>(input: R) -> error::Result<Buffer<P, C, Vec<C>>>
 /// read::from_path::<Rgb, u8, _>("tests/boat.xyz").unwrap();
 /// ```
 pub fn from_path<P, C, R>(path: R) -> error::Result<Buffer<P, C, Vec<C>>>
-	where P: From<color::Rgb> + From<color::Rgba> + From<color::Luma> + From<color::Lumaa>,
-	      P: pixel::Write<C>,
-	      C: pixel::Channel,
-	      R: AsRef<Path>
+where
+	P: From<color::Rgb> + From<color::Rgba> + From<color::Luma> + From<color::Lumaa>,
+	P: pixel::Write<C>,
+	C: pixel::Channel,
+	R: AsRef<Path>,
 {
-	from(BufReader::new(r#try!(File::open(path))))
+	from(BufReader::new(File::open(path)?))
 }
 
 /// Load an image from an input stream with the given format.
@@ -104,38 +111,32 @@ pub fn from_path<P, C, R>(path: R) -> error::Result<Buffer<P, C, Vec<C>>>
 /// read::with_format::<Rgb, u8, _>(File::open("tests/boat.xyz").unwrap(), Format::Xyz).unwrap();
 /// ```
 pub fn with_format<P, C, R>(input: R, format: Format) -> error::Result<Buffer<P, C, Vec<C>>>
-	where P: From<color::Rgb> + From<color::Rgba> + From<color::Luma> + From<color::Lumaa>,
-	      P: pixel::Write<C>,
-	      C: pixel::Channel,
-	      R: Read + Seek
+where
+	P: From<color::Rgb> + From<color::Rgba> + From<color::Luma> + From<color::Lumaa>,
+	P: pixel::Write<C>,
+	C: pixel::Channel,
+	R: Read + Seek,
 {
 	match format {
 		#[cfg(feature = "png")]
-		Format::Png =>
-			png(input, |_| { }),
+		Format::Png => png(input, |_| {}),
 
 		#[cfg(feature = "jpeg")]
-		Format::Jpeg =>
-			jpeg(input, |_| { }),
+		Format::Jpeg => jpeg(input, |_| {}),
 
 		#[cfg(feature = "bmp")]
-		Format::Bmp =>
-			bmp(input, |_| { }),
+		Format::Bmp => bmp(input, |_| {}),
 
 		#[cfg(feature = "tga")]
-		Format::Tga =>
-			tga(input, |_| { }),
+		Format::Tga => tga(input, |_| {}),
 
 		#[cfg(feature = "gif")]
-		Format::Gif =>
-			gif(input, |_| { }),
+		Format::Gif => gif(input, |_| {}),
 
 		#[cfg(feature = "xyz")]
-		Format::Xyz =>
-			xyz(input, |_| { }),
+		Format::Xyz => xyz(input, |_| {}),
 
-		_ =>
-			Err(Error::Unsupported("unsupported image format".into())),
+		_ => Err(Error::Unsupported("unsupported image format".into())),
 	}
 }
 
@@ -144,11 +145,12 @@ pub fn with_format<P, C, R>(input: R, format: Format) -> error::Result<Buffer<P,
 #[cfg(feature = "png")]
 #[inline]
 pub fn png<P, C, F, R>(input: R, func: F) -> error::Result<Buffer<P, C, Vec<C>>>
-	where P: From<color::Rgb> + From<color::Rgba> + From<color::Luma> + From<color::Lumaa>,
-	      P: pixel::Write<C>,
-	      C: pixel::Channel,
-	      F: FnOnce(&mut decoder::png::Decoder<R>),
-	      R: Read
+where
+	P: From<color::Rgb> + From<color::Rgba> + From<color::Luma> + From<color::Lumaa>,
+	P: pixel::Write<C>,
+	C: pixel::Channel,
+	F: FnOnce(&mut decoder::png::Decoder<R>),
+	R: Read,
 {
 	let mut decoder = decoder::png::Decoder::new(input);
 	func(&mut decoder);
@@ -160,11 +162,12 @@ pub fn png<P, C, F, R>(input: R, func: F) -> error::Result<Buffer<P, C, Vec<C>>>
 #[cfg(feature = "jpeg")]
 #[inline]
 pub fn jpeg<P, C, F, R>(input: R, func: F) -> error::Result<Buffer<P, C, Vec<C>>>
-	where P: From<color::Rgb> + From<color::Luma>,
-	      P: pixel::Write<C>,
-	      C: pixel::Channel,
-	      F: FnOnce(&mut decoder::jpeg::Decoder<R>),
-	      R: Read
+where
+	P: From<color::Rgb> + From<color::Luma>,
+	P: pixel::Write<C>,
+	C: pixel::Channel,
+	F: FnOnce(&mut decoder::jpeg::Decoder<R>),
+	R: Read,
 {
 	let mut decoder = decoder::jpeg::Decoder::new(input);
 	func(&mut decoder);
@@ -176,11 +179,12 @@ pub fn jpeg<P, C, F, R>(input: R, func: F) -> error::Result<Buffer<P, C, Vec<C>>
 #[cfg(feature = "bmp")]
 #[inline]
 pub fn bmp<P, C, F, R>(input: R, func: F) -> error::Result<Buffer<P, C, Vec<C>>>
-	where P: From<color::Rgb> + From<color::Rgba>,
-	      P: pixel::Write<C>,
-	      C: pixel::Channel,
-	      F: FnOnce(&mut decoder::bmp::Decoder<R>),
-	      R: Read + Seek
+where
+	P: From<color::Rgb> + From<color::Rgba>,
+	P: pixel::Write<C>,
+	C: pixel::Channel,
+	F: FnOnce(&mut decoder::bmp::Decoder<R>),
+	R: Read + Seek,
 {
 	let mut decoder = decoder::bmp::Decoder::new(input);
 	func(&mut decoder);
@@ -192,11 +196,12 @@ pub fn bmp<P, C, F, R>(input: R, func: F) -> error::Result<Buffer<P, C, Vec<C>>>
 #[cfg(feature = "tga")]
 #[inline]
 pub fn tga<P, C, F, R>(input: R, func: F) -> error::Result<Buffer<P, C, Vec<C>>>
-	where P: From<color::Rgb> + From<color::Rgba> + From<color::Luma> + From<color::Lumaa>,
-	      P: pixel::Write<C>,
-	      C: pixel::Channel,
-	      F: FnOnce(&mut decoder::tga::Decoder<R>),
-	      R: Read + Seek
+where
+	P: From<color::Rgb> + From<color::Rgba> + From<color::Luma> + From<color::Lumaa>,
+	P: pixel::Write<C>,
+	C: pixel::Channel,
+	F: FnOnce(&mut decoder::tga::Decoder<R>),
+	R: Read + Seek,
 {
 	let mut decoder = decoder::tga::Decoder::new(input);
 	func(&mut decoder);
@@ -208,11 +213,12 @@ pub fn tga<P, C, F, R>(input: R, func: F) -> error::Result<Buffer<P, C, Vec<C>>>
 #[cfg(feature = "gif")]
 #[inline]
 pub fn gif<P, C, F, R>(input: R, func: F) -> error::Result<Buffer<P, C, Vec<C>>>
-	where P: From<color::Rgb> + From<color::Rgba> + From<color::Luma> + From<color::Lumaa>,
-	      P: pixel::Write<C>,
-	      C: pixel::Channel,
-	      F: FnOnce(&mut decoder::gif::Decoder<R>),
-	      R: Read
+where
+	P: From<color::Rgb> + From<color::Rgba> + From<color::Luma> + From<color::Lumaa>,
+	P: pixel::Write<C>,
+	C: pixel::Channel,
+	F: FnOnce(&mut decoder::gif::Decoder<R>),
+	R: Read,
 {
 	let mut decoder = decoder::gif::Decoder::new(input);
 	func(&mut decoder);
@@ -224,11 +230,12 @@ pub fn gif<P, C, F, R>(input: R, func: F) -> error::Result<Buffer<P, C, Vec<C>>>
 #[cfg(feature = "xyz")]
 #[inline]
 pub fn xyz<P, C, F, R>(input: R, func: F) -> error::Result<Buffer<P, C, Vec<C>>>
-	where P: From<color::Rgb> + From<color::Rgba>,
-	      P: pixel::Write<C>,
-	      C: pixel::Channel,
-	      F: FnOnce(&mut decoder::xyz::Decoder<R>),
-	      R: Read
+where
+	P: From<color::Rgb> + From<color::Rgba>,
+	P: pixel::Write<C>,
+	C: pixel::Channel,
+	F: FnOnce(&mut decoder::xyz::Decoder<R>),
+	R: Read,
 {
 	let mut decoder = decoder::xyz::Decoder::new(input);
 	func(&mut decoder);

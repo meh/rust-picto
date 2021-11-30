@@ -16,8 +16,7 @@ extern crate clap;
 use clap::{App, Arg};
 
 extern crate picto;
-use picto::color::Rgba;
-use picto::processing::prelude::*;
+use picto::{color::Rgba, processing::prelude::*};
 
 fn main() {
 	let matches = App::new("resize")
@@ -46,47 +45,30 @@ fn main() {
 		.get_matches();
 
 	let image = picto::read::from_path::<Rgba, u8, _>(matches.value_of("INPUT").unwrap()).unwrap();
-	let by    = matches.value_of("by").unwrap().parse::<f32>().unwrap();
+	let by = matches.value_of("by").unwrap().parse::<f32>().unwrap();
 
-	picto::write::to_path(matches.value_of("OUTPUT").unwrap(), &match &*matches.value_of("scaler").unwrap_or("nearest").to_lowercase() {
-		"nearest" =>
-			image.scale_by::<scaler::Nearest>(by),
+	picto::write::to_path(matches.value_of("OUTPUT").unwrap(), &match &*matches
+		.value_of("scaler")
+		.unwrap_or("nearest")
+		.to_lowercase()
+	{
+		"nearest" => image.scale_by::<scaler::Nearest>(by),
+		"linear" => image.scale_by::<scaler::Linear>(by),
+		"cubic" => image.scale_by::<scaler::Cubic>(by),
+		"gaussian" => image.scale_by::<scaler::Gaussian>(by),
+		"lanczos2" => image.scale_by::<scaler::Lanczos2>(by),
+		"lanczos3" => image.scale_by::<scaler::Lanczos3>(by),
+		"super-xbr" => image.scale_by::<scaler::xbr::Super>(by),
 
-		"linear" =>
-			image.scale_by::<scaler::Linear>(by),
-
-		"cubic" =>
-			image.scale_by::<scaler::Cubic>(by),
-
-		"gaussian" =>
-			image.scale_by::<scaler::Gaussian>(by),
-
-		"lanczos2" =>
-			image.scale_by::<scaler::Lanczos2>(by),
-
-		"lanczos3" =>
-			image.scale_by::<scaler::Lanczos3>(by),
-
-		"super-xbr" =>
-			image.scale_by::<scaler::xbr::Super>(by),
-
-		_ =>
-			unreachable!()
-	}).unwrap();
+		_ => unreachable!(),
+	})
+	.unwrap();
 }
 
 fn is_scaler(arg: String) -> Result<(), String> {
 	match &*arg.to_lowercase() {
-		"nearest"   |
-		"linear"    |
-		"cubic"     |
-		"gaussian"  |
-		"lanczos2"  |
-		"lanczos3"  |
-		"super-xbr" =>
-			Ok(()),
+		"nearest" | "linear" | "cubic" | "gaussian" | "lanczos2" | "lanczos3" | "super-xbr" => Ok(()),
 
-		_ =>
-			Err("unknown scaler".into())
+		_ => Err("unknown scaler".into()),
 	}
 }

@@ -13,14 +13,18 @@
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
 use std::borrow::Cow;
-use crate::pixel::{self, Pixel};
-use crate::buffer::Buffer;
+
+use crate::{
+	buffer::Buffer,
+	pixel::{self, Pixel},
+};
 
 /// This trait is used for optimizations where turning a `Buffer` into another
 /// can just reuse the inner data as is.
 pub trait Into<P, C>
-	where P: Pixel<C>,
-	      C: pixel::Channel,
+where
+	P: Pixel<C>,
+	C: pixel::Channel,
 {
 	/// Convert `Self` into a `Buffer`.
 	fn into(self) -> Buffer<P, C, Vec<C>>;
@@ -29,8 +33,9 @@ pub trait Into<P, C>
 /// This trait is used for optimizations where the type can be converted to an
 /// `&[u8]` as is without going through any conversions.
 pub trait Bytes<P, C>
-	where P: Pixel<C>,
-	      C: pixel::Channel,
+where
+	P: Pixel<C>,
+	C: pixel::Channel,
 {
 	/// Convert `Self` to a byte slice.
 	fn bytes(&self) -> Cow<[u8]>;
@@ -38,18 +43,18 @@ pub trait Bytes<P, C>
 
 #[cfg(not(feature = "nightly"))]
 mod stable {
-	use std::borrow::Cow;
-	use std::ops::Deref;
-	use crate::pixel;
-	use crate::buffer::Buffer;
+	use std::{borrow::Cow, ops::Deref};
+
+	use crate::{buffer::Buffer, pixel};
 
 	impl<PI, CI, DI, PO, CO> super::Into<PO, CO> for Buffer<PI, CI, DI>
-		where PI: pixel::Read<CI>,
-		      CI: pixel::Channel,
-		      DI: Deref<Target = [CI]>,
-		      PO: pixel::Write<CO>,
-		      PO: From<PI>,
-		      CO: pixel::Channel,
+	where
+		PI: pixel::Read<CI>,
+		CI: pixel::Channel,
+		DI: Deref<Target = [CI]>,
+		PO: pixel::Write<CO>,
+		PO: From<PI>,
+		CO: pixel::Channel,
 	{
 		#[inline]
 		fn into(self) -> Buffer<PO, CO, Vec<CO>> {
@@ -58,12 +63,13 @@ mod stable {
 	}
 
 	impl<PI, CI, DI, PO, CO> super::Bytes<PO, CO> for Buffer<PI, CI, DI>
-		where PI: pixel::Read<CI>,
-		      PI: Into<PO>,
-		      CI: pixel::Channel,
-		      DI: Deref<Target = [CI]>,
-		      PO: pixel::Write<CO> + pixel::Write<u8>,
-		      CO: pixel::Channel,
+	where
+		PI: pixel::Read<CI>,
+		PI: Into<PO>,
+		CI: pixel::Channel,
+		DI: Deref<Target = [CI]>,
+		PO: pixel::Write<CO> + pixel::Write<u8>,
+		CO: pixel::Channel,
 	{
 		#[inline]
 		fn bytes(&self) -> Cow<[u8]> {
@@ -74,43 +80,39 @@ mod stable {
 
 #[cfg(feature = "nightly")]
 mod nightly {
-	use std::slice;
-	use std::mem;
-	use std::borrow::Cow;
-	use std::ops::Deref;
+	use std::{borrow::Cow, mem, ops::Deref, slice};
 
+	use buffer::Buffer;
+	use color::{Hsl, Hsla, Hsv, Hsva, Hwb, Hwba, Lab, Laba, Lch, Lcha, Luma, Lumaa, Rgb, Rgba, Xyz, Xyza, Yxy, Yxya};
 	use num::Float;
 	use pixel;
-	use buffer::Buffer;
-	use color::{Luma, Rgb, Hsl, Hsv, Hwb, Lab, Lch, Xyz, Yxy};
-	use color::{Lumaa, Rgba, Hsla, Hsva, Hwba, Laba, Lcha, Xyza, Yxya};
 
 	impl<PI, CI, DI, CO, PO> super::Into<PO, CO> for Buffer<PI, CI, DI>
-		where PI: pixel::Read<CI>,
-		      CI: pixel::Channel,
-		      DI: Deref<Target = [CI]>,
-		      PO: pixel::Write<CO>,
-		      PO: From<PI>,
-		      CO: pixel::Channel,
+	where
+		PI: pixel::Read<CI>,
+		CI: pixel::Channel,
+		DI: Deref<Target = [CI]>,
+		PO: pixel::Write<CO>,
+		PO: From<PI>,
+		CO: pixel::Channel,
 	{
 		#[inline]
-		default
-		fn into(self) -> Buffer<PO, CO, Vec<CO>> {
+		default fn into(self) -> Buffer<PO, CO, Vec<CO>> {
 			self.convert::<PO, CO>()
 		}
 	}
 
 	impl<PI, CI, DI, PO, CO> super::Bytes<PO, CO> for Buffer<PI, CI, DI>
-		where PI: pixel::Read<CI>,
-		      PI: Into<PO>,
-		      CI: pixel::Channel,
-		      DI: Deref<Target = [CI]>,
-		      PO: pixel::Write<CO> + pixel::Write<u8>,
-		      CO: pixel::Channel,
+	where
+		PI: pixel::Read<CI>,
+		PI: Into<PO>,
+		CI: pixel::Channel,
+		DI: Deref<Target = [CI]>,
+		PO: pixel::Write<CO> + pixel::Write<u8>,
+		CO: pixel::Channel,
 	{
 		#[inline]
-		default
-		fn bytes(&self) -> Cow<[u8]> {
+		default fn bytes(&self) -> Cow<[u8]> {
 			Cow::Owned(self.convert::<PO, u8>().into_raw())
 		}
 	}

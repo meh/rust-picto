@@ -12,14 +12,17 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-use crate::buffer::Buffer;
-use crate::pixel::{self, Pixel};
-use crate::error;
+use crate::{
+	buffer::Buffer,
+	error,
+	pixel::{self, Pixel},
+};
 
 /// An image decoder.
 pub trait Decoder<P, C>
-	where P: Pixel<C>,
-	      C: pixel::Channel,
+where
+	P: Pixel<C>,
+	C: pixel::Channel,
 {
 	/// Decode a frame from the stream.
 	fn frame(&mut self) -> error::Result<Buffer<P, C, Vec<C>>>;

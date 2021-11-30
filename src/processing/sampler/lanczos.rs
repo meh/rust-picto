@@ -12,8 +12,7 @@
 //
 //  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-use num::Float;
-use num::traits::FloatConst;
+use num::{traits::FloatConst, Float};
 
 pub struct Lanczos2;
 pub struct Lanczos3;
